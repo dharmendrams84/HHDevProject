@@ -1,0 +1,199 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin: 'war'
+apply plugin: 'checkstyle'
+
+task checkstyleMain1 (type: Checkstyle) {
+    ignoreFailures = false
+    showViolations = false
+    source 'src/main'
+    include '**/*.java'
+    exclude '**/gen/**'
+    exclude '**/R.java'
+    exclude '**/BuildConfig.java'
+    reports {
+        xml.destination "$project.buildDir/reports/checkstyle/main.xml"
+    }
+    classpath = files()
+    configFile = file("${rootDir}/config/checkstyle/ignitiv_checkStyle.xml")
+}
+
+task checkstyleTest1 (type: Checkstyle){
+    ignoreFailures = false
+    showViolations = false
+    source 'src/integrationtest', 'src/junittest'
+    include '**/*.java'
+    exclude '**/gen/**'
+    exclude '**/R.java'
+    exclude '**/BuildConfig.java'
+    reports {
+        xml.destination "$project.buildDir/reports/checkstyle/test.xml"
+    }
+    classpath = files()
+    configFile = file("${rootDir}/config/checkstyle/ignitiv_checkStyle.xml")
+}
+
+task checkstyle(dependsOn:['checkstyleMain1', 'checkstyleTest1']) {
+}
+
+def loadConfiguration() {
+    def environment = hasProperty('env') ? env : 'akshaylocal'
+    System.setProperty('environment', environment)
+}
+task copyConfiguration << {
+    def environment = System.properties['environment']
+    println "Target Environment: ${environment}"
+
+    copy {
+        from "src/main/resources/${environment}"
+        into "src/main/resources"
+    }
+}
+loadConfiguration()
+processResources.dependsOn copyConfiguration
+
+project.ext.set("tomcatHome", "D:/HOMEHARDWARE/software_installation/apache-tomcat-9.0.1-windows-x64/apache-tomcat-9.0.1")
+archivesBaseName='hdmi'
+group='wars'
+war.archiveName="hdmi.war"
+
+// Dynamically insert TeamCity build number if available
+if (hasProperty("teamcity")) {
+    version = teamcity["build.number"]
+        println "TeamCity build number passed into gradle is " + version
+    }
+    else {
+// Manually insert the version numbers here when building outside of TeamCity
+    version = '0.0.1-LocalBuild'
+}
+
+war {
+    manifest {
+        attributes 'Implementation-Title': 'HDMI - Home Hardware Data Merger and Importer', 'Implementation-Version': version
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.1'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+configurations.all {
+    // check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+dependencies {
+
+	checkstyle 'com.puppycrawl.tools:checkstyle:8.3'
+	
+	ext {
+		springVersion='5.0.0.RELEASE'
+	}	
+	
+	providedCompile 'javax.servlet:servlet-api:2.5'
+		
+    compile group: 'org.springframework', name: 'spring-aop', version: springVersion
+    compile group: 'org.springframework', name: 'spring-beans', version: springVersion
+    compile group: 'org.springframework', name: 'spring-context', version: springVersion
+    compile group: 'org.springframework', name: 'spring-core', version: springVersion
+    compile group: 'org.springframework', name: 'spring-expression', version: springVersion   
+    compile group: 'org.springframework', name: 'spring-web', version: springVersion     
+    compile group: 'org.springframework', name: 'spring-webmvc', version: springVersion 
+    compile group: 'org.springframework', name: 'spring-test', version: springVersion
+    compile group: 'org.springframework', name: 'spring-aspects', version: springVersion
+    compile group: 'org.springframework', name: 'spring-orm', version: springVersion
+    
+    
+	compile ("com.mozu:mozu-api-toolkit:1.1.9") {
+		exclude group: 'mysql'
+        exclude group: 'xerces'
+        exclude group: 'berkeleydb'
+        exclude group: 'hsqldb'
+        exclude group: 'tomcat'
+        
+        changing = true
+	}
+	
+    compile ("com.mozu:mozu-api-java:2.0.0") {
+        exclude group: 'mysql'
+        exclude group: 'xerces'
+        exclude group: 'berkeleydb'
+        exclude group: 'hsqldb'
+        exclude group: 'tomcat'
+        
+        changing = true
+    }
+    
+    compile ('ch.qos.logback:logback-classic:1.2.3')
+    compile ('ch.qos.logback:logback-core:1.2.3')
+    
+	compile ("org.slf4j:slf4j-api:1.7.25")
+	compile ("org.slf4j:slf4j-log4j12:1.7.25")
+	compile ("org.slf4j:jcl-over-slf4j:1.7.25")
+	
+    compile ('org.modelmapper:modelmapper-parent:1.1.1')
+    compile ('org.modelmapper:modelmapper:1.1.1')
+    
+    compile ('org.thymeleaf:thymeleaf:3.0.8.RELEASE')
+    compile ('org.thymeleaf:thymeleaf-spring5:3.0.8.RELEASE')
+    
+    compile ('org.apache.axis:axis:1.4')
+    compile ('javax.xml:jaxrpc-api:1.1')
+    compile	('javax.xml.ws:jaxws-api:2.2.6')
+    compile ('javax.xml.soap:javax.xml.soap-api:1.3.5')
+    compile ('wsdl4j:wsdl4j:1.6.3')
+    compile ('org.jdom:jdom:2.0.0')
+    compile ('commons-discovery:commons-discovery:0.4')
+    
+    compile ('org.springframework.ws:spring-ws:2.4.1.RELEASE')
+    compile ('org.springframework.ws:spring-ws-core:2.4.1.RELEASE')
+    
+    compile ('org.jasypt:jasypt:1.9.2')
+    compile ('javax.activation:activation:1.1.1')
+    compile ('javax.mail:mail:1.4')  
+    
+    compile('antlr:antlr:2.7.7')
+    compile ('dom4j:dom4j:1.6.1')
+    compile ('javax.transaction:jta:1.1')
+    compile('cglib:cglib:3.2.0')
+    compile('commons-collections:commons-collections:3.2.2')
+    
+    compile ('org.hibernate:hibernate-core:5.2.12.Final')
+    compile ('org.hibernate:hibernate-ehcache:5.2.12.Final')
+    compile ('org.hibernate:hibernate-entitymanager:4.3.8.Final')
+    compile ('org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final')    
+    compile ('org.springframework.batch:spring-batch-core:3.0.8.RELEASE')
+    
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.2'
+      
+	compile group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '9.0.1'
+	
+	compile group: 'org.apache.camel', name: 'camel-core', version: '2.20.0'
+	
+	compile group: 'org.apache.activemq', name: 'activemq-core', version: '5.7.0'
+	
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.44'
+    
+	compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.3'
+
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+test {
+    systemProperties 'property': 'value'
+}
+
+task cleanupTomcat(type: Delete) {
+  delete "${tomcatHome}/webapps/hdmi.war", "${tomcatHome}/webapps/hdmi"
+}
+
+task deployToTomcat(type: Copy) {
+  from war
+  into "${tomcatHome}/webapps"
+}
+

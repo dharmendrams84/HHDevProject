@@ -1,0 +1,28 @@
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="content">
+		<div class="row">
+			<div class="tab-full-column">
+				<div class="text-center">
+					<p th:text="#{label.appname}"></p>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div th:text="#{label.appdescription}" style="font-size: 15px; font-weight: bold; color: #333333; line-height: 17px;margin-bottom: 10px;"
+						class="text-center"></div>
+		</div>
+
+		<div class="row">
+			<div class="tab-full-column  text-center">
+					<img src="images/cbLogo.png" class="img-thumbnail" ></img>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+
+
+

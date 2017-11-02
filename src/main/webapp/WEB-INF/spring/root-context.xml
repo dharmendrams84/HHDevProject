@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<!-- **************************************************************** -->
+	<!-- MESSAGE EXTERNALIZATION/INTERNATIONALIZATION -->
+	<!-- Standard Spring MessageSource implementation -->
+	<!-- **************************************************************** -->
+ 	<!-- <bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="Messages" />
+	</bean> -->
+
+	<!-- <bean id="emailTemplateResolver"
+		class="org.thymeleaf.templateresolver.ClassLoaderTemplateResolver">
+		<property name="prefix" value="email-templates/" />
+		<property name="templateMode" value="HTML5" />
+		<property name="characterEncoding" value="UTF-8" />
+		<property name="order" value="1" />
+		Template cache is true by default. Set to false if you want
+		templates to be automatically updated when modified.
+		<property name="cacheable" value="true" />
+	</bean> 
+ -->
+
+ 	<!-- <bean id="webTemplateResolver"
+		class="org.thymeleaf.templateresolver.ServletContextTemplateResolver">
+		<property name="prefix" value="/WEB-INF/templates/" />
+		<property name="suffix" value=".html" />
+		<property name="templateMode" value="HTML5" />
+		<property name="order" value="2" />
+		<property name="cacheable" value="true" />
+	</bean>  -->
+
+	<!--  <bean id="templateEngine" class="org.thymeleaf.spring3.SpringTemplateEngine">
+		<property name="templateResolvers">
+			<set>
+				<ref bean="emailTemplateResolver" />
+				<ref bean="webTemplateResolver" />
+			</set>
+		</property>
+	</bean>
+ -->
+	<!--  <bean class="org.thymeleaf.spring3.view.ThymeleafViewResolver">
+		<property name="templateEngine" ref="templateEngine" />
+	</bean> -->
+
+	<!-- Hibernate configurations -->
+	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
+	<!-- (in this case, JDBC-related settings for the JPA EntityManager definition below) -->
+	<context:property-placeholder
+		location="file:${catalina.home}/conf/data-access.properties, classpath:mozu_config.properties, classpath:mail.properties"
+		ignore-resource-not-found="true" />
+
+	<!-- enables scanning for @Transactional annotations -->
+	
+	<tx:annotation-driven />
+	
+	<!-- JPA EntityManagerFactory -->
+	 <!-- <bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+		p:dataSource-ref="dataSource">
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+				p:database="${jpa.database}" p:showSql="${jpa.showSql}" />
+		</property>
+		gDickens: BOTH Persistence Unit and Packages to Scan are NOT compatible, persistenceUnit will win
+		<property name="persistenceUnitName" value="ApplicationEntityManager" />
+		<property name="packagesToScan">
+			<list>
+				<value>com.homehardware</value>
+				<value>com.ignitiv</value>
+			</list>
+		</property>
+	</bean> -->
+
+	<!-- Transaction manager for a single JPA EntityManagerFactory (alternative to JTA) -->
+	 <!-- <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
+		p:entityManagerFactory-ref="entityManagerFactory" />  -->
+
+	<!-- Post-processor to perform exception translation on @Repository classes 
+		(from native exceptions such as JPA PersistenceExceptions to Spring's DataAccessException hierarchy). -->
+	 <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" /> 
+
+ 	<!-- <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
+		p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}"
+		p:username="${jdbc.username}" p:password="${jdbc.password}"
+		p:initialSize="${jdbc.initialSize}" p:maxActive="${jdbc.maxActive}"
+		p:validationQuery="${jdbc.validationQuery}" p:testWhileIdle="${jdbc.testWhileIdle}" />
+  -->
+
+	<!-- Include the services component scan here -->
+
+	
+
+</beans>

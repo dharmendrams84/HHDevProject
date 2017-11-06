@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+	
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving 
+		up static resources in the ${webappRoot}/resources directory -->
+	<!-- <beans:import resource="classpath*:/mozu-base.xml" />
+	<resources mapping="/**" location="/resources/" /> -->
+
+	<context:property-placeholder
+		location="classpath:mozu_config.properties, classpath:mail.properties"
+		ignore-resource-not-found="true" />
+
+   <context:component-scan base-package="com.homehardware.dao,com.homehardware.beans.Store" /> 
+	<!-- <context:component-scan base-package="com.homehardware" /> -->
+	
+	<!--  <aop:aspectj-autoproxy>
+		<aop:include name="myLogger" />
+	</aop:aspectj-autoproxy>
+ -->
+	<!-- <beans:bean id="myLogger" class="com.homehardware.logging.util.HHAOPLogger" />  -->
+
+ <!-- <beans:bean id="dataSource"
+        class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+        mvc:driverClassName="com.mysql.jdbc.Driver"
+        mvc:url="jdbc:mysql://localhost:3306/sys"  mvc:username="root"
+       mvc:password="ignitiv123" /> -->
+ <beans:bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">  
+        <beans:property name="driverClassName"  value="com.mysql.jdbc.Driver"></beans:property>  
+        <beans:property name="url" value="jdbc:mysql://localhost:3306/ignitiv"></beans:property>  
+        <beans:property name="username" value="root"></beans:property>  
+        <beans:property name="password" value="ignitiv123"></beans:property>  
+    </beans:bean>
+ 
+    <beans:bean id="sessionFactory"
+        class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <beans:property name="dataSource" ref="dataSource" />
+        <beans:property name="configLocation">
+            <beans:value>classpath:hibernate.cfg.xml</beans:value>
+        </beans:property>
+        
+        <beans:property name="hibernateProperties">
+            <beans:props>
+                <beans:prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</beans:prop>
+                <beans:prop key="hibernate.show_sql">true</beans:prop>
+            </beans:props>
+        </beans:property>
+       </beans:bean>
+	<beans:bean id="store" class="com.homehardware.beans.Store"></beans:bean>
+
+</beans:beans>

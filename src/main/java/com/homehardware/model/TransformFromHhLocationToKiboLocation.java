@@ -18,7 +18,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 public final class TransformFromHhLocationToKiboLocation {
 
-	protected static void testTransformHhLocationToKiboLocation
+	public static void testTransformHhLocationToKiboLocation
 	(final Location location, final Store store) {
 
 		// transform hh location address obj to kibo location address
@@ -57,6 +57,11 @@ public final class TransformFromHhLocationToKiboLocation {
 
 		final List<LocationType> locationTypes = new ArrayList<>();
 
+		LocationType locationType = new LocationType();
+		locationType.setCode("WH1");
+		locationType.setName("WareHouse");
+		locationTypes.add(locationType);
+				
 		location.setLocationTypes(locationTypes);
 
 		// transform hh location store code obj to kibo location store code
@@ -68,11 +73,11 @@ public final class TransformFromHhLocationToKiboLocation {
 		// transform hh location phone number obj to kibo location phone number
 		location.setPhone(store.getPhoneNumber());
 
-		location.setCode(Integer.valueOf(store.getStoreNumber()).toString());
+		location.setCode(store.getStoreNumber());
 
 		location.setDescription("DEFAULT ");
 
-		location.setFax("111-111-1111");
+		location.setFax("4444444444");
 	}
 
 	protected static void setGeoCoordinates(final Location location, final Store store) {
@@ -102,10 +107,11 @@ public final class TransformFromHhLocationToKiboLocation {
 				regularHours.setWednesday(hours);
 				setDays(jsonObject, hours, regularHours);
 			}
+			location.setRegularHours(regularHours);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-
+		
 	}
 
 	protected static void setDays(final JSONObject jsonObject, final Hours hours, final RegularHours regularHours) {
@@ -167,10 +173,23 @@ public final class TransformFromHhLocationToKiboLocation {
 		address.setAddress2(store.getStoreAdd2());
 		address.setAddress3("");
 		address.setAddress4("");
+		
+		address.setCountryCode("CA");
 		address.setCityOrTown(store.getCity());
-		address.setAddressType("commercial");
+		address.setAddressType("Commercial");
+		address.setIsValidated(false);
 		setZipCode(address, store);
 		location.setAddress(address);
+		
+		//Address address = new Address();
+		address.setAddress1("Clarke & Clarke Home Hardware Building Centre");
+		//address.setCountryCode("CA");
+		/*address.setStateOrProvince("NL");
+		address.setCityOrTown("Bell Island");
+		address.setPostalOrZipCode("A0A 4H0");
+		address.setAddressType("Commercial");
+		address.setIsValidated(false);*/
+
 	}
 
 	protected static void setZipCode(final Address address, final Store store) {
@@ -181,12 +200,13 @@ public final class TransformFromHhLocationToKiboLocation {
 
 	protected static void setShippingoriginContact(final Location location, final Store store) {
 		final ShippingOriginContact shippingOriginContact = new ShippingOriginContact();
+		
 		shippingOriginContact.setFirstName("Alex");
 		shippingOriginContact.setLastNameOrSurname("Graham");
 		shippingOriginContact.setCompanyOrOrganization("HH");
 		shippingOriginContact.setEmail("ag@hh.ca");
 		shippingOriginContact.setPhoneNumber("1111111111");
-
+				
 		location.setShippingOriginContact(shippingOriginContact);
 	}
 }

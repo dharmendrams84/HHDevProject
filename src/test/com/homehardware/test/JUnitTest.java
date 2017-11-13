@@ -2,6 +2,8 @@ package com.homehardware.test;
 
 import com.homehardware.beans.Store;
 import com.homehardware.dao.HhDaoImpl;
+import com.homehardware.model.Item;
+import com.homehardware.model.TransformFromHhLocationToKiboLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +23,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.mozu.api.MozuApiContext;
 import com.mozu.api.contracts.core.Address;
+import com.mozu.api.contracts.core.Measurement;
 import com.mozu.api.contracts.location.Coordinates;
 import com.mozu.api.contracts.location.Location;
 import com.mozu.api.contracts.location.LocationType;
 import com.mozu.api.contracts.location.ShippingOriginContact;
 import com.mozu.api.contracts.mzdb.EntityList;
 import com.mozu.api.resources.commerce.admin.LocationResource;
+import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
+import com.mozu.api.contracts.productadmin.Product;
+import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
+import com.mozu.api.contracts.productadmin.ProductInventoryInfo;
+import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
+import com.mozu.api.contracts.productadmin.ProductPrice;
 import com.mozu.api.resources.platform.EntityListResource;
 
 
@@ -43,7 +52,7 @@ public class JUnitTest {
 	@Autowired
 	private HhDaoImpl hhDaoImpl;
 	
-	@Test
+	//@Test
 	public void testFetchHHStoreObjectFromDB()throws Exception{
 		hhDaoImpl.getStore();
 		
@@ -52,16 +61,20 @@ public class JUnitTest {
 	//@Test
 	public void testInsertOrUpdateLocationObjectIntoKibo() throws Exception {
 		LocationResource locationResource = new LocationResource(new MozuApiContext(24094,35909)); 
-		String locationCode = "hh-1014";
+		Store store = hhDaoImpl.getStore();
+		String locationCode = store.getStoreNumber();
 		Location location = locationResource.getLocation(locationCode);
-		Store store = new Store();
+		
+		
 		store.setStoreName(locationCode);
 		if(location==null){
 			location = new Location();
-			convertStoreTOMozuLocation(location, store);
+			//convertStoreTOMozuLocation(location, store);
+			TransformFromHhLocationToKiboLocation.testTransformHhLocationToKiboLocation(location, store);
 			locationResource.addLocation(location);
 		}else{
-			convertStoreTOMozuLocation(location, store);
+			TransformFromHhLocationToKiboLocation.testTransformHhLocationToKiboLocation(location, store);
+			//convertStoreTOMozuLocation(location, store);
 			locationResource.updateLocation(location, locationCode);
 		}
 		
@@ -124,6 +137,76 @@ public class JUnitTest {
 		System.out.println("After creating entityList resource"+entityListResource);
 	}
 
+	@Test
+	public void testFetcgHhProductFromDb() {
+		try{
+		Item item = hhDaoImpl.getItem();
+		ProductResource productResource = new ProductResource(new MozuApiContext(24094, 35909));
+		Product product = productResource.getProduct(item.getItem());
+	  //  Product product1 = productResource.getProduct("82537SRN");
+		
+		
+		if (product == null) {
+			System.out.println("Adding new product");
+			product = new Product();
+			//product.setPrice(product1.getPrice());
+			//product.setProductInCatalogs(product1.getProductInCatalogs());
+			convertItemToMozuProduct(item, product);
+			productResource.addProduct(product);
+		} else {
+			System.out.println("Updating existing product");
+			convertItemToMozuProduct(item, product);
+			//product.setProductInCatalogs(product1.getProductInCatalogs());
+			productResource.updateProduct(product, product.getProductCode());
+		}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	protected static void convertItemToMozuProduct(Item item, final Product product) {
+		product.setProductCode(item.getItem());
+		ProductLocalizedContent productLocalizedContent = new ProductLocalizedContent();
+		productLocalizedContent.setLocaleCode("en-US");
+		//productLocalizedContent.setProductName("29 Espresso Adelaide Swivel Stool3");
+		productLocalizedContent.setProductName(item.getItemDesc());
+		product.setContent(productLocalizedContent);
+		product.setProductTypeId(2);
+		
+		product.setProductUsage("Standard");
+		product.setMasterCatalogId(2);
+		
+		
+		ProductPrice price = new ProductPrice();
+		price.setPrice(209.99);
+		price.setIsoCurrencyCode("CAD");
+		price.setSalePrice(209.99);
+		product.setPrice(price);
+		List list = new ArrayList<ProductInCatalogInfo>();
+		ProductInCatalogInfo productInCatalogInfo = new ProductInCatalogInfo();
+		productInCatalogInfo.setCatalogId(2);
+		
+		productInCatalogInfo.setPrice(price);
+		
+		productInCatalogInfo.setIsActive(true);
+		//productInCatalogInfo.setCatalogId(2);
+		
+		list.add(productInCatalogInfo);
+		product.setProductInCatalogs(list);
+		
+		
+		Measurement measurement = new Measurement();
+		measurement.setUnit("lbs");
+		measurement.setValue(new Double(2));
+		product.setPackageWeight(measurement);
+		
+		product.setBaseProductCode(item.getBrandCode()); 
+		
+		product.setIsValidForProductType(false);
+		
+		
+	}
+		
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {

@@ -3,6 +3,8 @@ package com.homehardware.test;
 import com.homehardware.beans.Store;
 import com.homehardware.dao.HhDaoImpl;
 import com.homehardware.model.Item;
+import com.homehardware.model.ProductAttribute;
+import com.homehardware.model.ProductItemAttributes;
 import com.homehardware.model.TransformFromHhLocationToKiboLocation;
 
 import java.util.ArrayList;
@@ -22,6 +24,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 
 import com.mozu.api.MozuApiContext;
+import com.mozu.api.contracts.productadmin.ProductProperty;
+import com.mozu.api.contracts.productadmin.ProductPropertyValue;
+import com.mozu.api.contracts.productadmin.ProductPropertyValueLocalizedContent;
 import com.mozu.api.contracts.core.Address;
 import com.mozu.api.contracts.core.Measurement;
 import com.mozu.api.contracts.location.Coordinates;
@@ -31,6 +36,7 @@ import com.mozu.api.contracts.location.ShippingOriginContact;
 import com.mozu.api.contracts.mzdb.EntityList;
 import com.mozu.api.resources.commerce.admin.LocationResource;
 import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
+import com.mozu.api.resources.commerce.catalog.admin.products.ProductPropertyResource;
 import com.mozu.api.contracts.productadmin.Product;
 import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
 import com.mozu.api.contracts.productadmin.ProductInventoryInfo;
@@ -140,10 +146,12 @@ public class JUnitTest {
 	@Test
 	public void testFetcgHhProductFromDb() {
 		try{
+	
 		Item item = hhDaoImpl.getItem();
 		ProductResource productResource = new ProductResource(new MozuApiContext(24094, 35909));
 		Product product = productResource.getProduct(item.getItem());
-	  //  Product product1 = productResource.getProduct("82537SRN");
+		List<ProductAttribute> productAttributes  =  hhDaoImpl.getProductAttributesList();
+		
 		
 		
 		if (product == null) {
@@ -151,14 +159,40 @@ public class JUnitTest {
 			product = new Product();
 			//product.setPrice(product1.getPrice());
 			//product.setProductInCatalogs(product1.getProductInCatalogs());
+			product.setProductTypeId(7);
 			convertItemToMozuProduct(item, product);
 			productResource.addProduct(product);
-		} else {
-			System.out.println("Updating existing product");
-			convertItemToMozuProduct(item, product);
-			//product.setProductInCatalogs(product1.getProductInCatalogs());
-			productResource.updateProduct(product, product.getProductCode());
-		}
+			
+			} else {
+				System.out.println("Updating existing product");
+				// convertItemToMozuProduct(item, product);
+				// product.setProductInCatalogs(product1.getProductInCatalogs());
+				hhDaoImpl.getProductItemAttribute();
+				List<ProductProperty> productProperties = product.getProperties();
+				if (productProperties != null && productProperties.size() != 0) {
+					for (ProductAttribute p : productAttributes) {
+						ProductItemAttributes productItemAttributes = hhDaoImpl
+								.getProductItemAttribute(p.getProductAttrId(), product.getProductCode());
+						if (productItemAttributes != null
+								&& isProductPropertyExist(product.getProperties(), p.getProductAttrId())) {
+							convertProductAttribute(p.getProductAttrId(), productItemAttributes, product);
+						} else {
+							if (p.getProductAttrId().equals("tenant~unit-of-measure-fr")) {
+								addProductProperty(productItemAttributes, product);
+							}
+						}
+					}
+				}else{
+					 productProperties = new ArrayList<>();
+					 for (ProductAttribute p : productAttributes) {
+						 ProductItemAttributes productItemAttributes = hhDaoImpl
+									.getProductItemAttribute(p.getProductAttrId(), product.getProductCode());
+						 addProductProperty(productItemAttributes, product);
+					 }
+					 product.setProperties(productProperties);
+				}
+				productResource.updateProduct(product, product.getProductCode());
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -171,11 +205,12 @@ public class JUnitTest {
 		//productLocalizedContent.setProductName("29 Espresso Adelaide Swivel Stool3");
 		productLocalizedContent.setProductName(item.getItemDesc());
 		product.setContent(productLocalizedContent);
-		product.setProductTypeId(2);
+		//product.setProductTypeId(7);
 		
 		product.setProductUsage("Standard");
 		product.setMasterCatalogId(2);
 		
+		//product.getPr
 		
 		ProductPrice price = new ProductPrice();
 		price.setPrice(209.99);
@@ -206,7 +241,67 @@ public class JUnitTest {
 		
 		
 	}
+	
+	protected static void convertProductAttribute(String attrFqnId ,ProductItemAttributes productItemAttributes, final Product product) {
+		try{
+		List<ProductProperty> productProperties = product.getProperties();
+		if(productProperties!=null&&productProperties.size()!=0){
+			for(ProductProperty p : productProperties){
+				if(p.getAttributeFQN().equalsIgnoreCase(attrFqnId)){
+					ProductPropertyValue productPropertyValue = p.getValues().get(0);
+					if(productPropertyValue instanceof ProductPropertyValue && productPropertyValue.getContent()!=null){
+						
+						productPropertyValue.getContent().setStringValue(productItemAttributes.getAttributeValue());
+					}
+				  ProductPropertyResource productPropertyResource = new ProductPropertyResource(new MozuApiContext(24094, 35909));
+				  productPropertyResource.updateProperty(p, product.getProductCode(), p.getAttributeFQN());
+				}
+			}
+		}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		
+	}
+
+	protected static void addProductProperty(ProductItemAttributes productItemAttributes, final Product product) {
+		try {
+		ProductProperty productProperty = new ProductProperty();
+	    productProperty.setAttributeFQN(productItemAttributes.getId().getProductAttrId());
+	 
+	    ProductPropertyValue productPropertyValueAttr = new ProductPropertyValue();
+	    List<ProductPropertyValue> productPropertyValue = new ArrayList<ProductPropertyValue>();
+	    productPropertyValueAttr.setValue(productItemAttributes.getAttributeValue());
+	    
+	    ProductPropertyValueLocalizedContent content = new ProductPropertyValueLocalizedContent();
+	    content.setLocaleCode("En");
+	    content.setStringValue(productItemAttributes.getAttributeValue());
+	    productPropertyValueAttr.setContent(content);
+	    
+	    productPropertyValue.add(productPropertyValueAttr);
+	    productProperty.setValues(productPropertyValue);
+	    product.getProperties().add(productProperty);
+	    ProductPropertyResource productPropertyResource = new ProductPropertyResource(new MozuApiContext(24094, 35909));
+	    //productPropertyResource.updateProperty(p, product.getProductCode(), p.getAttributeFQN());
+	    
+			productPropertyResource.addProperty(productProperty, product.getProductCode());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	protected static boolean isProductPropertyExist(List<ProductProperty> productProperties, String produtFqn){
+		boolean productPropertyExist = false;
+		for(ProductProperty pp : productProperties){
+			if(pp.getAttributeFQN().equalsIgnoreCase(produtFqn)){
+				productPropertyExist = true;
+				break;
+			}
+		}
+		
+		return productPropertyExist;
+	}
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {

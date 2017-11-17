@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.mozu.api.ApiException;
 import com.mozu.api.MozuApiContext;
 import com.mozu.api.contracts.productadmin.ProductProperty;
 import com.mozu.api.contracts.productadmin.ProductPropertyValue;
@@ -135,7 +136,7 @@ public class JUnitTest {
 		System.out.println("After creating entityList resource" + entityListResource);
 	}
 
-	@Test
+	//@Test
 	public void testFetcgHhProductFromDb() {
 		try {
 
@@ -152,13 +153,32 @@ public class JUnitTest {
 
 			} else {
 				convertItemToMozuProduct(item, product);
-				setProductAttributes(product);
 				productResource.updateProduct(product, product.getProductCode());
+				//setProductAttributes(product);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	@Test
+	public void testFetcgHhProductAttributesFromDb() {
+		try {
+			Item item = hhDaoImpl.getItem();
+			ProductResource productResource = new ProductResource(new MozuApiContext(24094, 35909));
+			Product product = productResource.getProduct(item.getItem());
+			if (product == null) {
+				System.out.println("Product " + item.getItem() + " is not existing ");
+			} else {
+				
+				setProductAttributes(product);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	
 	
 	protected  void setProductAttributes(Product product){
@@ -169,10 +189,14 @@ public class JUnitTest {
 				ProductItemAttributes productItemAttributes = hhDaoImpl
 						.getProductItemAttribute(p.getProductAttrId(), product.getProductCode());
 				if (productItemAttributes != null
+						&& isStatusInitial(productItemAttributes.getStatus())
 						&& isProductPropertyExist(product.getProperties(), p.getProductAttrId())) {
+					
 					convertProductAttribute(p.getProductAttrId(), productItemAttributes, product);
 				} else {
-					if (productItemAttributes != null && productItemAttributes.getId() != null
+					if (productItemAttributes != null
+							&& isStatusInitial(productItemAttributes.getStatus())
+							&& productItemAttributes.getId() != null
 							&& productItemAttributes.getId().getProductAttrId() != null) {
 						addProductProperty(productItemAttributes, product);
 					}
@@ -232,7 +256,7 @@ public class JUnitTest {
 
 	}
 
-	protected static void convertProductAttribute(String attrFqnId, ProductItemAttributes productItemAttributes,
+	protected  void convertProductAttribute(String attrFqnId, ProductItemAttributes productItemAttributes,
 			final Product product) {
 		try {
 			List<ProductProperty> productProperties = product.getProperties();
@@ -245,22 +269,29 @@ public class JUnitTest {
 
 							productPropertyValue.getContent().setStringValue(productItemAttributes.getAttributeValue());
 						}
+						productPropertyValue.setValue(productItemAttributes.getAttributeValue());
 						ProductPropertyResource productPropertyResource = new ProductPropertyResource(
 								new MozuApiContext(24094, 35909));
 						productPropertyResource.updateProperty(p, product.getProductCode(), p.getAttributeFQN());
 					}
 				}
 			}
+			;
+			productItemAttributes.setStatus("SUCCESS");
+			hhDaoImpl.updateProductItemAttributes(productItemAttributes);
 			System.out
-					.println("Property " + productItemAttributes.getId().getProductAttrId() + " updated successfully ");
+			.println("Property " + productItemAttributes.getId().getProductAttrId() + " updated successfully ");
 		} catch (Exception e) {
+			
+			productItemAttributes.setStatus("ERROR");
+			hhDaoImpl.updateProductItemAttributes(productItemAttributes);
 			System.out.println("Exception while updating property " + productItemAttributes.getId().getProductAttrId()
 					+ " " + e.getCause());
 		}
 
 	}
 
-	protected static void addProductProperty(ProductItemAttributes productItemAttributes, final Product product) {
+	protected  void addProductProperty(ProductItemAttributes productItemAttributes, final Product product) {
 		try {
 			ProductProperty productProperty = new ProductProperty();
 			productProperty.setAttributeFQN(productItemAttributes.getId().getProductAttrId());
@@ -270,7 +301,7 @@ public class JUnitTest {
 			productPropertyValueAttr.setValue(productItemAttributes.getAttributeValue());
 
 			ProductPropertyValueLocalizedContent content = new ProductPropertyValueLocalizedContent();
-			content.setLocaleCode("En");
+			content.setLocaleCode("En-US");
 			content.setStringValue(productItemAttributes.getAttributeValue());
 			productPropertyValueAttr.setContent(content);
 
@@ -279,12 +310,14 @@ public class JUnitTest {
 			product.getProperties().add(productProperty);
 			ProductPropertyResource productPropertyResource = new ProductPropertyResource(
 					new MozuApiContext(24094, 35909));
-			// productPropertyResource.updateProperty(p,
-			// product.getProductCode(), p.getAttributeFQN());
-
 			productPropertyResource.addProperty(productProperty, product.getProductCode());
+			productItemAttributes.setStatus("SUCCESS");
+			hhDaoImpl.updateProductItemAttributes(productItemAttributes);
 			System.out.println("Property " + productItemAttributes.getId().getProductAttrId() + " added successfully ");
+			
 		} catch (Exception e) {
+			productItemAttributes.setStatus("ERROR");
+			hhDaoImpl.updateProductItemAttributes(productItemAttributes);
 			System.out.println("Exception while adding property " + productItemAttributes.getId().getProductAttrId()
 					+ " " + e.getCause());
 		}
@@ -302,6 +335,21 @@ public class JUnitTest {
 		return productPropertyExist;
 	}
 
+	protected static boolean isStatusInitial(String itemAttributeStatus) {
+		boolean isStatusInitial = false;
+		if (!isEmpty(itemAttributeStatus) && itemAttributeStatus.equalsIgnoreCase("INITIAL")) {
+			isStatusInitial = true;
+		}
+		return isStatusInitial;
+	}
+	
+	protected static boolean isEmpty(String str) {
+		if (str == null || str.length() == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}

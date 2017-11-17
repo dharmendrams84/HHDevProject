@@ -1,6 +1,7 @@
 package com.homehardware.model;
 
 import com.homehardware.beans.Store;
+import com.mozu.api.contracts.commerceruntime.products.Product;
 import com.mozu.api.contracts.core.Address;
 import com.mozu.api.contracts.location.Coordinates;
 import com.mozu.api.contracts.location.FulfillmentType;
@@ -9,6 +10,7 @@ import com.mozu.api.contracts.location.Location;
 import com.mozu.api.contracts.location.LocationType;
 import com.mozu.api.contracts.location.RegularHours;
 import com.mozu.api.contracts.location.ShippingOriginContact;
+import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +20,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 public final class TransformFromHhLocationToKiboLocation {
 
-	public static void testTransformHhLocationToKiboLocation
-	(final Location location, final Store store) {
+	public static void testTransformHhLocationToKiboLocation(final Location location, final Store store) {
 
 		// transform hh location address obj to kibo location address
 		setAddress(location, store);
@@ -57,11 +58,11 @@ public final class TransformFromHhLocationToKiboLocation {
 
 		final List<LocationType> locationTypes = new ArrayList<>();
 
-		LocationType locationType = new LocationType();
+		final LocationType locationType = new LocationType();
 		locationType.setCode("WH1");
 		locationType.setName("WareHouse");
 		locationTypes.add(locationType);
-				
+
 		location.setLocationTypes(locationTypes);
 
 		// transform hh location store code obj to kibo location store code
@@ -111,7 +112,7 @@ public final class TransformFromHhLocationToKiboLocation {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	protected static void setDays(final JSONObject jsonObject, final Hours hours, final RegularHours regularHours) {
@@ -173,22 +174,23 @@ public final class TransformFromHhLocationToKiboLocation {
 		address.setAddress2(store.getStoreAdd2());
 		address.setAddress3("");
 		address.setAddress4("");
-		
+
 		address.setCountryCode("CA");
 		address.setCityOrTown(store.getCity());
 		address.setAddressType("Commercial");
 		address.setIsValidated(false);
 		setZipCode(address, store);
 		location.setAddress(address);
-		
-		//Address address = new Address();
+
+		// Address address = new Address();
 		address.setAddress1("Clarke & Clarke Home Hardware Building Centre");
-		//address.setCountryCode("CA");
-		/*address.setStateOrProvince("NL");
-		address.setCityOrTown("Bell Island");
-		address.setPostalOrZipCode("A0A 4H0");
-		address.setAddressType("Commercial");
-		address.setIsValidated(false);*/
+		// address.setCountryCode("CA");
+		/*
+		 * address.setStateOrProvince("NL");
+		 * address.setCityOrTown("Bell Island");
+		 * address.setPostalOrZipCode("A0A 4H0");
+		 * address.setAddressType("Commercial"); address.setIsValidated(false);
+		 */
 
 	}
 
@@ -200,13 +202,24 @@ public final class TransformFromHhLocationToKiboLocation {
 
 	protected static void setShippingoriginContact(final Location location, final Store store) {
 		final ShippingOriginContact shippingOriginContact = new ShippingOriginContact();
-		
+
 		shippingOriginContact.setFirstName("Alex");
 		shippingOriginContact.setLastNameOrSurname("Graham");
 		shippingOriginContact.setCompanyOrOrganization("HH");
 		shippingOriginContact.setEmail("ag@hh.ca");
 		shippingOriginContact.setPhoneNumber("1111111111");
-				
+
 		location.setShippingOriginContact(shippingOriginContact);
 	}
+	
+	protected static void convertItemToMozuProduct(final Item item ,final Product product) {
+		
+	}
+		
+		
+	
+	
+	
+	
+	
 }

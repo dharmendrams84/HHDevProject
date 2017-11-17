@@ -22,7 +22,7 @@ public final class Store implements Serializable {
 	private Integer jobId;
 
 	@Column(name = "STORE_NUMBER")
-	private int storeNumber;
+	private String storeNumber;
 
 	@Column(name = "STORE_NAME")
 	private String storeName;
@@ -119,11 +119,11 @@ public final class Store implements Serializable {
 		this.id = id;
 	}
 
-	public final int getStoreNumber() {
+	public final String getStoreNumber() {
 		return storeNumber;
 	}
 
-	public final void setStoreNumber(final int storeNumber) {
+	public final void setStoreNumber(final String storeNumber) {
 		this.storeNumber = storeNumber;
 	}
 

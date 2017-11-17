@@ -6,7 +6,6 @@ import javax.persistence.TransactionRequiredException;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-/*import org.springframework.transaction.annotation.Transactional;*/
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -18,7 +17,10 @@ public final class HhController {
 	@Autowired
 	private HhDaoImpl hhDaoImpl;
 
-		
+	/**
+	 * Return login screen.
+	 * 
+	 */	
 	@RequestMapping("/login")
 	public final String login() {
 		/*try {
@@ -31,15 +33,22 @@ public final class HhController {
 		return "login";
 	}
 	
+	/**
+	 * this methid returns login a store object.
+	 * 
+	 */	
 	@RequestMapping("/addAttribute")
 	public final String addAttribute(final ModelMap map) {
 		try {
 			
-			hhDaoImpl.saveItemDetails();;
+			//hhDaoImpl.saveItemDetails();;
+			hhDaoImpl.getStore();
 		} catch (TransactionRequiredException e) {
 			logger.error("Error while persisting " + e.getCause());
 		}
 		return "home";
 	}
+	
+	
 
 }

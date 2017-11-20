@@ -7,6 +7,12 @@
     <session-factory>
         <mapping class="com.homehardware.beans.Employee" />
         <mapping class="com.homehardware.model.ItemDynAttrId" />
+        <mapping class="com.homehardware.model.EcoFees" />
+        <mapping class="com.homehardware.beans.Store" />
+        <mapping class="com.homehardware.model.Item" />
+        <mapping class="com.homehardware.model.ProductAttribute" />
+        <mapping class="com.homehardware.model.ProductItemAttributes" />
+        <mapping class="com.homehardware.model.ExtDesc" />
     </session-factory>
        
 </hibernate-configuration>

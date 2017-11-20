@@ -168,6 +168,7 @@ public class JUnitTest {
 			Item item = hhDaoImpl.getItem();
 			ProductResource productResource = new ProductResource(new MozuApiContext(24094, 35909));
 			Product product = productResource.getProduct(item.getItem());
+			
 			if (product == null) {
 				System.out.println("Product " + item.getItem() + " is not existing ");
 			} else {
@@ -204,9 +205,11 @@ public class JUnitTest {
 			}
 		} else {
 			productProperties = new ArrayList<>();
+			product.setProperties(productProperties);
 			for (ProductAttribute p : productAttributes) {
 				ProductItemAttributes productItemAttributes = hhDaoImpl
 						.getProductItemAttribute(p.getProductAttrId(), product.getProductCode());
+				if(productItemAttributes!=null&& isStatusInitial(productItemAttributes.getStatus()))
 				addProductProperty(productItemAttributes, product);
 			}
 			product.setProperties(productProperties);
@@ -325,13 +328,14 @@ public class JUnitTest {
 
 	protected static boolean isProductPropertyExist(List<ProductProperty> productProperties, String produtFqn) {
 		boolean productPropertyExist = false;
+		if(productProperties !=null&& productProperties.size()!=0){
 		for (ProductProperty pp : productProperties) {
 			if (pp.getAttributeFQN().equalsIgnoreCase(produtFqn)) {
 				productPropertyExist = true;
 				break;
 			}
 		}
-
+		}
 		return productPropertyExist;
 	}
 

@@ -3,11 +3,13 @@ package com.homehardware.dao;
 import com.homehardware.beans.Employee;
 import com.homehardware.beans.Store;
 import com.homehardware.model.EcoFees;
+import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Item;
 import com.homehardware.model.ProductAttribute;
 import com.homehardware.model.ProductItemAttributes;
 import com.homehardware.model.ProductItemAttributesId;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -186,6 +188,20 @@ public class HhDaoImpl implements HhDao {
 			session.close();
 		}
 
+	}
+	
+	
+	@Override
+	public final List<ExtDesc> geExtendedDescription(String item){
+		List<ExtDesc> extDescs = new ArrayList<>();
+		final Session session = sessionFactory.openSession();
+		Query query = session.createQuery("from ExtDesc e where e.item = :item");
+		query.setParameter("item", item);
+
+		extDescs = query.list();   
+		session.close();
+		
+		return extDescs;
 	}
 
 }

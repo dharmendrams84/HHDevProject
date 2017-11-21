@@ -1,7 +1,12 @@
 package com.homehardware.test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.hardware.constants.AttributeConstants;
 import com.homehardware.beans.Store;
 import com.homehardware.dao.HhDaoImpl;
+import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Item;
 import com.homehardware.model.ProductAttribute;
 import com.homehardware.model.ProductItemAttributes;
@@ -42,6 +47,7 @@ import com.mozu.api.contracts.productadmin.ProductInventoryInfo;
 import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
 import com.mozu.api.contracts.productadmin.ProductPrice;
 import com.mozu.api.resources.platform.EntityListResource;
+import com.mozu.api.resources.platform.entitylists.EntityResource;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 // @ContextConfiguration(locations = {
@@ -136,14 +142,13 @@ public class JUnitTest {
 		System.out.println("After creating entityList resource" + entityListResource);
 	}
 
-	//@Test
+	 @Test
 	public void testFetcgHhProductFromDb() {
 		try {
 
 			Item item = hhDaoImpl.getItem();
 			ProductResource productResource = new ProductResource(new MozuApiContext(24094, 35909));
 			Product product = productResource.getProduct(item.getItem());
-			
 
 			if (product == null) {
 				product = new Product();
@@ -154,25 +159,24 @@ public class JUnitTest {
 			} else {
 				convertItemToMozuProduct(item, product);
 				productResource.updateProduct(product, product.getProductCode());
-				//setProductAttributes(product);
+				// setProductAttributes(product);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	@Test
+
+	// @Test
 	public void testFetcgHhProductAttributesFromDb() {
 		try {
 			Item item = hhDaoImpl.getItem();
 			ProductResource productResource = new ProductResource(new MozuApiContext(24094, 35909));
 			Product product = productResource.getProduct(item.getItem());
-			
+
 			if (product == null) {
 				System.out.println("Product " + item.getItem() + " is not existing ");
 			} else {
-				
+
 				setProductAttributes(product);
 			}
 		} catch (Exception e) {
@@ -181,22 +185,100 @@ public class JUnitTest {
 	}
 
 	
-	
-	protected  void setProductAttributes(Product product){
+//	@Test
+	public void testFetchEntityListFromDB() {
+		MozuApiContext context = new MozuApiContext();
+		context.setTenantId(24094);
+		context.setSiteId(35909);
+		final String EHF_TEMPLATE = "EHF-TEMPLATE";
+		final String ITEM = "productCode";
+		final String PROVINCE = "province";
+		final String FEE_AMT = "feeAmt";
+		EntityResource entityResource = new EntityResource(context);
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode fitmentNode = mapper.getNodeFactory().objectNode();
+
+		fitmentNode.put(ITEM, "10001");
+		fitmentNode.put(PROVINCE, "ON");
+		fitmentNode.put(FEE_AMT, "2.00");
+		JsonNode returnNode = null;
+		try {
+			//returnNode = entityResource.insertEntity(fitmentNode, EHF_TEMPLATE + "@" + "HomeH");
+			JsonNode jsonNode =  entityResource.getEntity(EHF_TEMPLATE + "@" + "HomeH", "b87fb7634b6247abb82101f16996fbbd");
+			System.out.println(jsonNode.toString());
+			JsonNode jsonNode2 = jsonNode.get("productCode");
+			ObjectNode objectNode = (ObjectNode)jsonNode;
+			objectNode.put("productCode", "10003");
+
+
+			entityResource.updateEntity(jsonNode,EHF_TEMPLATE + "@" + "HomeH", "b87fb7634b6247abb82101f16996fbbd");
+			JsonNode jsonNode3 =  entityResource.getEntity(EHF_TEMPLATE + "@" + "HomeH", "b87fb7634b6247abb82101f16996fbbd");
+			System.out.println("updated JSON "+jsonNode3.toString());
+			//System.out.println("Added Entity for : " + returnNode.get(ITEM)+ " : "+jsonNode.toString());
+		} catch (Exception e) {
+			System.out.println("Error processing Entity for : " + fitmentNode.get(ITEM));
+			e.printStackTrace();
+		}
+
+	}
+	//@Test
+	public void testFetchExtendedDescriptionFromDB() {
+		try {
+			String productCode = "4466-443";
+			List<ExtDesc> extDescs = hhDaoImpl.geExtendedDescription(productCode);
+			ProductResource productResource = new ProductResource(new MozuApiContext(24094, 35909));
+			Product product = productResource.getProduct(productCode);
+			/*String description = extDescs.get(1).getDescription();
+			description = description.replaceAll("-", "\n-");*/
+			int tenantId = 24094, siteId = 35909;
+
+			if (extDescs != null && extDescs.size() != 0) {
+				for (ExtDesc e : extDescs) {
+					String type = e.getType();
+					if (!isEmpty(type) && type.equalsIgnoreCase(AttributeConstants.MKTG)) {
+						if (isProductPropertyExist(product.getProperties(),
+								AttributeConstants.tenant_marketing_description)) {
+							updateProductproperty(AttributeConstants.tenant_marketing_description, e.getDescription(),
+									product, tenantId, siteId);
+						} else {
+							addProductProperty(AttributeConstants.tenant_marketing_description, e.getDescription(),
+									product, tenantId, siteId);
+						}
+					}else if (!isEmpty(type) && type.equalsIgnoreCase(AttributeConstants.INGR)) {
+						if (isProductPropertyExist(product.getProperties(), AttributeConstants.TENANT_INGREDIENTS)) {
+							updateProductproperty(AttributeConstants.TENANT_INGREDIENTS, e.getDescription(),
+									product, tenantId, siteId);
+						} else {
+							addProductProperty(AttributeConstants.TENANT_INGREDIENTS, e.getDescription(),
+									product, tenantId, siteId);
+						}
+					}else if (!isEmpty(type) && type.equalsIgnoreCase(AttributeConstants.FB)) {
+						if(product.getContent()!=null){
+							product.getContent().setProductFullDescription(e.getDescription());
+							 productResource.updateProduct(product, product.getProductCode());
+						}
+					}
+					//System.out.println(e.getDescription());
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	protected void setProductAttributes(Product product) {
 		List<ProductAttribute> productAttributes = hhDaoImpl.getProductAttributesList();
 		List<ProductProperty> productProperties = product.getProperties();
 		if (productProperties != null && productProperties.size() != 0) {
 			for (ProductAttribute p : productAttributes) {
-				ProductItemAttributes productItemAttributes = hhDaoImpl
-						.getProductItemAttribute(p.getProductAttrId(), product.getProductCode());
-				if (productItemAttributes != null
-						&& isStatusInitial(productItemAttributes.getStatus())
+				ProductItemAttributes productItemAttributes = hhDaoImpl.getProductItemAttribute(p.getProductAttrId(),
+						product.getProductCode());
+				if (productItemAttributes != null && isStatusInitial(productItemAttributes.getStatus())
 						&& isProductPropertyExist(product.getProperties(), p.getProductAttrId())) {
-					
+
 					convertProductAttribute(p.getProductAttrId(), productItemAttributes, product);
 				} else {
-					if (productItemAttributes != null
-							&& isStatusInitial(productItemAttributes.getStatus())
+					if (productItemAttributes != null && isStatusInitial(productItemAttributes.getStatus())
 							&& productItemAttributes.getId() != null
 							&& productItemAttributes.getId().getProductAttrId() != null) {
 						addProductProperty(productItemAttributes, product);
@@ -207,10 +289,10 @@ public class JUnitTest {
 			productProperties = new ArrayList<>();
 			product.setProperties(productProperties);
 			for (ProductAttribute p : productAttributes) {
-				ProductItemAttributes productItemAttributes = hhDaoImpl
-						.getProductItemAttribute(p.getProductAttrId(), product.getProductCode());
-				if(productItemAttributes!=null&& isStatusInitial(productItemAttributes.getStatus()))
-				addProductProperty(productItemAttributes, product);
+				ProductItemAttributes productItemAttributes = hhDaoImpl.getProductItemAttribute(p.getProductAttrId(),
+						product.getProductCode());
+				if (productItemAttributes != null && isStatusInitial(productItemAttributes.getStatus()))
+					addProductProperty(productItemAttributes, product);
 			}
 			product.setProperties(productProperties);
 		}
@@ -259,7 +341,7 @@ public class JUnitTest {
 
 	}
 
-	protected  void convertProductAttribute(String attrFqnId, ProductItemAttributes productItemAttributes,
+	protected void convertProductAttribute(String attrFqnId, ProductItemAttributes productItemAttributes,
 			final Product product) {
 		try {
 			List<ProductProperty> productProperties = product.getProperties();
@@ -283,9 +365,9 @@ public class JUnitTest {
 			productItemAttributes.setStatus("SUCCESS");
 			hhDaoImpl.updateProductItemAttributes(productItemAttributes);
 			System.out
-			.println("Property " + productItemAttributes.getId().getProductAttrId() + " updated successfully ");
+					.println("Property " + productItemAttributes.getId().getProductAttrId() + " updated successfully ");
 		} catch (Exception e) {
-			
+
 			productItemAttributes.setStatus("ERROR");
 			hhDaoImpl.updateProductItemAttributes(productItemAttributes);
 			System.out.println("Exception while updating property " + productItemAttributes.getId().getProductAttrId()
@@ -294,7 +376,36 @@ public class JUnitTest {
 
 	}
 
-	protected  void addProductProperty(ProductItemAttributes productItemAttributes, final Product product) {
+	protected void updateProductproperty(String attributeFqn, String attributeValue, final Product product,
+			int tenantId, int siteId) {
+		try {
+			List<ProductProperty> productProperties = product.getProperties();
+			if (productProperties != null && productProperties.size() != 0) {
+				for (ProductProperty p : productProperties) {
+					if (p.getAttributeFQN().equalsIgnoreCase(attributeFqn)) {
+						ProductPropertyValue productPropertyValue = p.getValues().get(0);
+						if (productPropertyValue instanceof ProductPropertyValue
+								&& productPropertyValue.getContent() != null) {
+
+							productPropertyValue.getContent().setStringValue(attributeValue);
+						}
+						//productPropertyValue.setValue(attributeValue);
+						ProductPropertyResource productPropertyResource = new ProductPropertyResource(
+								new MozuApiContext(tenantId, siteId));
+						productPropertyResource.updateProperty(p, product.getProductCode(), p.getAttributeFQN());
+					}
+				}
+			}
+			System.out.println(" property " + attributeFqn + " updated successfully");
+		} catch (Exception e) {
+
+			System.out.println("Exception while updating property " + attributeFqn + " " );
+			e.printStackTrace();
+		}
+
+	}
+
+	protected void addProductProperty(ProductItemAttributes productItemAttributes, final Product product) {
 		try {
 			ProductProperty productProperty = new ProductProperty();
 			productProperty.setAttributeFQN(productItemAttributes.getId().getProductAttrId());
@@ -317,7 +428,7 @@ public class JUnitTest {
 			productItemAttributes.setStatus("SUCCESS");
 			hhDaoImpl.updateProductItemAttributes(productItemAttributes);
 			System.out.println("Property " + productItemAttributes.getId().getProductAttrId() + " added successfully ");
-			
+
 		} catch (Exception e) {
 			productItemAttributes.setStatus("ERROR");
 			hhDaoImpl.updateProductItemAttributes(productItemAttributes);
@@ -326,15 +437,44 @@ public class JUnitTest {
 		}
 	}
 
+	protected void addProductProperty(String attributeFqn, String attributeValue, final Product product, int tenantId,
+			int siteId) {
+		try {
+			ProductProperty productProperty = new ProductProperty();
+			productProperty.setAttributeFQN(attributeFqn);
+
+			ProductPropertyValue productPropertyValue = new ProductPropertyValue();
+			List<ProductPropertyValue> productPropertyValuesList = new ArrayList<ProductPropertyValue>();
+			//productPropertyValueAttr.setValue("");
+
+			ProductPropertyValueLocalizedContent content = new ProductPropertyValueLocalizedContent();
+			content.setLocaleCode("en-US");
+			content.setStringValue(attributeValue);
+			productPropertyValue.setContent(content);
+
+			productPropertyValuesList.add(productPropertyValue);
+			productProperty.setValues(productPropertyValuesList);
+			product.getProperties().add(productProperty);
+			ProductPropertyResource productPropertyResource = new ProductPropertyResource(
+					new MozuApiContext(tenantId, siteId));
+			productPropertyResource.addProperty(productProperty, product.getProductCode());
+			System.out.println("Property " + attributeFqn + " added successfully ");
+
+		} catch (Exception e) {
+			System.out.println("Exception while adding property " + attributeFqn + " " );
+			e.printStackTrace();
+		}
+	}
+
 	protected static boolean isProductPropertyExist(List<ProductProperty> productProperties, String produtFqn) {
 		boolean productPropertyExist = false;
-		if(productProperties !=null&& productProperties.size()!=0){
-		for (ProductProperty pp : productProperties) {
-			if (pp.getAttributeFQN().equalsIgnoreCase(produtFqn)) {
-				productPropertyExist = true;
-				break;
+		if (productProperties != null && productProperties.size() != 0) {
+			for (ProductProperty pp : productProperties) {
+				if (pp.getAttributeFQN().equalsIgnoreCase(produtFqn)) {
+					productPropertyExist = true;
+					break;
+				}
 			}
-		}
 		}
 		return productPropertyExist;
 	}
@@ -346,7 +486,7 @@ public class JUnitTest {
 		}
 		return isStatusInitial;
 	}
-	
+
 	protected static boolean isEmpty(String str) {
 		if (str == null || str.length() == 0) {
 			return true;
@@ -354,6 +494,7 @@ public class JUnitTest {
 			return false;
 		}
 	}
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}

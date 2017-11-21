@@ -7,7 +7,7 @@
  *  
  *  VERSION     MODIFIED BY               (MM/DD/YY)      Description
  *  ====================================================================================================
- *  1.0         Ashwinee Salunkhe          11/1/17        Camel-context route configuration file
+ *  1.0         Ashwinee Salunkhe          11/1/17        Camel-contextr route configuration file
  *  ====================================================================================================
  */
 -->
@@ -15,8 +15,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:camel="http://camel.apache.org/schema/spring"
        xmlns:drools="http://drools.org/schema/drools-spring"
-       xsi:schemaLocation="
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        http://drools.org/schema/drools-spring http://drools.org/schema/drools-spring.xsd">       
           
@@ -25,12 +24,12 @@
 		 <camel:route id="processReportData" >
 			<camel:from uri="file://E:/HOMEHARDWARE/Files/CamelFiles/?noop=true"/>
 			<camel:unmarshal ref="bindyDataformat">
-				<camel:bindy type="Csv" classType="com.hh.model.dao.HHProductAttrDAO"/>
+				<camel:bindy type="Csv" classType="com.hh.model.dao.HhProductAttrDAO"/>
 			</camel:unmarshal>
 		  <camel:log message="Camel unmarshlling is completed" loggingLevel="INFO" />
 		   <camel:process ref="hhProductRecordProcessor"/> 
 		   <camel:log message="Processing of reports record is complete" loggingLevel="INFO" />
 	  	</camel:route>
   </camelContext>  
-   <bean id="hhProductRecordProcessor" class="com.hh.report.processor.HHProductProcessor" />
+   <bean id="hhProductRecordProcessor" class="com.hh.report.processor.HhProductProcessor" />
 </beans>

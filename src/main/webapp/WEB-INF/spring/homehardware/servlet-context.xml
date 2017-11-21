@@ -67,7 +67,8 @@
 		destroy-method="stopCache" lazy-init="false">
 	</beans:bean>
 	<beans:bean id="employee" class="com.homehardware.beans.Employee"></beans:bean>
-	<beans:bean id="hhDaoImpl" class="com.homehardware.dao.HhDaoImpl"></beans:bean>
+	<beans:bean id="store" class="com.homehardware.beans.Store"></beans:bean>
+	<!-- <beans:bean id="hhDaoImpl" class="com.homehardware.dao.HhDaoImpl"></beans:bean> -->
 	<!-- <beans:bean id="itemDynAttr" class="com.homehardware.model.ItemDynAttr"></beans:bean> -->
 	<beans:bean id="itemDynAttrId" class="com.homehardware.model.ItemDynAttrId"></beans:bean>
 	<!-- enables scanning for @Scheduled annotations -->

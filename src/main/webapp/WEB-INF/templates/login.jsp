@@ -8,6 +8,6 @@
 </head>
 <body>
   <h2>Welcome to Home hardware </h2>
-   <a href="addAttribute">add new product</a>
+   <a href="testFetchHHStoreObjectFromDB">test HH Store Object</a>
 </body>
 </html>

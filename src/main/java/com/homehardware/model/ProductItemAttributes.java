@@ -1,5 +1,5 @@
 // default package
-// Generated Nov 14, 2017 4:09:32 PM by Hibernate Tools 5.2.6.Final
+// Generated Nov 20, 2017 3:39:29 PM by Hibernate Tools 5.2.6.Final
 package com.homehardware.model;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -23,7 +23,6 @@ public class ProductItemAttributes implements java.io.Serializable {
 	private Integer errorCode;
 	private String errorDesc;
 	private String status;
-	
 
 	public ProductItemAttributes() {
 	}
@@ -33,7 +32,7 @@ public class ProductItemAttributes implements java.io.Serializable {
 	}
 
 	public ProductItemAttributes(ProductItemAttributesId id, Integer jobId, String attributeValue,
-			String attributeValueFr, String isProcessSuccess, Integer errorCode, String errorDesc) {
+			String attributeValueFr, String isProcessSuccess, Integer errorCode, String errorDesc, String status) {
 		this.id = id;
 		this.jobId = jobId;
 		this.attributeValue = attributeValue;
@@ -111,15 +110,13 @@ public class ProductItemAttributes implements java.io.Serializable {
 		this.errorDesc = errorDesc;
 	}
 
-	@Column(name = "STATUS")
+	@Column(name = "status", length = 64)
 	public String getStatus() {
-		return status;
+		return this.status;
 	}
 
 	public void setStatus(String status) {
 		this.status = status;
 	}
-
-
 
 }

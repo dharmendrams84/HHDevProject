@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hardware.constants.AttributeConstants;
 import com.homehardware.beans.Store;
 import com.homehardware.dao.HhDaoImpl;
+import com.homehardware.model.EcoFees;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Item;
 import com.homehardware.model.ProductAttribute;
@@ -37,6 +38,7 @@ import com.mozu.api.contracts.location.Coordinates;
 import com.mozu.api.contracts.location.Location;
 import com.mozu.api.contracts.location.LocationType;
 import com.mozu.api.contracts.location.ShippingOriginContact;
+import com.mozu.api.contracts.mzdb.EntityCollection;
 import com.mozu.api.contracts.mzdb.EntityList;
 import com.mozu.api.resources.commerce.admin.LocationResource;
 import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
@@ -131,18 +133,9 @@ public class JUnitTest {
 
 	}
 
+	
+
 	// @Test
-	public void testFetchHHEcoFeesFromDB() throws Exception {
-		// hhDaoImpl.getEcoFees();
-		EntityList entityList = new EntityList();
-		entityList.setName("testName");
-		EntityListResource entityListResource = new EntityListResource(new MozuApiContext(24094, 35909));
-
-		entityListResource.createEntityList(entityList);
-		System.out.println("After creating entityList resource" + entityListResource);
-	}
-
-	 @Test
 	public void testFetcgHhProductFromDb() {
 		try {
 
@@ -184,9 +177,52 @@ public class JUnitTest {
 		}
 	}
 
+	//@Test
+	public void testFetchHHEcoFeesFromDB() throws Exception {
+		
+		List<EcoFees> ecoFeesList = hhDaoImpl.getEcoFes();
+		int tenantId=24094 ,siteId = 35909;
+		final String fullPathName = "EHF_TEMPLATE" + "@" + "HomeH";
+
+		for(EcoFees e : ecoFeesList){
+			EntityCollection ec = getEntityCollection(tenantId, siteId, e.getItem(), e.getProv());
+		 System.out.println(ec);
+		 
+		 if(ec !=null&&ec.getItems()!=null&&ec.getItems().size()==0){			
+			 		//insertEntityList(tenantId, siteId, e.getItem(), e.getProv(), e.getFeeAmt(), fullPathName);
+			 configureEntity(tenantId, siteId,e.getItem(),e.getProv(),new Double(e.getFeeAmt()).toString());
+		 }else{
+			 updateEntity(tenantId, siteId, "", "", "", null);
+		 }
+		}
+	}
 	
-//	@Test
-	public void testFetchEntityListFromDB() {
+	
+	public EntityCollection getEntityCollection(int tenantId,int siteId,String productCode,String province) {
+		EntityCollection entityCollection = null;
+		try{
+		MozuApiContext context = new MozuApiContext();
+		context.setTenantId(tenantId);
+		context.setSiteId(siteId);
+		EntityResource entityResource = new EntityResource(context);
+		final String EHF_TEMPLATE = "EHF-TEMPLATE";
+		final String fullName = EHF_TEMPLATE + "@" + "HomeH";
+		String filterString = "(productCode eq '";
+		filterString = filterString+productCode+"') and (province eq '"+province+"')";
+		
+		System.out.println(filterString);
+		
+		entityCollection = entityResource.getEntities(fullName, null, null, filterString, null, null);
+		
+		
+		}catch(Exception e){
+			System.out.println("Exception while getting EntityCollection");
+			e.printStackTrace();
+		}
+		return entityCollection;
+	}
+	
+		public void fetchEntityListFromDB() {
 		MozuApiContext context = new MozuApiContext();
 		context.setTenantId(24094);
 		context.setSiteId(35909);
@@ -203,18 +239,27 @@ public class JUnitTest {
 		fitmentNode.put(FEE_AMT, "2.00");
 		JsonNode returnNode = null;
 		try {
-			//returnNode = entityResource.insertEntity(fitmentNode, EHF_TEMPLATE + "@" + "HomeH");
-			JsonNode jsonNode =  entityResource.getEntity(EHF_TEMPLATE + "@" + "HomeH", "b87fb7634b6247abb82101f16996fbbd");
-			System.out.println(jsonNode.toString());
-			JsonNode jsonNode2 = jsonNode.get("productCode");
-			ObjectNode objectNode = (ObjectNode)jsonNode;
-			objectNode.put("productCode", "10003");
-
-
-			entityResource.updateEntity(jsonNode,EHF_TEMPLATE + "@" + "HomeH", "b87fb7634b6247abb82101f16996fbbd");
+			String fullName = EHF_TEMPLATE + "@" + "HomeH";
+			//JsonNode jsonNode =  entityResource.getEntity(EHF_TEMPLATE + "@" + "HomeH", "b87fb7634b6247abb82101f16996fbbd");
+			//System.out.println(jsonNode.toString());
+//			JsonNode jsonNode2 = jsonNode.get("productCode");
+			//ObjectNode objectNode = (ObjectNode)jsonNode;
+			//objectNode.put("productCode", "10003");
+			String productCode ="10003" , province ="ON";
+			String filterString = "(productCode eq '";
+			filterString = filterString+productCode+"') and (province eq '"+province+"')";
+			
+			System.out.println(filterString);
+			//EntityCollection entityCollection = entityResource.getEntities(fullName, null, null, "(productCode eq '10003') and (province eq 'ON')", null, null);
+			EntityCollection entityCollection = entityResource.getEntities(fullName, null, null, filterString, null, null);
+			//(productCode eq ”10003”) and (province eq ”ON”)
+			
+			List<JsonNode> list = entityCollection.getItems();
+			System.out.println(list);
+			/*entityResource.updateEntity(jsonNode,EHF_TEMPLATE + "@" + "HomeH", "b87fb7634b6247abb82101f16996fbbd");
 			JsonNode jsonNode3 =  entityResource.getEntity(EHF_TEMPLATE + "@" + "HomeH", "b87fb7634b6247abb82101f16996fbbd");
 			System.out.println("updated JSON "+jsonNode3.toString());
-			//System.out.println("Added Entity for : " + returnNode.get(ITEM)+ " : "+jsonNode.toString());
+			*/
 		} catch (Exception e) {
 			System.out.println("Error processing Entity for : " + fitmentNode.get(ITEM));
 			e.printStackTrace();
@@ -222,43 +267,107 @@ public class JUnitTest {
 
 	}
 	//@Test
+	public void configureEntity(int tenantId, int siteId,String productCode,String province,String feeAmount)  {
+		MozuApiContext context = new MozuApiContext();
+		context.setTenantId(tenantId);
+		context.setSiteId(siteId);
+		final String EHF_TEMPLATE = "EHF-TEMPLATE";
+		final String ITEM = "productCode";
+		final String PROVINCE = "province";
+		final String FEE_AMT = "feeAmt";
+		EntityResource entityResource = new EntityResource(context);
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode fitmentNode = mapper.getNodeFactory().objectNode();
+
+		fitmentNode.put(ITEM, productCode);
+		fitmentNode.put(PROVINCE, province);
+		fitmentNode.put(FEE_AMT, feeAmount);
+		JsonNode returnNode = null;
+		try {
+		returnNode = entityResource.insertEntity(fitmentNode, EHF_TEMPLATE+"@"+"HomeH");
+		System.out.println("Added Entity for : "+ returnNode.get(ITEM));
+		} catch (Exception e) {
+		System.out.println("Error processing Entity for : "+ fitmentNode.get(ITEM));
+		e.printStackTrace();
+		}
+		}
+
+	public void updateEntity(int tenantId, int siteId,String productCode,String province,String feeAmount,ObjectNode fitmentNode1 )  {
+		MozuApiContext context = new MozuApiContext();
+		context.setTenantId(tenantId);
+		context.setSiteId(siteId);
+		final String EHF_TEMPLATE = "EHF-TEMPLATE";
+		final String ITEM = "productCode";
+		final String PROVINCE = "province";
+		final String FEE_AMT = "feeAmt";
+		EntityResource entityResource = new EntityResource(context);
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode fitmentNode = mapper.getNodeFactory().objectNode();
+
+		fitmentNode.put(ITEM, productCode);
+		fitmentNode.put(PROVINCE, province);
+		fitmentNode.put(FEE_AMT, feeAmount);
+		JsonNode returnNode = null;
+		try {
+		//returnNode = entityResource.insertEntity(fitmentNode, EHF_TEMPLATE+"@"+"HomeH");
+		//entityResource.updateEntity(fitmentNode,  EHF_TEMPLATE+"@"+"HomeH", );
+		JsonNode jsonNode3 =  entityResource.getEntity(EHF_TEMPLATE + "@" + "HomeH", "7834105e07b84e96871c6b9d3b85a5bc");
+		//entityResource.get
+		System.out.println("updated JSON "+jsonNode3.toString());
+		System.out.println("Added Entity for : "+ returnNode.get(ITEM));
+		} catch (Exception e) {
+		System.out.println("Error processing Entity for : "+ fitmentNode.get(ITEM));
+		e.printStackTrace();
+		}
+		}
+
+
+
+	
+	@Test
 	public void testFetchExtendedDescriptionFromDB() {
 		try {
 			String productCode = "4466-443";
 			List<ExtDesc> extDescs = hhDaoImpl.geExtendedDescription(productCode);
 			ProductResource productResource = new ProductResource(new MozuApiContext(24094, 35909));
 			Product product = productResource.getProduct(productCode);
-			/*String description = extDescs.get(1).getDescription();
-			description = description.replaceAll("-", "\n-");*/
-			int tenantId = 24094, siteId = 35909;
+			final int tenantId = 24094, siteId = 35909;
+			if (product != null) {
+				if (extDescs != null && extDescs.size() != 0) {
+					for (ExtDesc e : extDescs) {
+						String type = e.getType();
+						String description = e.getDescription();
+						if (!isEmpty(description) && description.trim().length() != 0) {
+							if (!isEmpty(type) && type.equalsIgnoreCase(AttributeConstants.MKTG)) {
+								if (isProductPropertyExist(product.getProperties(),
+										AttributeConstants.tenant_marketing_description)) {
+									updateProductproperty(AttributeConstants.tenant_marketing_description,
+											e.getDescription(), product, tenantId, siteId);
+								} else {
+									addProductProperty(AttributeConstants.tenant_marketing_description,
+											e.getDescription(), product, tenantId, siteId);
+								}
+							} else if (!isEmpty(type) && type.equalsIgnoreCase(AttributeConstants.INGR)) {
+								if (isProductPropertyExist(product.getProperties(),
+										AttributeConstants.TENANT_INGREDIENTS)) {
+									updateProductproperty(AttributeConstants.TENANT_INGREDIENTS, e.getDescription(),
+											product, tenantId, siteId);
+								} else {
+									addProductProperty(AttributeConstants.TENANT_INGREDIENTS, e.getDescription(),
+											product, tenantId, siteId);
+								}
+							} else if (!isEmpty(type) && type.equalsIgnoreCase(AttributeConstants.FB)) {
+								if (product.getContent() != null) {
+									product.getContent().setProductFullDescription(e.getDescription());
+									productResource.updateProduct(product, product.getProductCode());
+								}
+							}
 
-			if (extDescs != null && extDescs.size() != 0) {
-				for (ExtDesc e : extDescs) {
-					String type = e.getType();
-					if (!isEmpty(type) && type.equalsIgnoreCase(AttributeConstants.MKTG)) {
-						if (isProductPropertyExist(product.getProperties(),
-								AttributeConstants.tenant_marketing_description)) {
-							updateProductproperty(AttributeConstants.tenant_marketing_description, e.getDescription(),
-									product, tenantId, siteId);
 						} else {
-							addProductProperty(AttributeConstants.tenant_marketing_description, e.getDescription(),
-									product, tenantId, siteId);
+							System.out.println("Not updating " + e.getType() + " as this is a blank value");
 						}
-					}else if (!isEmpty(type) && type.equalsIgnoreCase(AttributeConstants.INGR)) {
-						if (isProductPropertyExist(product.getProperties(), AttributeConstants.TENANT_INGREDIENTS)) {
-							updateProductproperty(AttributeConstants.TENANT_INGREDIENTS, e.getDescription(),
-									product, tenantId, siteId);
-						} else {
-							addProductProperty(AttributeConstants.TENANT_INGREDIENTS, e.getDescription(),
-									product, tenantId, siteId);
-						}
-					}else if (!isEmpty(type) && type.equalsIgnoreCase(AttributeConstants.FB)) {
-						if(product.getContent()!=null){
-							product.getContent().setProductFullDescription(e.getDescription());
-							 productResource.updateProduct(product, product.getProductCode());
-						}
+
 					}
-					//System.out.println(e.getDescription());
 				}
 			}
 		} catch (Exception e) {

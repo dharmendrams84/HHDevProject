@@ -203,5 +203,15 @@ public class HhDaoImpl implements HhDao {
 		
 		return extDescs;
 	}
+	
+	@Override
+	public final List<EcoFees> getEcoFes() {
 
+		final Session session = sessionFactory.openSession();
+		Query query = session.createQuery("from EcoFees");
+		List<EcoFees> ecofees = query.list();   
+		session.close();
+		
+		return ecofees;
+	}
 }

@@ -13,6 +13,7 @@
         <mapping class="com.homehardware.model.ProductAttribute" />
         <mapping class="com.homehardware.model.ProductItemAttributes" />
         <mapping class="com.homehardware.model.ExtDesc" />
+        <mapping class="com.homehardware.model.EcoFees" />
     </session-factory>
        
 </hibernate-configuration>

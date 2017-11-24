@@ -3,6 +3,7 @@ package com.homehardware.dao;
 import java.util.List;
 
 import com.homehardware.beans.Store;
+import com.homehardware.model.EcoFees;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Item;
 import com.homehardware.model.ProductAttribute;
@@ -31,4 +32,6 @@ public interface HhDao {
 	void updateProductItemAttributes(ProductItemAttributes productItemAttributes);
 
 	List<ExtDesc> geExtendedDescription(String item);
+	
+	public List<EcoFees> getEcoFes();
 }

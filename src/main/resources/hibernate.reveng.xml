@@ -3,4 +3,6 @@
 
 <hibernate-reverse-engineering>
 <table-filter match-catalog="ignitiv" match-name="ext_desc"/>
+<table-filter match-catalog="ignitiv" match-name="eco_fees"/>
+
 </hibernate-reverse-engineering>

@@ -58,6 +58,6 @@
         </beans:property>
        </beans:bean>
 	<beans:bean id="store" class="com.homehardware.beans.Store"></beans:bean>
-	<beans:bean id="ecofees" class="com.homehardware.model.EcoFees"></beans:bean>
+	<!-- <beans:bean id="ecofees" class="com.homehardware.model.EcoFees"></beans:bean> -->
 
 </beans:beans>

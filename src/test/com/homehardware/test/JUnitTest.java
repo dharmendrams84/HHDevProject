@@ -14,6 +14,7 @@ import com.homehardware.model.ProductItemAttributes;
 import com.homehardware.model.TransformFromHhLocationToKiboLocation;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.After;
@@ -58,6 +59,8 @@ import com.mozu.api.resources.platform.entitylists.EntityResource;
 @ContextConfiguration(locations = { "file:src/main/webapp/WEB-INF/spring/homehardware/applicationContext.xml" })
 
 public class JUnitTest {
+
+	
 
 	public JUnitTest() {
 
@@ -179,23 +182,26 @@ public class JUnitTest {
 
 	@Test
 	public void testFetchHHEcoFeesFromDB() throws Exception {
-
+		Date d1 = new java.util.Date(); 
+		System.out.println(d1);
 		List<EcoFees> ecoFeesList = hhDaoImpl.getEcoFes();
 		int tenantId = Constants.tenantId, siteId = Constants.siteId;
 		MozuApiContext context = new MozuApiContext();
 		context.setTenantId(tenantId);
 		context.setSiteId(siteId);
 		for (EcoFees e : ecoFeesList) {
-			JsonNode ec = getEntity(context,tenantId, siteId, e.getItem(), e.getProv());
-			
-			
+			JsonNode ec = getEntity(context, tenantId, siteId, e.getItem(), e.getProv());
+
 			if (ec == null) {
-				insertEntity(context,tenantId, siteId, e.getItem(), e.getProv(), new Double(e.getFeeAmt()).toString());
+				insertEntity(context, tenantId, siteId, e.getItem(), e.getProv(), new Double(e.getFeeAmt()).toString());
 			} else {
-				
-				updateEntity(context,tenantId, siteId, e.getItem(), e.getProv(), new Double(e.getFeeAmt()).toString(), null);
+			/*	updateEntity(context, tenantId, siteId, e.getItem(), e.getProv(), new Double(e.getFeeAmt()).toString(),
+						null);*/
+				System.out.println("updating entity with productCode "+e.getItem()+ " province : "+e.getProv());
 			}
 		}
+		Date d2 = new java.util.Date(); 
+		System.out.println(d2);
 	}
 
 	public JsonNode getEntity(MozuApiContext context,int tenantId, int siteId, String productCode, String province) {
@@ -277,16 +283,13 @@ public class JUnitTest {
 	public void insertEntity(MozuApiContext context,int tenantId, int siteId, String productCode, String province, String feeAmount)
 			throws Exception {
 		
-		final String ITEM = "productCode";
-		final String PROVINCE = "province";
-		final String FEE_AMT = "feeAmt";
 		EntityResource entityResource = new EntityResource(context);
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode fitmentNode = mapper.getNodeFactory().objectNode();
-		fitmentNode.put("id",  createIdForEntityList(productCode,province));
-		fitmentNode.put(ITEM, productCode);
-		fitmentNode.put(PROVINCE, province);
-		fitmentNode.put(FEE_AMT, feeAmount);
+		fitmentNode.put(Constants.ID,  createIdForEntityList(productCode,province));
+		fitmentNode.put(Constants.PRODUCT_CODE, productCode);
+		fitmentNode.put(Constants.PROVINCE, province);
+		fitmentNode.put(Constants.FEE_AMT, feeAmount);
 		
 		try {
 			entityResource.insertEntity(fitmentNode, Constants.FULL_PATH_NAME);
@@ -305,14 +308,12 @@ public class JUnitTest {
 			
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode fitmentNode = mapper.getNodeFactory().objectNode();
-			final String ITEM = "productCode";
-			final String PROVINCE = "province";
-			final String FEE_AMT = "feeAmt";
+		
 			final String ID = createIdForEntityList(productCode, province); 
-			fitmentNode.put("id", ID);
-			fitmentNode.put(ITEM, productCode);
-			fitmentNode.put(PROVINCE,province);
-			fitmentNode.put(FEE_AMT, feeAmount);
+			fitmentNode.put(Constants.ID, ID);
+			fitmentNode.put(Constants.PRODUCT_CODE, productCode);
+			fitmentNode.put(Constants.PROVINCE,province);
+			fitmentNode.put(Constants.FEE_AMT, feeAmount);
 			entityResource.updateEntity(fitmentNode, Constants.FULL_PATH_NAME, ID);
 			System.out.println("Enity with product code : "+productCode+ " and province : "+province+" updated successfully!!!!! ");
 		} catch (Exception e) {
@@ -604,7 +605,7 @@ public class JUnitTest {
 		productCode = productCode.toLowerCase();
 		productCode = productCode.replaceAll("\\W", ""); 
 		province = province.toLowerCase();
-		province = province.replaceAll("\\W", ""); 
+		province = province.replaceAll("\\W", "-"); 
 		return productCode+"-"+province;
 	}
 

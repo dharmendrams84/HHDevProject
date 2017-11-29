@@ -10,7 +10,7 @@ import com.mozu.api.contracts.location.Location;
 import com.mozu.api.contracts.location.LocationType;
 import com.mozu.api.contracts.location.RegularHours;
 import com.mozu.api.contracts.location.ShippingOriginContact;
-import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
+
 
 import java.util.ArrayList;
 import java.util.List;

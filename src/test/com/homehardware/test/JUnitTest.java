@@ -180,7 +180,7 @@ public class JUnitTest {
 		}
 	}
 
-	@Test
+	//@Test
 	public void testFetchHHEcoFeesFromDB() throws Exception {
 		Date d1 = new java.util.Date(); 
 		System.out.println(d1);
@@ -204,6 +204,10 @@ public class JUnitTest {
 		System.out.println(d2);
 	}
 
+	@Test
+	public void testFetchHHProductDetails() throws Exception {
+		hhDaoImpl.getProductDetailsFromDB();
+	}
 	public JsonNode getEntity(MozuApiContext context,int tenantId, int siteId, String productCode, String province) {
 		
 		JsonNode jsonNode = null;

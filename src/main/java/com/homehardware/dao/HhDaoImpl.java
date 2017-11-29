@@ -11,11 +11,13 @@ import com.homehardware.model.ProductItemAttributesId;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -213,5 +215,31 @@ public class HhDaoImpl implements HhDao {
 		session.close();
 		
 		return ecofees;
+	}
+	
+	
+	@Override
+	public final Item getProductDetailsFromDB() {
+
+		final Session session = sessionFactory.openSession();
+		Item item = new Item();
+		String query = "from Item i left join ExtDesc e on i.item=e.item left join EcoFees c on i.item=c.item";
+		
+		
+		
+	  //  Item item1 =	(Item)session.get(Item.class, "4466-443");
+	  //  List<ExtDesc>  extsSet = item1.getExtendedDescriptions();
+	  
+		List<?> list = session.createQuery(query).list();
+
+		for(int i=0; i<list.size(); i++) {
+			 Object[] row = (Object[]) list.get(i);
+			/* EcoFees subject= (Subject )row[0];
+			 Employee employee = (Employee)row[1];*/
+		}
+		session.createQuery(query);
+		
+		session.close();
+		return item;
 	}
 }

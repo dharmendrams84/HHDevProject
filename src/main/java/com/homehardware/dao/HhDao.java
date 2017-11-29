@@ -34,4 +34,6 @@ public interface HhDao {
 	List<ExtDesc> geExtendedDescription(String item);
 	
 	public List<EcoFees> getEcoFes();
+
+	Item getProductDetailsFromDB();
 }

@@ -6,6 +6,7 @@ import com.homehardware.beans.Store;
 import com.homehardware.model.EcoFees;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Item;
+import com.homehardware.model.ItemAffiliated;
 import com.homehardware.model.ProductAttribute;
 import com.homehardware.model.ProductItemAttributes;
 
@@ -36,4 +37,12 @@ public interface HhDao {
 	public List<EcoFees> getEcoFes();
 
 	Item getProductDetailsFromDB();
+
+	Item getItem(String itemId, String batchId ,String status);
+
+	List<ItemAffiliated> getItemAffliated(String itemId, String batchId ,String status);
+
+	List getItemsList(String batchId, String status);
+
+	/*List<ItemAffiliated> getItemDynAttribute(String itemId, String batchId, String status);*/
 }

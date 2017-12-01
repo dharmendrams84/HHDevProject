@@ -5,6 +5,8 @@ import com.homehardware.beans.Store;
 import com.homehardware.model.EcoFees;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Item;
+import com.homehardware.model.ItemAffiliated;
+import com.homehardware.model.ItemId;
 import com.homehardware.model.ProductAttribute;
 import com.homehardware.model.ProductItemAttributes;
 import com.homehardware.model.ProductItemAttributesId;
@@ -22,6 +24,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -85,6 +88,7 @@ public class HhDaoImpl implements HhDao {
 			//final JSONObject jsonObject = new JSONObject(store.getRegularHours());
 			//final JSONObject regularHours = (JSONObject) jsonObject.get("regularHours");
 			//regularHours.get("friday");
+			session.close();
 			System.out.println("store website url " + store.getStoreWebsiteUrl());
 			
 		} catch (Exception e) {
@@ -99,6 +103,7 @@ public class HhDaoImpl implements HhDao {
 		final Session session = sessionFactory.openSession();
 		final EcoFees ecoFees = (EcoFees) session.get(EcoFees.class, 1);
 		System.out.println(ecoFees);
+		session.close();
 
 	}
 	
@@ -114,6 +119,76 @@ public class HhDaoImpl implements HhDao {
 
 	}
 	
+	
+	@Override
+	public final Item getItem(String itemId,String batchId,String status) {
+
+		final Session session = sessionFactory.openSession();
+		String queryString = "from Item i where i.id.item = :item and i.id.batchId = :batchId and i.status = :status";
+		
+		Query query = session.createQuery(queryString);
+		query.setParameter("item", itemId);
+		query.setParameter("batchId", batchId);
+		query.setParameter("status", status);
+		
+		List list = query.list();
+		Item item = (Item)list.get(0);
+		/*
+		ItemId itemIdObj = new ItemId();
+		itemIdObj.setItem(itemId);
+		itemIdObj.setBatchId(batchId);
+		
+		Item item = (Item) session.get(Item.class, itemIdObj);*/
+		System.out.println("Item Dyn attr size "+item.getItemDynAttr().size()+ " Ext Desc Size : "+item.getExtDesc().size());
+		session.close();
+		return item;
+	}
+	
+	@Override
+	public final List getItemsList(String batchId,String status) {
+
+		final Session session = sessionFactory.openSession();
+		String queryString = "from Item i where i.id.batchId = :batchId and i.status = :status";
+		Query query = session.createQuery(queryString);
+	
+		query.setParameter("batchId", batchId);
+		query.setParameter("status", status);
+		
+		List list = query.list();
+		/*for(Object o:list){
+			Item item = (Item)o;
+			System.out.println(item);
+		}*/
+		session.close();
+		/*
+		ItemId itemIdObj = new ItemId();
+		itemIdObj.setItem(itemId);
+		itemIdObj.setBatchId(batchId);
+		
+		Item item = (Item) session.get(Item.class, itemIdObj);*/
+	//	System.out.println("Item Dyn attr size "+item.getItemDynAttr().size()+ " Ext Desc Size : "+item.getExtDesc().size());
+		return list;
+	}
+	@Override
+	public final List<ItemAffiliated> getItemAffliated(String itemId,String batchId,String status) {
+
+		final Session session = sessionFactory.openSession();
+		String queryString = "from ItemAffiliated i where i.item = :item and i.batchId = :batchId and i.status = :status";
+		Query query = session.createQuery(queryString);
+		query.setParameter("item", itemId);
+		query.setParameter("batchId", batchId);
+		query.setParameter("status", status);
+		
+		List<ItemAffiliated> list = query.list();
+		session.close();
+		return list;
+	}
+	
+	/*@Override
+	public final List<ItemAffiliated> getItemDynAttribute(String itemId,String batchId,String status) {
+
+	}
+		*/
 	
 	@Override
 	public final List<ProductAttribute> getProductAttributesList() {

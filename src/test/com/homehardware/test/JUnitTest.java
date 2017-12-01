@@ -139,7 +139,7 @@ public class JUnitTest {
 
 	}
 
-	@Test
+	//@Test
 	public void testFetcgHhProductFromDb() {
 		try {
 
@@ -211,7 +211,7 @@ public class JUnitTest {
 		System.out.println(d2);
 	}
 
-	//@Test
+	@Test
 	public void testFetchHHProductDetails() throws Exception {
 		GlobalItem globalItem = new GlobalItem();
 		String itemId = "4466-443";

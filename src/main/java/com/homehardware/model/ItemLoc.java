@@ -195,5 +195,9 @@ public class ItemLoc implements java.io.Serializable {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
+	
+	public String toString(){
+	  return "Item Loc Details WEIGHT : "+weight+ " : VPN : "+vpn+ " : LOC : "+loc+" \n ";
+	}
 
 }

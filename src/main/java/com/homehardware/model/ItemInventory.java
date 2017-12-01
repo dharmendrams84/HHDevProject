@@ -173,5 +173,7 @@ public class ItemInventory implements java.io.Serializable {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
-
+	public String toString(){
+		return "Inventory Quantity "+quantity+" \n ";
+	}
 }

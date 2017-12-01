@@ -33,7 +33,7 @@ public class TransformationOfProductProperties {
   
   protected static final Logger logger = Logger.getLogger(TransformationOfProductProperties.class);
   
-  protected static void updateProductPropertiesAttribute(ProductProperty productPropertiesAction,
+  public static void updateProductPropertiesAttribute(ProductProperty productPropertiesAction,
       String productPropertyAttrValue) {
     // TODO Auto-generated method stub
     try {
@@ -110,7 +110,8 @@ public class TransformationOfProductProperties {
       
     } catch (Exception e) {
       logger.error(" Exception while Adding property product cross sell "
-          + " Due to Exception = " + e.getCause());      
+          + " Due to Exception = " + e.getCause());   
+      e.printStackTrace();
     }
     
   }

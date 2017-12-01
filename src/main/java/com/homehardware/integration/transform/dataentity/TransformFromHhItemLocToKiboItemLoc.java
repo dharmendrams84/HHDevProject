@@ -36,10 +36,10 @@ public class TransformFromHhItemLocToKiboItemLoc {
    * @return. 
    */
   public static Product testTransformationFromHhItemLocToKiboItemLoc(
-      Product product,Location location ,ItemLoc itemLoc) {
+      Product product ,ItemLoc itemLoc) {
     
     // transform item loc product code obj to kibo product code
-    product.setProductCode(itemLoc.getItem());
+   // product.setProductCode(itemLoc.getItem());
     
     // transform location obj to kibo location
     //location.setCode(itemLoc.getLoc());

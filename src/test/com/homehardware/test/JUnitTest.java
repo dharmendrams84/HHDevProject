@@ -6,13 +6,28 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hardware.constants.Constants;
 import com.homehardware.beans.Store;
 import com.homehardware.dao.HhDaoImpl;
+import com.homehardware.integration.transform.dataentity.TransformFromHhAffilatedItemToKiboAffilatedItem;
+import com.homehardware.integration.transform.dataentity.TransformFromHhBrandToKiboBrand;
+import com.homehardware.integration.transform.dataentity.TransformFromHhExtendedDescToKiboExtendedDesc;
+import com.homehardware.integration.transform.dataentity.TransformFromHhGtinToKiboGtin;
+import com.homehardware.integration.transform.dataentity.TransformFromHhItemLocToKiboItemLoc;
+import com.homehardware.integration.transform.dataentity.TransformFromHhItemRestrictedToKiboItemRestricted;
+import com.homehardware.integration.transform.dataentity.TransformFromHhPromotionToKiboPromotion;
+import com.homehardware.integration.transform.dataentity.TransformFromHhRetailMsrpToKiboRetailMsrp;
+import com.homehardware.integration.transform.dataentity.TransformationOfProductProperties;
+import com.homehardware.model.Brand;
 import com.homehardware.model.EcoFees;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.GlobalItem;
+import com.homehardware.model.Gtin;
 import com.homehardware.model.Item;
 import com.homehardware.model.ItemAffiliated;
+import com.homehardware.model.ItemLoc;
+import com.homehardware.model.ItemRestricted;
 import com.homehardware.model.ProductAttribute;
 import com.homehardware.model.ProductItemAttributes;
+import com.homehardware.model.Promotion;
+import com.homehardware.model.RetailMsrp;
 import com.homehardware.model.TransformFromHhLocationToKiboLocation;
 
 import java.util.ArrayList;
@@ -139,7 +154,7 @@ public class JUnitTest {
 
 	}
 
-	//@Test
+	@Test
 	public void testFetcgHhProductFromDb() {
 		try {
 
@@ -211,7 +226,7 @@ public class JUnitTest {
 		System.out.println(d2);
 	}
 
-	@Test
+	//@Test
 	public void testFetchHHProductDetails() throws Exception {
 		GlobalItem globalItem = new GlobalItem();
 		String itemId = "4466-443";
@@ -504,7 +519,25 @@ public class JUnitTest {
 		product.setBaseProductCode(item.getHhCtrlBrandInd());
 
 		product.setIsValidForProductType(false);
-
+		
+		List<ItemAffiliated> itemAffiliateds = item.getItemAfffliated();
+		TransformFromHhAffilatedItemToKiboAffilatedItem.transformHhRelatedProductToKiboRelatedProductCode(product,itemAffiliateds);
+		Brand brand = (Brand)item.getBrand().get(0);
+        TransformFromHhBrandToKiboBrand.testTransformationFromHhBrandToKiboBrand(product,brand);
+        ExtDesc ed = item.getExtDesc().get(0);
+        TransformFromHhExtendedDescToKiboExtendedDesc.testTransformationFromHhExtendedDescToKiboExtendedDesc(product,ed);
+        Gtin gtin = item.getGtin().get(0);
+        TransformFromHhGtinToKiboGtin.testTransformationFromHhGtinToKiboGtin(product, gtin);
+        ItemLoc itemLoc =  item.getItemLoc().get(0);
+        TransformFromHhItemLocToKiboItemLoc.testTransformationFromHhItemLocToKiboItemLoc(product, itemLoc);
+        ItemRestricted itemRestricted = item.getItemRestricted().get(0);
+        TransformFromHhItemRestrictedToKiboItemRestricted.testTransformFromHhItemRestrictedToKiboItemRestricted(product,  itemRestricted);
+        /*Promotion promotion = item.getPromotion().get(0);
+        TransformFromHhPromotionToKiboPromotion.testTransformationFromHhPromotionToKiboPromotion(product, promotion);*/
+        RetailMsrp retailMsrp = item.getRetailMsrp().get(0);
+        TransformFromHhRetailMsrpToKiboRetailMsrp.testTransformationFromHhPriceToKiboPrice(product, retailMsrp);
+        
+       
 	}
 
 	protected void convertProductAttribute(String attrFqnId, ProductItemAttributes productItemAttributes,

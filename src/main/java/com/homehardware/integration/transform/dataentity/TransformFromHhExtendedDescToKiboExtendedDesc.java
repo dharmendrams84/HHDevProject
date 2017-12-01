@@ -31,7 +31,7 @@ public class TransformFromHhExtendedDescToKiboExtendedDesc {
   /**
    * This method is transform HH brand object to KIBO brand object.
    */  
-  public Product testTransformationFromHhExtendedDescToKiboExtendedDesc(
+  public static Product testTransformationFromHhExtendedDescToKiboExtendedDesc(
       Product product,ExtDesc extendedDesc) {
     
     // transform product code object to kibo product code obj
@@ -48,7 +48,7 @@ public class TransformFromHhExtendedDescToKiboExtendedDesc {
     
   }
 
-  private void transformHhProductDescTypeToKiboProductDescType(
+  private static void transformHhProductDescTypeToKiboProductDescType(
       Product product, ExtDesc extendedDesc) {
     // TODO Auto-generated method stub
     List<ProductProperty> productProperties;
@@ -63,7 +63,7 @@ public class TransformFromHhExtendedDescToKiboExtendedDesc {
           if (updateProductProperties.getAttributeFQN().equalsIgnoreCase(
               HhProductAttributeFqnConstants.Hh_Extended_Desc_Type_Attr_Fqn)) {
             
-            TransformationOfProductProperties.updateProductPropertiesAttribute(
+             TransformationOfProductProperties.updateProductPropertiesAttribute(
                 updateProductProperties,extendedDesc.getType());
           }
           
@@ -84,7 +84,7 @@ public class TransformFromHhExtendedDescToKiboExtendedDesc {
     
   }
 
-  private void transformHhProductContentToKiboProductContent(
+  private static void transformHhProductContentToKiboProductContent(
       Product product, ExtDesc extendedDesc) {
     // TODO Auto-generated method stub
     if (extendedDesc != null) {
@@ -95,7 +95,7 @@ public class TransformFromHhExtendedDescToKiboExtendedDesc {
     }
   }
 
-  private void transformHhProductCodeToKiboProductCode(
+  private static void transformHhProductCodeToKiboProductCode(
       Product product, ExtDesc extendedDesc) {
     // TODO Auto-generated method stub
     product.setProductCode(extendedDesc.getItem());

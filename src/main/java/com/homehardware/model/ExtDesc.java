@@ -1,11 +1,15 @@
 // default package
-// Generated Nov 22, 2017 11:27:21 AM by Hibernate Tools 5.2.6.Final
+// Generated Nov 30, 2017 12:19:14 PM by Hibernate Tools 5.2.6.Final
 package com.homehardware.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import static javax.persistence.GenerationType.IDENTITY;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -23,6 +27,8 @@ public class ExtDesc implements java.io.Serializable {
 	private String isProcessSuccess;
 	private Integer errorCode;
 	private String errorDesc;
+	private String batchId;
+	private String status;
 
 	public ExtDesc() {
 	}
@@ -32,7 +38,7 @@ public class ExtDesc implements java.io.Serializable {
 	}
 
 	public ExtDesc(String item, String language, String description, String type, String isProcessSuccess,
-			Integer errorCode, String errorDesc) {
+			Integer errorCode, String errorDesc, String batchId, String status) {
 		this.item = item;
 		this.language = language;
 		this.description = description;
@@ -40,6 +46,8 @@ public class ExtDesc implements java.io.Serializable {
 		this.isProcessSuccess = isProcessSuccess;
 		this.errorCode = errorCode;
 		this.errorDesc = errorDesc;
+		this.batchId = batchId;
+		this.status = status;
 	}
 
 	@Id
@@ -117,4 +125,26 @@ public class ExtDesc implements java.io.Serializable {
 		this.errorDesc = errorDesc;
 	}
 
+	@Column(name = "BATCH_ID", length = 64)
+	public String getBatchId() {
+		return this.batchId;
+	}
+
+	public void setBatchId(String batchId) {
+		this.batchId = batchId;
+	}
+
+	@Column(name = "status", length = 64)
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	
+
+	public String toString(){
+		return "Extended Desc : "+description+" : status : "+status + " : batch id : "+batchId+" : type : "+type+" \n ";
+	}
 }

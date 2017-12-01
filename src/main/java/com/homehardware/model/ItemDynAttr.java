@@ -162,4 +162,7 @@ public class ItemDynAttr implements java.io.Serializable {
 		this.updateDate = updateDate;
 	}
 
+	public String toString(){
+		return " Item Dyn Attr Details : dynAttrDesc :"+ dynAttrDesc+ " : status : "+status+ " : batchId : "+batchId+" \n ";
+	}
 }

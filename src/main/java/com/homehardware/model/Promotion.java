@@ -260,5 +260,9 @@ public class Promotion implements java.io.Serializable {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
+	
+	public String toString(){
+		return "Promotion Details DCodeDesc : "+DCodeDesc+" : Promo Retails : "+promoRetail+" : marketingRetail : " +marketingRetail+ " : batch id : "+batchId+" : store : "+store+" \n ";
+	}
 
 }

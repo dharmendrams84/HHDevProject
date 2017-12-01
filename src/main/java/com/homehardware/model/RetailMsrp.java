@@ -174,5 +174,9 @@ public class RetailMsrp implements java.io.Serializable {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
+	
+	public String toString(){
+		return "Retails MSRP : "+retailMsrp+" : store : "+store+" : status : "+status + " : batch id : "+batchId+" \n ";
+	}
 
 }

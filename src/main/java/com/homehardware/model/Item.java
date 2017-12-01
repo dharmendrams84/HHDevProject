@@ -476,6 +476,37 @@ public class Item implements java.io.Serializable {
 	public void setRetailMsrp(List<RetailMsrp> retailMsrp) {
 		this.retailMsrp = retailMsrp;
 	}
+	
+	private List<ItemInventory> itemInventory;
+	
+	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	 @JoinColumns({
+       @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
+       @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
+       })
+	public List<ItemInventory> getItemInventory() {
+		return itemInventory;
+	}
+
+	public void setItemInventory(List<ItemInventory> itemInventory) {
+		this.itemInventory = itemInventory;
+	}
+
+	
+	private List<ItemLoc> itemLoc;
+	
+	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	 @JoinColumns({
+      @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
+      @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
+      })
+	public List<ItemLoc> getItemLoc() {
+		return itemLoc;
+	}
+
+	public void setItemLoc(List<ItemLoc> itemLoc) {
+		this.itemLoc = itemLoc;
+	}
 
 	public String toString(){
 		String returnToString= " Item Id : "+this.getId().getItem() + " : batch Id : "+this.getId().getBatchId()+" \n ";
@@ -499,7 +530,16 @@ public class Item implements java.io.Serializable {
 				returnToString +=id; 
 			}
 			}
-	
+		if(this.itemLoc!=null && this.itemLoc.size()!=0){
+			for(ItemLoc id :this.getItemLoc()){
+				returnToString +=id; 
+			}
+			}
+		if(this.itemInventory!=null && this.itemInventory.size()!=0){
+			for(ItemInventory id :this.getItemInventory()){
+				returnToString +=id; 
+			}
+			}
 		returnToString+="\n";
 		return returnToString;
 	}

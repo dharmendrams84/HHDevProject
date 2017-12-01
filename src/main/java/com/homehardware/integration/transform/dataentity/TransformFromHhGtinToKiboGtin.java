@@ -30,7 +30,7 @@ public class TransformFromHhGtinToKiboGtin {
   /**
    * This method is transform HH gtin object to KIBO gtin object.
    */  
-  public Product testTransformationFromHhGtinToKiboGtin(Product product,Gtin gtin) {
+  public static Product testTransformationFromHhGtinToKiboGtin(Product product,Gtin gtin) {
     
     // transform product code object to kibo product code obj
     transformHhProductCodeToKiboProductCode(product,gtin);
@@ -42,7 +42,7 @@ public class TransformFromHhGtinToKiboGtin {
     
   }
 
-  private void transformHhProductGtinToKiboProductGtin(Product product, Gtin gtin) {
+  private static void transformHhProductGtinToKiboProductGtin(Product product, Gtin gtin) {
     // TODO Auto-generated method stub
     List<ProductProperty> productProperties;
     productProperties = product.getProperties();
@@ -77,9 +77,9 @@ public class TransformFromHhGtinToKiboGtin {
     
   }
 
-  private void transformHhProductCodeToKiboProductCode(Product product, Gtin gtin) {
+  private static void transformHhProductCodeToKiboProductCode(Product product, Gtin gtin) {
     // TODO Auto-generated method stub
-    product.setProductCode(gtin.getItem());
+    //product.setProductCode(gtin.getItem());
   }
   
 }

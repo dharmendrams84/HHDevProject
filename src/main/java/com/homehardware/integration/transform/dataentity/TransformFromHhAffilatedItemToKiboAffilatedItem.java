@@ -45,7 +45,7 @@ public class TransformFromHhAffilatedItemToKiboAffilatedItem {
      
   }
 
-  private void transformHhRelatedProductToKiboRelatedProductCode(
+  public static void transformHhRelatedProductToKiboRelatedProductCode(
       Product product, List<ItemAffiliated> affiliatedItems) {
     // TODO Auto-generated method stub
     List<ProductProperty> productProperties;
@@ -84,6 +84,7 @@ public class TransformFromHhAffilatedItemToKiboAffilatedItem {
        
       logger.error(" Not able to transfer related "
            + "(affiliated items) items due to cause = " + e.getCause());
+      e.printStackTrace();
     }
        
   }

@@ -32,13 +32,13 @@ public class TransformFromHhRetailMsrpToKiboRetailMsrp {
    * This method is transform HH Item Retail Price object to KIBO item retail price object.
    */
   public static void testTransformationFromHhPriceToKiboPrice(
-      Product product,Location location,RetailMsrp retailMsrp) {
+      Product product,RetailMsrp retailMsrp) {
     
     // transform item loc product code obj to kibo product code
     product.setProductCode(retailMsrp.getItem());
     
     // transform location obj to kibo location
-    location.setCode(retailMsrp.getStore().toString());
+    //location.setCode(retailMsrp.getStore().toString());
     
     // transform retail price obj to kibo retail price
     setRetailPrice(product,retailMsrp);
@@ -47,6 +47,30 @@ public class TransformFromHhRetailMsrpToKiboRetailMsrp {
 
   @SuppressWarnings({ "unchecked" })
   protected static void setRetailPrice(Product product, RetailMsrp retailMsrp) {
+    // TODO Auto-generated method stub
+    ProductPrice productPrice =  product.getPrice();
+    System.out.println(retailMsrp.getRetailMsrp().doubleValue());
+    productPrice.setPrice(retailMsrp.getRetailMsrp().doubleValue());
+    product.setPrice(productPrice);
+    
+/*    if (productPrice != null && productPrice.size() != 0) {
+      productPrice.forEach(price -> {
+        price.setMsrp(Double.parseDouble(retailMsrp.getRetailMsrp().toString()));
+      });
+       
+    } else {
+      productPrice = new ArrayList<ProductPrice>();
+      productPrice.forEach(price -> {
+        price.setMsrp(Double.parseDouble(retailMsrp.getRetailMsrp().toString()));
+      });
+      product.setPrice((ProductPrice) productPrice);
+    }
+*/    
+  }
+
+  
+  @SuppressWarnings({ "unchecked" })
+  protected static void setRetailPrice1(Product product, RetailMsrp retailMsrp) {
     // TODO Auto-generated method stub
     List<ProductPrice> productPrice = (List<ProductPrice>) product.getPrice();
     if (productPrice != null && productPrice.size() != 0) {

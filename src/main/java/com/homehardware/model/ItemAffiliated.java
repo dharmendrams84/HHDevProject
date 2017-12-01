@@ -1,5 +1,5 @@
 // default package
-// Generated Nov 29, 2017 3:10:59 PM by Hibernate Tools 5.2.6.Final
+// Generated Dec 1, 2017 5:22:09 PM by Hibernate Tools 5.2.6.Final
 package com.homehardware.model;
 import java.util.Date;
 import javax.persistence.Column;

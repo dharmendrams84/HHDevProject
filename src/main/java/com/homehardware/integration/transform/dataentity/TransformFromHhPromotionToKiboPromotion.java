@@ -37,7 +37,7 @@ public class TransformFromHhPromotionToKiboPromotion {
    * This method is used to transform HH promotion object to KIBO promotion obj.
    */
   public static void testTransformationFromHhPromotionToKiboPromotion(
-      Product product, Promotion promotion,Location location) {
+      Product product, Promotion promotion/*,Location location*/) {
     
     // set start date
     setStartDateAndEndDate(product, promotion);
@@ -49,7 +49,7 @@ public class TransformFromHhPromotionToKiboPromotion {
     product.setProductCode(promotion.getDItem());
     
     // set location code
-    location.setCode(new Integer(promotion.getStore()).toString());
+   // location.setCode(new Integer(promotion.getStore()).toString());
     
   }
   

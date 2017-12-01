@@ -33,7 +33,7 @@ public class TransformFromHhBrandToKiboBrand {
   /**
    * This method is transform HH brand object to KIBO brand object.
    */
-  public Product testTransformationFromHhBrandToKiboBrand(Product product, Brand brand) {
+  public static Product testTransformationFromHhBrandToKiboBrand(Product product, Brand brand) {
     
     // transform product brand description obj to kibo product brand description
     setProductBrandDescription(product, brand);
@@ -52,7 +52,7 @@ public class TransformFromHhBrandToKiboBrand {
     
   }
   
-  protected void setProductHomeExclusiveInd(Product product, Brand brand) {
+  protected static void setProductHomeExclusiveInd(Product product, Brand brand) {
     // TODO Auto-generated method stub
     
     List<ProductProperty> productProperties;
@@ -87,7 +87,7 @@ public class TransformFromHhBrandToKiboBrand {
     
   }
   
-  protected void setProductBrandCode(Product product, Brand brand) {
+  protected static void setProductBrandCode(Product product, Brand brand) {
     // TODO Auto-generated method stub
     
     List<ProductProperty> productProperties;
@@ -123,7 +123,7 @@ public class TransformFromHhBrandToKiboBrand {
   }
   
   
-  protected void setProductBrandDescription(Product product, Brand brand) {
+  protected static void setProductBrandDescription(Product product, Brand brand) {
     // TODO Auto-generated method stub
     
     List<ProductProperty> productProperties;
@@ -158,7 +158,7 @@ public class TransformFromHhBrandToKiboBrand {
     
   }
   
-  protected void setProductImageIdAndProductLocale(Product product, Brand brand) {
+  protected static void setProductImageIdAndProductLocale(Product product, Brand brand) {
     // TODO Auto-generated method stub
     ProductLocalizedContent content = product.getContent();
     List<ProductLocalizedImage> productImages = content.getProductImages();

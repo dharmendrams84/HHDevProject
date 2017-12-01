@@ -33,13 +33,13 @@ public class TransformFromHhItemRestrictedToKiboItemRestricted {
    * This method is transform HH Item restricted object to KIBO item restricted object.
    */
   public static void testTransformFromHhItemRestrictedToKiboItemRestricted(
-      Product product,Location location,ItemRestricted itemRestricted) {
+      Product product,ItemRestricted itemRestricted) {
     
     // transform item loc product code obj to kibo product code
-    product.setProductCode(itemRestricted.getItem());
+   // product.setProductCode(itemRestricted.getItem());
     
     // transform location obj to kibo location
-    location.setCode(new Integer(itemRestricted.getStore()).toString());
+   // location.setCode(new Integer(itemRestricted.getStore()).toString());
     
     // transform item loca vendor product number obj to kibo vendor product number
     setProductWebsiteInd(product,itemRestricted);

@@ -48,13 +48,14 @@ public class TransformationOfProductProperties {
       logger.error(" Exception while updating property "
           + "value" + productPropertyAttrValue
           + " Due to Exception = " + e.getCause());
-      
+      throw e;
     }
   }
   
   protected static void addProductProperty(Product product,
       String productPropertyAttrValue, String productAttrFqn) {
     try { 
+       //if(productAttrFqn!=null&&!productAttrFqn.equalsIgnoreCase("tenant~isecommitems")){	
       ProductProperty productPropertyAttr = new ProductProperty();
       productPropertyAttr.setAttributeFQN(productAttrFqn);
       
@@ -70,14 +71,20 @@ public class TransformationOfProductProperties {
       productPropertyAttr.setValues(productPropertyValue);
       
       List<ProductProperty> productProperties = product.getProperties();
+      if(productProperties==null||productProperties.size()==0){
+    	  productProperties =  new ArrayList<ProductProperty>();
+    	  product.setProperties(productProperties);
+      }
       productProperties.add(productPropertyAttr);
       
       product.setProperties(productProperties);
-      
+       
     } catch (Exception e) {
       logger.error(" Exception while Adding property "
           + "value" + productAttrFqn
           + " Due to Exception = " + e.getCause());
+      e.printStackTrace();
+      throw e;
     }
   }
   
@@ -105,6 +112,10 @@ public class TransformationOfProductProperties {
       }
       productProperty.setValues(productPropertyValueList);
       List<ProductProperty> productProperties = product.getProperties();
+      if(productProperties==null||productProperties.size()==0){
+    	  productProperties = new  ArrayList<ProductProperty>();
+    	  product.setProperties(productProperties);
+      }
       productProperties.add(productProperty);
       product.setProperties(productProperties);
       
@@ -112,6 +123,7 @@ public class TransformationOfProductProperties {
       logger.error(" Exception while Adding property product cross sell "
           + " Due to Exception = " + e.getCause());   
       e.printStackTrace();
+      throw e;
     }
     
   }
@@ -130,6 +142,7 @@ public class TransformationOfProductProperties {
     } catch (Exception e) {
       logger.error(" Exception while updating property "
           + "product cross sell" + " Due to Exception = " + e.getCause());
+      throw e;
     }
   }
   

@@ -83,8 +83,8 @@ public class TransformFromHhAffilatedItemToKiboAffilatedItem {
     } catch (Exception e) {
        
       logger.error(" Not able to transfer related "
-           + "(affiliated items) items due to cause = " + e.getCause());
-      e.printStackTrace();
+           + "(affiliated items) items due to cause = " + e.getMessage());
+      throw e;
     }
        
   }

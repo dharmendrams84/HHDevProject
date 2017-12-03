@@ -29,7 +29,7 @@ public interface HhProductAttributeFqnConstants {
   final String Hh_Extended_Desc_Type_Attr_Fqn = "tenant~desctype";
   final String Hh_Gtin_Attr_Fqn = "tenant~gtin";
   final String Hh_VendorProductNumber_Attr_Fqn = "tenant~vendor-product-number";
-  final String Hh_Ecomm_Ind_Attr_Fqn = "tenant~isecommitem";
+  final String Hh_Ecomm_Ind_Attr_Fqn = "tenant~isecommitems";
   final String Hh_Website_Ind_Attr_Fqn = "tenant~iswebsiteind";
   final String Hh_Product_CrossSell_Attr_Fqn = "tenant~product-crosssell";
 }

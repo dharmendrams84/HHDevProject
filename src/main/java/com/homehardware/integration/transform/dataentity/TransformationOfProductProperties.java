@@ -82,7 +82,11 @@ public class TransformationOfProductProperties {
     } catch (Exception e) {
       logger.error(" Exception while Adding property "
           + "value" + productAttrFqn
+
           + " Due to Exception = " + e.getCause() + " message "+e.getMessage());
+
+         
+
       e.printStackTrace();
       throw e;
     }

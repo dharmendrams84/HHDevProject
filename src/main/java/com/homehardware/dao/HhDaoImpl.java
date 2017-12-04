@@ -155,11 +155,11 @@ public class HhDaoImpl implements HhDao {
 		query.setParameter("status", status);
 		
 		List list = query.list();
-		for(Object o:list){
+		/*for(Object o:list){
 			Item item = (Item)o;
 			System.out.println(item);
 		}
-		session.close();
+		*/
 		/*
 		ItemId itemIdObj = new ItemId();
 		itemIdObj.setItem(itemId);

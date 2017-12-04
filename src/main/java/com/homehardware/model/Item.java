@@ -27,6 +27,17 @@ import com.homehardware.model.Gtin;
 @Entity
 @Table(name = "item", catalog = "ignitiv")
 public class Item implements java.io.Serializable {
+	
+	private int id_1;
+
+	@Column(name = "id", unique = true, nullable = false)
+	public int getId_1() {
+		return id_1;
+	}
+
+	public void setId_1(int id_1) {
+		this.id_1 = id_1;
+	}
 
 	private ItemId id;
 	private String itemDesc;
@@ -84,6 +95,13 @@ public class Item implements java.io.Serializable {
 	public Item(ItemId id) {
 		this.id = id;
 	}
+	
+	
+	public Item(ItemId id, int id_1) {
+		this.id = id;
+		this.id_1 = id_1;
+	}
+
 
 	public Item(ItemId id, String itemDesc, String hhSellingUom, String sellingUomFr, Integer productClass,
 			Integer category, Integer finelineClass, String itemDescFr, String brandDesc, String codeDesc,
@@ -93,6 +111,7 @@ public class Item implements java.io.Serializable {
 			String hhConsumerItemDescFr, String gstInd, String ecommerceInd, String isProcessSuccess, Integer errorCode,
 			String errorDesc, String status, String createBy, Date createDate, String updateBy, Date updateDate) {
 		this.id = id;
+		this.id_1 = id_1;
 		this.itemDesc = itemDesc;
 		this.hhSellingUom = hhSellingUom;
 		this.sellingUomFr = sellingUomFr;

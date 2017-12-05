@@ -52,7 +52,7 @@ public class TransformationOfProductProperties {
     }
   }
   
-  protected static void addProductProperty(Product product,
+  public static void addProductProperty(Product product,
       String productPropertyAttrValue, String productAttrFqn) {
     try { 
        //if(productAttrFqn!=null&&!productAttrFqn.equalsIgnoreCase("tenant~isecommitems")){	
@@ -92,7 +92,7 @@ public class TransformationOfProductProperties {
     }
   }
   
-  static boolean isPropertyExists(List<ProductProperty> productProperties, String attributeFqn) {
+  public static boolean isPropertyExists(List<ProductProperty> productProperties, String attributeFqn) {
     boolean isExist = false;
     for (ProductProperty p : productProperties) {
       if (p.getAttributeFQN().equalsIgnoreCase(attributeFqn)) {

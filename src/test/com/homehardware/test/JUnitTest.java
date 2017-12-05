@@ -29,6 +29,7 @@ import com.homehardware.model.ProductItemAttributes;
 import com.homehardware.model.Promotion;
 import com.homehardware.model.RetailMsrp;
 import com.homehardware.model.TransformFromHhLocationToKiboLocation;
+import com.homehardware.utility.ProductUtility;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.mozu.api.ApiContext;
 import com.mozu.api.ApiException;
 import com.mozu.api.MozuApiContext;
 import com.mozu.api.contracts.productadmin.ProductProperty;
@@ -52,6 +54,7 @@ import com.mozu.api.contracts.productadmin.ProductPropertyValue;
 import com.mozu.api.contracts.productadmin.ProductPropertyValueLocalizedContent;
 import com.mozu.api.contracts.core.Address;
 import com.mozu.api.contracts.core.Measurement;
+import com.mozu.api.contracts.core.extensible.AttributeLocalizedContent;
 import com.mozu.api.contracts.location.Coordinates;
 import com.mozu.api.contracts.location.Location;
 import com.mozu.api.contracts.location.LocationType;
@@ -60,6 +63,7 @@ import com.mozu.api.contracts.mzdb.EntityCollection;
 import com.mozu.api.contracts.mzdb.EntityList;
 import com.mozu.api.resources.commerce.admin.LocationResource;
 import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
+import com.mozu.api.resources.commerce.catalog.admin.attributedefinition.AttributeResource;
 import com.mozu.api.resources.commerce.catalog.admin.products.ProductPropertyResource;
 import com.mozu.api.contracts.productadmin.Product;
 import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
@@ -69,7 +73,7 @@ import com.mozu.api.contracts.productadmin.ProductPrice;
 import com.mozu.api.resources.platform.EntityListResource;
 import com.mozu.api.resources.platform.entitylists.EntityContainerResource;
 import com.mozu.api.resources.platform.entitylists.EntityResource;
-
+import com.mozu.api.contracts.productadmin.Attribute;
 @RunWith(SpringJUnit4ClassRunner.class)
 // @ContextConfiguration(locations = {
 // "file:src/main/webapp/WEB-INF/spring/homehardware/applicationContext.xml" })
@@ -78,6 +82,8 @@ import com.mozu.api.resources.platform.entitylists.EntityResource;
 public class JUnitTest {
 
 	
+
+	public static final int _7 = 7;
 
 	public JUnitTest() {
 
@@ -92,7 +98,7 @@ public class JUnitTest {
 
 	}
 
-	// @Test
+	//@Test
 	public void testInsertOrUpdateLocationObjectIntoKibo() throws Exception {
 		LocationResource locationResource = new LocationResource(new MozuApiContext(Constants.tenantId, Constants.siteId));
 		Store store = hhDaoImpl.getStore();
@@ -158,29 +164,87 @@ public class JUnitTest {
 	public void testFetcgHhProductFromDb() {
 		try {
 
-			//Item item = hhDaoImpl.getItem();
-			ProductResource productResource = new ProductResource(new MozuApiContext(Constants.tenantId, Constants.siteId));
-			
-			List list = hhDaoImpl.getItemsList("1", "INITIAL");
+			// Item item = hhDaoImpl.getItem();
+			final ProductResource productResource = new ProductResource(
+					new MozuApiContext(Constants.tenantId, Constants.siteId));
+
+			final List list = hhDaoImpl.getItemsList("1", "INITIAL");
 			for (Object o : list) {
-				Item item = (Item)o;
-				Product product = productResource.getProduct(item.getId().getItem());
+				final Item item = (Item) o;
+				Product product 
+				    = productResource.getProduct(item.getId().getItem());
 
 				if (product == null) {
 					product = new Product();
-					product.setProductTypeId(7);
+					product.setProductTypeId(_7);
+
 					convertHhItemToMozuProduct(item, product);
 					productResource.addProduct(product);
 
 				} else {
+					product.getInventoryInfo();
 					convertHhItemToMozuProduct(item, product);
-					productResource.updateProduct(product, product.getProductCode());
+					productResource
+					.updateProduct(product, product.getProductCode());
 					// setProductAttributes(product);
 				}
 			}
 		} catch (Exception e) {
+			
 			e.printStackTrace();
 		}
+	}
+	
+	//@Test
+	public void testFetchAttributes() {
+		String attributeName = "sample";
+		String attributeFqn =  "tenant~"+attributeName;
+		try {
+			ApiContext apiContext = new MozuApiContext(Constants.tenantId, Constants.siteId);
+			AttributeResource attributeResource = new AttributeResource(apiContext);
+			com.mozu.api.contracts.productadmin.Attribute attribute = new com.mozu.api.contracts.productadmin.Attribute();
+			//attribute.setMasterCatalogId(7);
+			
+			attribute = attributeResource.getAttribute(attributeFqn);
+			
+			if (attribute == null) {
+
+		
+				attribute = new Attribute();
+				createNewAttribute(attributeName, attribute);
+				Attribute newAttribute = attributeResource.addAttribute(attribute);
+				if(newAttribute!=null){
+					System.out.println("Attribute "+attributeFqn + " created successfully!!!! ");
+				}
+				
+			}/* else {
+				attribute.setAdminName("Watts");
+				attributeResource.updateAttribute(attribute, "tenant~Watts");
+			}*/
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println("Exception while adding attribute "+attributeFqn);
+			e.printStackTrace();
+		}
+	}
+	
+	public void createNewAttribute(String attributeName,Attribute attribute) {
+		attribute.setAdminName(attributeName);
+		attribute.setInputType("TextBox");
+		attribute.setDataType("String");
+		attribute.setMasterCatalogId(2);
+		attribute.setValueType("AdminEntered");
+		attribute.setIsExtra(false);
+		attribute.setIsOption(false);
+		attribute.setIsProperty(true);
+		attribute.setAttributeCode(attributeName);
+		com.mozu.api.contracts.productadmin.AttributeLocalizedContent attributeLocalizedContent = new com.mozu.api.contracts.productadmin.AttributeLocalizedContent();
+		attributeLocalizedContent.setLocaleCode("en-US");
+		attributeLocalizedContent.setName(attributeName);
+		List<com.mozu.api.contracts.productadmin.AttributeLocalizedContent> list = new ArrayList<>();
+		list.add(attributeLocalizedContent);
+		attribute.setLocalizedContent(list);
+		
 	}
 
 	// @Test
@@ -481,29 +545,36 @@ public class JUnitTest {
 
 	}
 
-	protected static void convertHhItemToMozuProduct(Item item, final Product product) {
-		product.setProductCode(item.getId().getItem());
-		ProductLocalizedContent productLocalizedContent = new ProductLocalizedContent();
+	
+	/**
+	 * @param item.
+	 * @param product.
+	 */
+	protected void convertHhItemToMozuProduct(final Item item, final Product product) {
+		setProductBasicProperties(item, product);
+		final List<ItemAffiliated> itemAffiliateds = item.getItemAfffliated();
+		ProductUtility
+		.transformHhRelatedProductToKiboRelatedProductCode(product,itemAffiliateds);
+		setProductBrandList(item, product);
+		setProductExtDesc(item, product);
+		setProductGtin(item, product);
+		setProductLocation(item, product);
+		setProductItemRestricted(item, product);
+		setProductRetailMsrp(item, product);
+                setProductItemAttributes(item, product);
+		/*product.setProductCode(item.getId().getItem());
+		final ProductLocalizedContent productLocalizedContent 
+		    = new ProductLocalizedContent();
 		productLocalizedContent.setLocaleCode("en-US");
-		// productLocalizedContent.setProductName("29 Espresso Adelaide Swivel
-		// Stool3");
 		productLocalizedContent.setProductName(item.getItemDesc());
 		product.setContent(productLocalizedContent);
 		
 
 		product.setProductUsage("Standard");
 		product.setMasterCatalogId(2);
-
-		ProductPrice price = new ProductPrice();
-		price.setPrice(209.99);
-		price.setIsoCurrencyCode("CAD");
-		price.setSalePrice(209.99);
-		product.setPrice(price);
-		List list = new ArrayList<ProductInCatalogInfo>();
-		ProductInCatalogInfo productInCatalogInfo = new ProductInCatalogInfo();
+		final List list = new ArrayList<ProductInCatalogInfo>();
+		final ProductInCatalogInfo productInCatalogInfo = new ProductInCatalogInfo();
 		productInCatalogInfo.setCatalogId(2);
-
-		productInCatalogInfo.setPrice(price);
 
 		productInCatalogInfo.setIsActive(true);
 		
@@ -511,35 +582,235 @@ public class JUnitTest {
 		list.add(productInCatalogInfo);
 		product.setProductInCatalogs(list);
 
-		Measurement measurement = new Measurement();
+		final Measurement measurement = new Measurement();
+		measurement.setUnit("lbs");
+		measurement.setValue(new Double(2));
+		product.setPackageWeight(measurement);*/
+		
+		/*final List<Brand> brandsList = item.getBrand();
+		for (Brand b : brandsList) {
+			ProductUtility.testTransformationFromHhBrandToKiboBrand(product, b);
+		}*/
+		
+		/*if (item.getExtDesc() != null && item.getExtDesc().size() != 0) {
+
+			for (ExtDesc e : item.getExtDesc()) {
+				ProductUtility
+				.testTransformationFromHhExtendedDescToKiboExtendedDesc(product, e);
+			}
+		}*/
+		
+		 
+		/*if (item.getGtin() != null && item.getGtin().size() != 0) {
+			for (Gtin g : item.getGtin()) {
+
+				ProductUtility.transformHhProductGtinToKiboProductGtin(product, g);
+			}
+		}*/
+		
+		/*if (item.getItemLoc() != null && item.getItemLoc().size() != 0) {
+			final ItemLoc itemLoc
+			    = item.getItemLoc().get(0);
+			ProductUtility
+			.testTransformationFromHhItemLocToKiboItemLoc(product, itemLoc);
+		}*/
+		
+		
+		
+		/*if (item.getItemRestricted() != null && item.getItemRestricted().size() != 0) {
+			for (ItemRestricted i : item.getItemRestricted()) {
+				ProductUtility
+				.testTransformFromHhItemRestrictedToKiboItemRestricted(product, i);
+			}
+		}*/
+       
+		
+		/*if (item.getRetailMsrp() != null && item.getRetailMsrp().size() != 0) {
+			for (RetailMsrp r : item.getRetailMsrp()) {
+				ProductUtility.testTransformationFromHhPriceToKiboPrice(product, r);
+			}
+		}*/
+		
+	              	/*for (ProductItemAttributes p : item.getProductItemAttributes()) {
+			if (ProductUtility.isPropertyExists(
+			product.getProperties(), p.getId().getProductAttrId())) {
+				for (ProductProperty pp : product.getProperties()) {
+					if (pp.getAttributeFQN().
+					equalsIgnoreCase(p.getId().getProductAttrId())) {
+						ProductUtility.
+(pp, p.getAttributeValue());
+					}
+				}
+
+			} else {
+				ProductUtility
+				.addProductProperty(product,
+				 p.getAttributeValue(), p.getId().getProductAttrId());
+			}
+		}*/
+	}
+
+	/**
+	 * @param item.
+	 * @param product.
+	 */
+	protected void setProductBasicProperties(final Item item, final Product product) {
+		product.setProductCode(item.getId().getItem());
+		setProductCatalogInfo(product);
+		setProductContent(item, product);
+		product.setProductUsage("Standard");
+		product.setBaseProductCode(item.getHhCtrlBrandInd());
+		//setProductMeasurement(product);
+		product.setIsValidForProductType(false);
+		
+	}
+	
+	/**
+	 * @param product.
+	 */
+	protected void setProductMeasurement(final Product product) {
+
+		final Measurement measurement = new Measurement();
 		measurement.setUnit("lbs");
 		measurement.setValue(new Double(2));
 		product.setPackageWeight(measurement);
 
-		product.setBaseProductCode(item.getHhCtrlBrandInd());
-
-		product.setIsValidForProductType(false);
-		
-		List<ItemAffiliated> itemAffiliateds = item.getItemAfffliated();
-		TransformFromHhAffilatedItemToKiboAffilatedItem.transformHhRelatedProductToKiboRelatedProductCode(product,itemAffiliateds);
-		Brand brand = (Brand)item.getBrand().get(0);
-        TransformFromHhBrandToKiboBrand.testTransformationFromHhBrandToKiboBrand(product,brand);
-        ExtDesc ed = item.getExtDesc().get(0);
-        TransformFromHhExtendedDescToKiboExtendedDesc.testTransformationFromHhExtendedDescToKiboExtendedDesc(product,ed);
-        Gtin gtin = item.getGtin().get(0);
-        TransformFromHhGtinToKiboGtin.testTransformationFromHhGtinToKiboGtin(product, gtin);
-        ItemLoc itemLoc =  item.getItemLoc().get(0);
-        TransformFromHhItemLocToKiboItemLoc.testTransformationFromHhItemLocToKiboItemLoc(product, itemLoc);
-        ItemRestricted itemRestricted = item.getItemRestricted().get(0);
-        TransformFromHhItemRestrictedToKiboItemRestricted.testTransformFromHhItemRestrictedToKiboItemRestricted(product,  itemRestricted);
-        /*Promotion promotion = item.getPromotion().get(0);
-        TransformFromHhPromotionToKiboPromotion.testTransformationFromHhPromotionToKiboPromotion(product, promotion);*/
-        RetailMsrp retailMsrp = item.getRetailMsrp().get(0);
-        TransformFromHhRetailMsrpToKiboRetailMsrp.testTransformationFromHhPriceToKiboPrice(product, retailMsrp);
-        
-       
 	}
+	
+	
+	/**
+	 * @param item.
+	 * @param product.
+	 */
+	protected void setProductContent(final Item item,final Product product) {
+		final ProductLocalizedContent productLocalizedContent
+		    = new ProductLocalizedContent();
+		productLocalizedContent.setLocaleCode("en-US");
+		productLocalizedContent.setProductName(item.getItemDesc());
+		product.setContent(productLocalizedContent);
+	}
+	
+	/**
+	 * @param product.
+	 */
+	protected void setProductCatalogInfo(final Product product) {
+		product.setMasterCatalogId(2);
+		final List list = new ArrayList<ProductInCatalogInfo>();
+		final ProductInCatalogInfo productInCatalogInfo = new ProductInCatalogInfo();
+		productInCatalogInfo.setCatalogId(2);
+		productInCatalogInfo.setIsActive(true);
+		list.add(productInCatalogInfo);
+		product.setProductInCatalogs(list);
+	}
+	
+	/**
+	 * @param item.
+	 * @param product.
+	 */
+	protected void setProductBrandList(final Item item, final Product product) {
+		final List<Brand> brandsList = item.getBrand();
+		for (Brand b : brandsList) {
+			ProductUtility.testTransformationFromHhBrandToKiboBrand(product, b);
+		}
+	}
+	
+	/**
+	 * @param item.
+	 * @param product.
+	 */
+	protected void setProductExtDesc(final Item item, final Product product) {
+		if (item.getExtDesc() != null && item.getExtDesc().size() != 0) {
 
+			for (ExtDesc e : item.getExtDesc()) {
+				ProductUtility
+				.testTransformationFromHhExtendedDescToKiboExtendedDesc(product, e);
+			}
+		}
+	}
+	
+	/**
+	 * @param item.
+	 * @param product.
+	 */
+	protected void setProductGtin(final Item item, final Product product) {
+		if (item.getGtin() != null && item.getGtin().size() != 0) {
+			for (Gtin g : item.getGtin()) {
+
+				ProductUtility.transformHhProductGtinToKiboProductGtin(product, g);
+			}
+		}
+	}
+	
+	/**
+	 * @param item.
+	 * @param product.
+	 */
+	protected void setProductLocation(final Item item, final Product product) {
+		if (item.getItemLoc() != null && item.getItemLoc().size() != 0) {
+			final ItemLoc itemLoc = item.getItemLoc().get(0);
+			ProductUtility
+			.testTransformationFromHhItemLocToKiboItemLoc(product, itemLoc);
+		}
+	}
+	
+	/**
+	 * @param item.
+	 * @param product.
+	 */
+	protected void setProductItemRestricted(final Item item, final Product product) {
+		if (item.getItemRestricted() != null && item.getItemRestricted().size() != 0) {
+			for (ItemRestricted i : item.getItemRestricted()) {
+				ProductUtility
+				.testTransformFromHhItemRestrictedToKiboItemRestricted(product, i);
+			}
+		}
+	}
+	
+	/**
+	 * @param item.
+	 * @param product.
+	 */
+	protected void setProductRetailMsrp(final Item item, final Product product) {
+		if (item.getRetailMsrp() != null && item.getRetailMsrp().size() != 0) {
+			for (RetailMsrp r : item.getRetailMsrp()) {
+				ProductUtility.testTransformationFromHhPriceToKiboPrice(product, r);
+			}
+		}
+	}
+	
+	/**
+	 * @param item.
+	 * @param product.
+	 */
+	protected void setProductItemAttributes(final Item item, final Product product) {
+		for (ProductItemAttributes p : item.getProductItemAttributes()) {
+			if (ProductUtility
+					.isPropertyExists(
+							product.getProperties(),
+							p.getId().getProductAttrId())) {
+				for (ProductProperty pp : product.getProperties()) {
+					if (pp.getAttributeFQN()
+							.equalsIgnoreCase(
+									p.getId()
+									.getProductAttrId())) {
+						ProductUtility
+						    .updateProductPropertiesAttribute(
+								pp, p.getAttributeValue());
+					}
+				}
+
+			} else {
+				ProductUtility
+				    .addProductProperty(
+						product, p.getAttributeValue(), 
+						p.getId().getProductAttrId());
+			}
+		}
+	}
+	
+	
+	
+	
 	protected void convertProductAttribute(String attrFqnId, ProductItemAttributes productItemAttributes,
 			final Product product) {
 		try {

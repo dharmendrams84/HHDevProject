@@ -33,75 +33,74 @@ public class TransformationOfProductProperties {
   
   protected static final Logger logger = Logger.getLogger(TransformationOfProductProperties.class);
   
-  public static void updateProductPropertiesAttribute(ProductProperty productPropertiesAction,
-      String productPropertyAttrValue) {
-    // TODO Auto-generated method stub
-    try {
-      ProductPropertyValue productPropertyValue = productPropertiesAction.getValues().get(0);
-      if (productPropertyValue instanceof ProductPropertyValue 
-          && productPropertyValue.getContent() != null) {
-        productPropertyValue.setValue(productPropertyAttrValue);
-        productPropertyValue.getContent().setStringValue(productPropertyAttrValue);
-        
-      }
-    } catch (Exception e) {
-      logger.error(" Exception while updating property "
-          + "value" + productPropertyAttrValue
-          + " Due to Exception = " + e.getCause());
-      throw e;
-    }
-  }
+	public static void updateProductPropertiesAttribute(final ProductProperty productPropertiesAction,
+			final String productPropertyAttrValue) {
+		// TODO Auto-generated method stub
+		try {
+			final ProductPropertyValue productPropertyValue 
+			    = productPropertiesAction.getValues().get(0);
+			if (productPropertyValue instanceof ProductPropertyValue
+					&& productPropertyValue.getContent() != null) {
+				productPropertyValue.setValue(productPropertyAttrValue);
+				productPropertyValue.getContent()
+				        .setStringValue(productPropertyAttrValue);
+
+			}
+		} catch (Exception e) {
+			logger.error(" Exception while updating property " + "value" + productPropertyAttrValue
+					+ " Due to Exception = " + e.getCause());
+			throw e;
+		}
+	}
   
-  public static void addProductProperty(Product product,
-      String productPropertyAttrValue, String productAttrFqn) {
-    try { 
-       //if(productAttrFqn!=null&&!productAttrFqn.equalsIgnoreCase("tenant~isecommitems")){	
-      ProductProperty productPropertyAttr = new ProductProperty();
-      productPropertyAttr.setAttributeFQN(productAttrFqn);
-      
-      ProductPropertyValue productPropertyValueAttr = new ProductPropertyValue();
-      productPropertyValueAttr.setValue(productPropertyAttrValue);
-      
-      ProductPropertyValueLocalizedContent content = new ProductPropertyValueLocalizedContent();
-      content.setStringValue(productPropertyAttrValue);
-      productPropertyValueAttr.setContent(content);
-      
-      List<ProductPropertyValue> productPropertyValue = new ArrayList<ProductPropertyValue>();
-      productPropertyValue.add(productPropertyValueAttr);
-      productPropertyAttr.setValues(productPropertyValue);
-      
-      List<ProductProperty> productProperties = product.getProperties();
-      if(productProperties==null||productProperties.size()==0){
-    	  productProperties =  new ArrayList<ProductProperty>();
-    	  product.setProperties(productProperties);
-      }
-      productProperties.add(productPropertyAttr);
-      
-      product.setProperties(productProperties);
-       
-    } catch (Exception e) {
-      logger.error(" Exception while Adding property "
-          + "value" + productAttrFqn
+	public static void addProductProperty(
+			final Product product,
+			final String productPropertyAttrValue,final String productAttrFqn) {
+		
+			
+		final ProductProperty productPropertyAttr = new ProductProperty();
+		productPropertyAttr.setAttributeFQN(productAttrFqn);
 
-          + " Due to Exception = " + e.getCause() + " message "+e.getMessage());
+		final ProductPropertyValue productPropertyValueAttr = new ProductPropertyValue();
+		productPropertyValueAttr.setValue(productPropertyAttrValue);
 
-         
+		final ProductPropertyValueLocalizedContent content 
+		    = new ProductPropertyValueLocalizedContent();
+		content.setStringValue(productPropertyAttrValue);
+		productPropertyValueAttr.setContent(content);
 
-      e.printStackTrace();
-      throw e;
-    }
-  }
+		final List<ProductPropertyValue> productPropertyValue
+		    = new ArrayList<ProductPropertyValue>();
+		productPropertyValue.add(productPropertyValueAttr);
+		productPropertyAttr.setValues(productPropertyValue);
+
+		List<ProductProperty> productProperties = product.getProperties();
+		if (productProperties == null || productProperties.size() == 0) {
+			productProperties = new ArrayList<ProductProperty>();
+			product.setProperties(productProperties);
+		}
+		productProperties.add(productPropertyAttr);
+
+		product.setProperties(productProperties);
+		
+	}
   
-  public static boolean isPropertyExists(List<ProductProperty> productProperties, String attributeFqn) {
-    boolean isExist = false;
-    for (ProductProperty p : productProperties) {
-      if (p.getAttributeFQN().equalsIgnoreCase(attributeFqn)) {
-        isExist = true;
-        break;
-      }
-    }
-    return isExist;
-  }
+	/**
+	 * @param productProperties.
+	 * @param attributeFqn.
+	 * @return.
+	 */
+	public static boolean isPropertyExists(final List<ProductProperty> productProperties,
+		final String attributeFqn) {
+		boolean isExist = false;
+		for (ProductProperty p : productProperties) {
+			if (p.getAttributeFQN().equalsIgnoreCase(attributeFqn)) {
+				isExist = true;
+				break;
+			}
+		}
+		return isExist;
+	}
 
   protected static void addProductPropertiesAttributeForAffiliatedItem(Product product,
       String productAttrFqn,List<ItemAffiliated> affiliatedItems) {

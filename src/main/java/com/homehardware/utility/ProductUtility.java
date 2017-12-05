@@ -1,12 +1,7 @@
 package com.homehardware.utility;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-
 import com.homehardware.constants.HhProductAttributeFqnConstants;
-import com.homehardware.integration.transform.dataentity.TransformationOfProductProperties;
+
 import com.homehardware.model.Brand;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Gtin;
@@ -22,108 +17,136 @@ import com.mozu.api.contracts.productadmin.ProductPrice;
 import com.mozu.api.contracts.productadmin.ProductProperty;
 import com.mozu.api.contracts.productadmin.ProductPropertyValue;
 import com.mozu.api.contracts.productadmin.ProductPropertyValueLocalizedContent;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ProductUtility {
+import org.apache.log4j.Logger;
+
+public final class ProductUtility {
 
 	protected static final Logger logger = Logger.getLogger(ProductUtility.class);
 
-	public static void transformHhRelatedProductToKiboRelatedProductCode(Product product,
-			List<ItemAffiliated> affiliatedItems) {
+	/**
+	 * transform related product.
+	 */
+	public static void transformHhRelatedProductToKiboRelatedProductCode(final Product product,
+			final List<ItemAffiliated> affiliatedItems) {
 		// TODO Auto-generated method stub
-		List<ProductProperty> productProperties;
-		productProperties = product.getProperties();
-		try {
-			if (productProperties != null && productProperties.size() != 0) {
+		final List<ProductProperty> productProperties = product.getProperties();
+		// try {
+		if (productProperties != null && productProperties.size() != 0) {
+			if (ProductUtility.isPropertyExists(productProperties,
+					HhProductAttributeFqnConstants
+					.Hh_Product_CrossSell_Attr_Fqn)) {
+				productProperties.forEach(updateProductProperties -> {
+					if (updateProductProperties.getAttributeFQN()
+							.equalsIgnoreCase(
+							HhProductAttributeFqnConstants
+							.Hh_Product_CrossSell_Attr_Fqn)) {
+						updateProductPropertiesAttributeForAffiliatedItem(
+								updateProductProperties, product,
+								affiliatedItems);
+					}
 
-				if (TransformationOfProductProperties.isPropertyExists(productProperties,
-						HhProductAttributeFqnConstants.Hh_Product_CrossSell_Attr_Fqn)) {
-
-					productProperties.forEach(updateProductProperties -> {
-						if (updateProductProperties.getAttributeFQN()
-								.equalsIgnoreCase(HhProductAttributeFqnConstants.Hh_Product_CrossSell_Attr_Fqn)) {
-
-							updateProductPropertiesAttributeForAffiliatedItem(updateProductProperties, product,
-									affiliatedItems);
-
-						}
-
-					});
-
-				} else {
-
-					addProductPropertiesAttributeForAffiliatedItem(product,
-							HhProductAttributeFqnConstants.Hh_Product_CrossSell_Attr_Fqn, affiliatedItems);
-				}
-
+				});
 			} else {
 				addProductPropertiesAttributeForAffiliatedItem(product,
-						HhProductAttributeFqnConstants.Hh_Product_CrossSell_Attr_Fqn, affiliatedItems);
+						HhProductAttributeFqnConstants
+						.Hh_Product_CrossSell_Attr_Fqn, affiliatedItems);
 			}
-
-		} catch (Exception e) {
-
-			logger.error(
-					" Not able to transfer related " + "(affiliated items) items due to cause = " + e.getMessage());
-			throw e;
+		} else {
+			addProductPropertiesAttributeForAffiliatedItem(product,
+					HhProductAttributeFqnConstants
+					.Hh_Product_CrossSell_Attr_Fqn, affiliatedItems);
 		}
+
+		/*
+		 * } catch (Exception e) {
+		 * 
+		 * logger.error( " Not able to transfer related " +
+		 * "(affiliated items) items due to cause = " + e.getMessage()); }
+		 */
 
 	}
 
-	protected static void updateProductPropertiesAttributeForAffiliatedItem(ProductProperty updateProductProperties,
-			Product product, List<ItemAffiliated> affiliatedItems) {
-		try {
-			List<ProductPropertyValue> productPropertyValueList = new ArrayList<>();
-			for (ItemAffiliated a : affiliatedItems) {
-				if (a.getItem().equals(product.getProductCode())) {
-					productPropertyValueList.add(createProductProperty(a.getItemAffiliated()));
-				}
+	protected static void updateProductPropertiesAttributeForAffiliatedItem(
+			final ProductProperty updateProductProperties, final Product product,
+			final List<ItemAffiliated> affiliatedItems) {
+		// try {
+		final List<ProductPropertyValue> productPropertyValueList = new ArrayList<>();
+		for (ItemAffiliated a : affiliatedItems) {
+			if (a.getItem().equals(product.getProductCode())) {
+				productPropertyValueList.add(
+						createProductProperty(a.getItemAffiliated()));
 			}
-			updateProductProperties.setValues(productPropertyValueList);
-		} catch (Exception e) {
-			logger.error(" Exception while updating property " + "product cross sell" + " Due to Exception = "
-					+ e.getCause());
-			throw e;
 		}
+		updateProductProperties.setValues(productPropertyValueList);
+		/*
+		 * } catch (Exception e) {
+		 * logger.error(" Exception while updating property " +
+		 * "product cross sell" + " Due to Exception = " + e.getCause()); throw
+		 * e; }
+		 */
 	}
 
-	protected static void addProductPropertiesAttributeForAffiliatedItem(Product product, String productAttrFqn,
-			List<ItemAffiliated> affiliatedItems) {
-		try {
-			ProductProperty productProperty = new ProductProperty();
-			productProperty.setAttributeFQN(productAttrFqn);
-			List<ProductPropertyValue> productPropertyValueList = new ArrayList<>();
-			for (ItemAffiliated a : affiliatedItems) {
-				if (a.getItem().equals(product.getProductCode())) {
-					productPropertyValueList.add(createProductProperty(a.getItemAffiliated()));
-				}
+	protected static void addProductPropertiesAttributeForAffiliatedItem(final Product product,
+			final String productAttrFqn, final List<ItemAffiliated> affiliatedItems) {
+		// try {
+		final ProductProperty productProperty = new ProductProperty();
+		productProperty.setAttributeFQN(productAttrFqn);
+		final List<ProductPropertyValue> productPropertyValueList = new ArrayList<>();
+		for (ItemAffiliated a : affiliatedItems) {
+			if (a.getItem().equals(product.getProductCode())) {
+				productPropertyValueList
+				.add(createProductProperty(a.getItemAffiliated()));
 			}
-			productProperty.setValues(productPropertyValueList);
-			List<ProductProperty> productProperties = product.getProperties();
-			if (productProperties == null || productProperties.size() == 0) {
-				productProperties = new ArrayList<ProductProperty>();
-				product.setProperties(productProperties);
-			}
-			productProperties.add(productProperty);
+		}
+		productProperty.setValues(productPropertyValueList);
+		setProductProperties(product, productProperty);
+		/*
+		 * List<ProductProperty> productProperties = product.getProperties(); if
+		 * (productProperties == null || productProperties.size() == 0) {
+		 * productProperties = new ArrayList<ProductProperty>();
+		 * product.setProperties(productProperties); }
+		 * productProperties.add(productProperty);
+		 * product.setProperties(productProperties);
+		 */
+
+		/*
+		 * } catch (Exception e) { logger.error(
+		 * " Exception while Adding property product cross sell " +
+		 * " Due to Exception = " + e.getCause()); e.printStackTrace(); throw e;
+		 * }
+		 */
+
+	}
+
+	protected static void setProductProperties(
+			final Product product, final ProductProperty productProperty) {
+		List<ProductProperty> productProperties = product.getProperties();
+		if (productProperties == null || productProperties.size() == 0) {
+			productProperties = new ArrayList<ProductProperty>();
 			product.setProperties(productProperties);
-
-		} catch (Exception e) {
-			logger.error(
-					" Exception while Adding property product cross sell " + " Due to Exception = " + e.getCause());
-			e.printStackTrace();
-			throw e;
 		}
-
+		productProperties.add(productProperty);
+		product.setProperties(productProperties);
 	}
 
-	protected static ProductPropertyValue createProductProperty(String value) {
-		ProductPropertyValue productPropertyValue = new ProductPropertyValue();
-		ProductPropertyValueLocalizedContent content = new ProductPropertyValueLocalizedContent();
+	protected static ProductPropertyValue createProductProperty(final String value) {
+		final ProductPropertyValue productPropertyValue = new ProductPropertyValue();
+		final ProductPropertyValueLocalizedContent content;
+		content = new ProductPropertyValueLocalizedContent();
 		content.setStringValue(value);
 		productPropertyValue.setContent(content);
 		return productPropertyValue;
 	}
 
-	public static void testTransformationFromHhBrandToKiboBrand(Product product, Brand brand) {
+	/**
+	 * @param product.
+	 * @param brand.
+	 */
+	public static void testTransformationFromHhBrandToKiboBrand(
+			final Product product, final Brand brand) {
 
 		// transform product brand description obj to kibo product brand
 		// description
@@ -141,114 +164,134 @@ public class ProductUtility {
 
 	}
 
-	protected static void setProductHomeExclusiveInd(Product product, Brand brand) {
+	protected static void setProductHomeExclusiveInd(final Product product, final Brand brand) {
 		// TODO Auto-generated method stub
 
-		List<ProductProperty> productProperties;
+		final List<ProductProperty> productProperties;
 		productProperties = product.getProperties();
 
 		if (productProperties != null && productProperties.size() != 0) {
 
-			if (TransformationOfProductProperties.isPropertyExists(productProperties,
-					HhProductAttributeFqnConstants.Hh_Home_Exclusive_Ind_Attr_Fqn)) {
+			if (ProductUtility.isPropertyExists(productProperties,
+					HhProductAttributeFqnConstants
+					.Hh_Home_Exclusive_Ind_Attr_Fqn)) {
 
 				productProperties.forEach(updateProductProperties -> {
 					if (updateProductProperties.getAttributeFQN()
-							.equalsIgnoreCase(HhProductAttributeFqnConstants.Hh_Home_Exclusive_Ind_Attr_Fqn)) {
+							.equalsIgnoreCase(
+								HhProductAttributeFqnConstants
+								.Hh_Home_Exclusive_Ind_Attr_Fqn)) {
 
-						TransformationOfProductProperties.updateProductPropertiesAttribute(updateProductProperties,
+						updateProductPropertiesAttribute(
+								updateProductProperties,
 								brand.getHomeExclusiveInd());
 					}
 
 				});
 
 			} else {
-				TransformationOfProductProperties.addProductProperty(product, brand.getHomeExclusiveInd(),
-						HhProductAttributeFqnConstants.Hh_Home_Exclusive_Ind_Attr_Fqn);
+				addProductProperty(
+						product, brand.getHomeExclusiveInd(),
+						HhProductAttributeFqnConstants
+						.Hh_Home_Exclusive_Ind_Attr_Fqn);
 			}
 
 		} else {
 
-			TransformationOfProductProperties.addProductProperty(product, brand.getHomeExclusiveInd(),
-					HhProductAttributeFqnConstants.Hh_Home_Exclusive_Ind_Attr_Fqn);
+			addProductProperty(product	,brand
+					.getHomeExclusiveInd(),
+						HhProductAttributeFqnConstants
+						.Hh_Home_Exclusive_Ind_Attr_Fqn);
 
 		}
 
 	}
 
-	protected static void setProductBrandCode(Product product, Brand brand) {
+	protected static void setProductBrandCode(final Product product, final Brand brand) {
 		// TODO Auto-generated method stub
 
-		List<ProductProperty> productProperties;
-		productProperties = product.getProperties();
+		final List<ProductProperty> productProperties = product.getProperties();
 
 		if (productProperties != null && productProperties.size() != 0) {
 
-			if (TransformationOfProductProperties.isPropertyExists(productProperties,
+			if (ProductUtility.isPropertyExists(productProperties,
 					HhProductAttributeFqnConstants.Hh_Brand_Code_Attr_Fqn)) {
 
 				productProperties.forEach(updateProductProperties -> {
 					if (updateProductProperties.getAttributeFQN()
-							.equalsIgnoreCase(HhProductAttributeFqnConstants.Hh_Brand_Code_Attr_Fqn)) {
+							.equalsIgnoreCase(
+								HhProductAttributeFqnConstants
+									.Hh_Brand_Code_Attr_Fqn)) {
 
-						TransformationOfProductProperties.updateProductPropertiesAttribute(updateProductProperties,
+						updateProductPropertiesAttribute(
+									updateProductProperties,
 								brand.getBrandCode());
 					}
 
 				});
 
 			} else {
-				TransformationOfProductProperties.addProductProperty(product, brand.getBrandCode(),
-						HhProductAttributeFqnConstants.Hh_Brand_Code_Attr_Fqn);
+				addProductProperty(
+						product, brand.getBrandCode(),
+						HhProductAttributeFqnConstants
+						.Hh_Brand_Code_Attr_Fqn);
 			}
 
 		} else {
 
-			TransformationOfProductProperties.addProductProperty(product, brand.getBrandCode(),
+			addProductProperty(
+					product, brand.getBrandCode(),
 					HhProductAttributeFqnConstants.Hh_Brand_Code_Attr_Fqn);
 
 		}
 
 	}
 
-	protected static void setProductBrandDescription(Product product, Brand brand) {
+	protected static void setProductBrandDescription(final Product product, final Brand brand) {
 		// TODO Auto-generated method stub
 
-		List<ProductProperty> productProperties;
-		productProperties = product.getProperties();
+		final List<ProductProperty> productProperties = product.getProperties();
 
 		if (productProperties != null && productProperties.size() != 0) {
 
-			if (TransformationOfProductProperties.isPropertyExists(productProperties,
+			if (isPropertyExists(productProperties,
 					HhProductAttributeFqnConstants.Hh_Brand_Desc_Attr_Fqn)) {
 
 				productProperties.forEach(updateProductProperties -> {
 					if (updateProductProperties.getAttributeFQN()
-							.equalsIgnoreCase(HhProductAttributeFqnConstants.Hh_Brand_Desc_Attr_Fqn)) {
+							.equalsIgnoreCase(
+								 HhProductAttributeFqnConstants
+									.Hh_Brand_Desc_Attr_Fqn)) {
 
-						TransformationOfProductProperties.updateProductPropertiesAttribute(updateProductProperties,
+						updateProductPropertiesAttribute(
+								 updateProductProperties,
 								brand.getBrandDesc());
 					}
 
 				});
 
 			} else {
-				TransformationOfProductProperties.addProductProperty(product, brand.getBrandDesc(),
-						HhProductAttributeFqnConstants.Hh_Brand_Desc_Attr_Fqn);
+				addProductProperty(
+						product, brand.getBrandDesc(),
+						HhProductAttributeFqnConstants
+						.Hh_Brand_Desc_Attr_Fqn);
 			}
 
 		} else {
 
-			TransformationOfProductProperties.addProductProperty(product, brand.getBrandDesc(),
+			
+			addProductProperty(product,
+					brand.getBrandDesc(),
 					HhProductAttributeFqnConstants.Hh_Brand_Desc_Attr_Fqn);
 
 		}
 
 	}
 
-	protected static void setProductImageIdAndProductLocale(Product product, Brand brand) {
+	protected static void setProductImageIdAndProductLocale(
+			final Product product, final Brand brand) {
 		// TODO Auto-generated method stub
-		ProductLocalizedContent content = product.getContent();
+		final ProductLocalizedContent content = product.getContent();
 		List<ProductLocalizedImage> productImages = content.getProductImages();
 		if (productImages != null && productImages.size() != 0) {
 			productImages.forEach(images -> {
@@ -267,8 +310,16 @@ public class ProductUtility {
 		content.setLocaleCode(brand.getLanguage());
 	}
 
-	public static Product testTransformationFromHhExtendedDescToKiboExtendedDesc(Product product,
-			ExtDesc extendedDesc) {
+        /**
+     * @param product.
+     * @param extendedDesc.
+     * @return.
+     */
+        public static 
+	    Product 
+		testTransformationFromHhExtendedDescToKiboExtendedDesc(
+			final Product product,
+			final ExtDesc extendedDesc) {
 
 		/*
 		 * // transform product code object to kibo product code obj
@@ -288,44 +339,54 @@ public class ProductUtility {
 
 	}
 
-	private static void transformHhProductDescTypeToKiboProductDescType(Product product, ExtDesc extendedDesc) {
+	private static void transformHhProductDescTypeToKiboProductDescType(final Product product,
+			final ExtDesc extendedDesc) {
 		// TODO Auto-generated method stub
-		List<ProductProperty> productProperties;
-		productProperties = product.getProperties();
+		final List<ProductProperty> productProperties = product.getProperties();
 
 		if (productProperties != null && productProperties.size() != 0) {
 
-			if (TransformationOfProductProperties.isPropertyExists(productProperties,
-					HhProductAttributeFqnConstants.Hh_Extended_Desc_Type_Attr_Fqn)) {
+			if (isPropertyExists(productProperties,
+					HhProductAttributeFqnConstants
+					.Hh_Extended_Desc_Type_Attr_Fqn)) {
 
 				productProperties.forEach(updateProductProperties -> {
 					if (updateProductProperties.getAttributeFQN()
-							.equalsIgnoreCase(HhProductAttributeFqnConstants.Hh_Extended_Desc_Type_Attr_Fqn)) {
+							.equalsIgnoreCase(
+								HhProductAttributeFqnConstants
+								.Hh_Extended_Desc_Type_Attr_Fqn)) {
 
-						TransformationOfProductProperties.updateProductPropertiesAttribute(updateProductProperties,
+						
+						updateProductPropertiesAttribute(
+								updateProductProperties,
 								extendedDesc.getType());
 					}
 
 				});
 
 			} else {
-				TransformationOfProductProperties.addProductProperty(product, extendedDesc.getType(),
-						HhProductAttributeFqnConstants.Hh_Extended_Desc_Type_Attr_Fqn);
+				
+				addProductProperty(product, extendedDesc.getType(),
+						HhProductAttributeFqnConstants
+						.Hh_Extended_Desc_Type_Attr_Fqn);
 			}
 
 		} else {
 
-			TransformationOfProductProperties.addProductProperty(product, extendedDesc.getType(),
-					HhProductAttributeFqnConstants.Hh_Extended_Desc_Type_Attr_Fqn);
+			addProductProperty(
+					product, extendedDesc.getType(),
+					HhProductAttributeFqnConstants
+					.Hh_Extended_Desc_Type_Attr_Fqn);
 
 		}
 
 	}
 
-	private static void transformHhProductContentToKiboProductContent(Product product, ExtDesc extendedDesc) {
+	private static void transformHhProductContentToKiboProductContent(final Product product,
+			final ExtDesc extendedDesc) {
 		// TODO Auto-generated method stub
 		if (extendedDesc != null) {
-			ProductLocalizedContent content = product.getContent();
+			final ProductLocalizedContent content = product.getContent();
 			content.setLocaleCode(extendedDesc.getLanguage());
 			content.setProductFullDescription(extendedDesc.getDescription());
 			product.setContent(content);
@@ -338,41 +399,58 @@ public class ProductUtility {
 	 * product.setProductCode(extendedDesc.getItem()); }
 	 */
 
-	public static void transformHhProductGtinToKiboProductGtin(Product product, Gtin gtin) {
+	/**
+	 * @param product.
+	 * @param gtin.
+	 */
+	public static void transformHhProductGtinToKiboProductGtin(
+			final Product product, final Gtin gtin) {
 		// TODO Auto-generated method stub
-		List<ProductProperty> productProperties;
-		productProperties = product.getProperties();
+		final List<ProductProperty> productProperties = product.getProperties();
 
 		if (productProperties != null && productProperties.size() != 0) {
 
-			if (TransformationOfProductProperties.isPropertyExists(productProperties,
+			if (isPropertyExists(productProperties,
 					HhProductAttributeFqnConstants.Hh_Gtin_Attr_Fqn)) {
 
 				productProperties.forEach(updateProductProperties -> {
 					if (updateProductProperties.getAttributeFQN()
-							.equalsIgnoreCase(HhProductAttributeFqnConstants.Hh_Gtin_Attr_Fqn)) {
+							.equalsIgnoreCase(
+								HhProductAttributeFqnConstants
+									.Hh_Gtin_Attr_Fqn)) {
 
-						TransformationOfProductProperties.updateProductPropertiesAttribute(updateProductProperties,
+						
+						updateProductPropertiesAttribute(
+								updateProductProperties,
 								gtin.getGtin());
 					}
 
 				});
 
 			} else {
-				TransformationOfProductProperties.addProductProperty(product, gtin.getGtin(),
+				
+				addProductProperty(product, gtin.getGtin(), 
 						HhProductAttributeFqnConstants.Hh_Gtin_Attr_Fqn);
 			}
 
 		} else {
 
-			TransformationOfProductProperties.addProductProperty(product, gtin.getGtin(),
+			
+			addProductProperty(product, gtin.getGtin(),
 					HhProductAttributeFqnConstants.Hh_Gtin_Attr_Fqn);
 
 		}
 
 	}
 
-	public static Product testTransformationFromHhItemLocToKiboItemLoc(Product product, ItemLoc itemLoc) {
+	/**
+	 * @param product.
+	 * @param itemLoc.
+	 * @return.
+	 */
+	public static Product 
+	      testTransformationFromHhItemLocToKiboItemLoc(
+			final Product product, final ItemLoc itemLoc) {
 
 		// transform item loc product code obj to kibo product code
 		// product.setProductCode(itemLoc.getItem());
@@ -390,47 +468,56 @@ public class ProductUtility {
 
 	}
 
-	protected static void setProductVendorProductNumber(Product product, ItemLoc itemLoc) {
+	protected static void setProductVendorProductNumber(
+			final Product product, final ItemLoc itemLoc) {
 		// TODO Auto-generated method stub
 
-		List<ProductProperty> productProperties;
-		productProperties = product.getProperties();
+		final List<ProductProperty> productProperties = product.getProperties();
 
 		if (productProperties != null && productProperties.size() != 0) {
 
-			if (TransformationOfProductProperties.isPropertyExists(productProperties,
-					HhProductAttributeFqnConstants.Hh_VendorProductNumber_Attr_Fqn)) {
+			if (isPropertyExists(productProperties,
+					HhProductAttributeFqnConstants
+					.Hh_VendorProductNumber_Attr_Fqn)) {
 
 				productProperties.forEach(updateProductProperties -> {
 					if (updateProductProperties.getAttributeFQN()
-							.equalsIgnoreCase(HhProductAttributeFqnConstants.Hh_VendorProductNumber_Attr_Fqn)) {
+							.equalsIgnoreCase(
+								HhProductAttributeFqnConstants
+								.Hh_VendorProductNumber_Attr_Fqn)) {
 
-						TransformationOfProductProperties.updateProductPropertiesAttribute(updateProductProperties,
+						
+						    updateProductPropertiesAttribute(
+						        updateProductProperties,
 								itemLoc.getVpn());
 					}
 
 				});
 
 			} else {
-				TransformationOfProductProperties.addProductProperty(product, itemLoc.getVpn(),
-						HhProductAttributeFqnConstants.Hh_VendorProductNumber_Attr_Fqn);
+				
+				addProductProperty(product, itemLoc.getVpn(),
+						HhProductAttributeFqnConstants
+						.Hh_VendorProductNumber_Attr_Fqn);
 			}
 
 		} else {
 
-			TransformationOfProductProperties.addProductProperty(product, itemLoc.getVpn(),
-					HhProductAttributeFqnConstants.Hh_VendorProductNumber_Attr_Fqn);
+			
+			addProductProperty(product, itemLoc.getVpn(),
+					HhProductAttributeFqnConstants
+					.Hh_VendorProductNumber_Attr_Fqn);
 		}
 
 	}
 
-	protected static void setProductMeasurment(Product product, ItemLoc itemLoc) {
+	protected static void setProductMeasurment(final Product product, final ItemLoc itemLoc) {
 		product.getPackageWeight().getValue();
 		// TODO Auto-generated method stub
 		if (product.getPackageWeight().getValue() != null && Double.SIZE != 0) {
 			product.getPackageWeight().setValue(itemLoc.getWeight());
 		} else {
-			Measurement measurement = new Measurement();
+			final Measurement measurement = new Measurement();
 			measurement.setValue(itemLoc.getWeight());
 			product.setPackageWeight(measurement);
 
@@ -438,8 +525,13 @@ public class ProductUtility {
 
 	}
 
-	public static void testTransformFromHhItemRestrictedToKiboItemRestricted(Product product,
-			ItemRestricted itemRestricted) {
+	/**
+	 * @param product.
+	 * @param itemRestricted.
+	 */
+	public static void testTransformFromHhItemRestrictedToKiboItemRestricted(
+			final Product product,
+			final ItemRestricted itemRestricted) {
 
 		// transform item loc product code obj to kibo product code
 		// product.setProductCode(itemRestricted.getItem());
@@ -457,115 +549,215 @@ public class ProductUtility {
 
 	}
 
-	protected static void setProductEcommerceInd(Product product, ItemRestricted itemRestricted) {
+	protected static void setProductEcommerceInd(
+			final Product product, final ItemRestricted itemRestricted) {
 		// TODO Auto-generated method stub
 
-		List<ProductProperty> productProperties;
-		productProperties = product.getProperties();
+		final List<ProductProperty> productProperties = product.getProperties();
 
 		if (productProperties != null && productProperties.size() != 0) {
 
-			if (TransformationOfProductProperties.isPropertyExists(productProperties,
+			if (isPropertyExists(productProperties,
 					HhProductAttributeFqnConstants.Hh_Ecomm_Ind_Attr_Fqn)) {
 
 				productProperties.forEach(updateProductProperties -> {
 					if (updateProductProperties.getAttributeFQN()
-							.equalsIgnoreCase(HhProductAttributeFqnConstants.Hh_Ecomm_Ind_Attr_Fqn)) {
+							.equalsIgnoreCase(
+								HhProductAttributeFqnConstants
+									.Hh_Ecomm_Ind_Attr_Fqn)) {
 
-						TransformationOfProductProperties.updateProductPropertiesAttribute(updateProductProperties,
+						
+						updateProductPropertiesAttribute(
+								updateProductProperties,
 								itemRestricted.getEcommerceInd());
 					}
 
 				});
 
 			} else {
-				TransformationOfProductProperties.addProductProperty(product, itemRestricted.getEcommerceInd(),
-						HhProductAttributeFqnConstants.Hh_Ecomm_Ind_Attr_Fqn);
+				addProductProperty(product, itemRestricted.getEcommerceInd(),
+						HhProductAttributeFqnConstants
+						.Hh_Ecomm_Ind_Attr_Fqn);
 			}
 
 		} else {
 
-			TransformationOfProductProperties.addProductProperty(product, itemRestricted.getEcommerceInd(),
+			
+			addProductProperty(product, itemRestricted.getEcommerceInd(),
 					HhProductAttributeFqnConstants.Hh_Ecomm_Ind_Attr_Fqn);
 		}
 
 	}
 
-	protected static void setProductWebsiteInd(Product product, ItemRestricted itemRestricted) {
+	protected static void setProductWebsiteInd(
+			final Product product, final ItemRestricted itemRestricted) {
 		// TODO Auto-generated method stub
 
-		List<ProductProperty> productProperties;
-		productProperties = product.getProperties();
+		final List<ProductProperty> productProperties = product.getProperties();
 
 		if (productProperties != null && productProperties.size() != 0) {
 
-			if (TransformationOfProductProperties.isPropertyExists(productProperties,
+			if (isPropertyExists(productProperties,
 					HhProductAttributeFqnConstants.Hh_Website_Ind_Attr_Fqn)) {
 
 				productProperties.forEach(updateProductProperties -> {
 					if (updateProductProperties.getAttributeFQN()
-							.equalsIgnoreCase(HhProductAttributeFqnConstants.Hh_Website_Ind_Attr_Fqn)) {
+							.equalsIgnoreCase(
+								HhProductAttributeFqnConstants
+									.Hh_Website_Ind_Attr_Fqn)) {
 
-						TransformationOfProductProperties.updateProductPropertiesAttribute(updateProductProperties,
+						
+						updateProductPropertiesAttribute(
+								updateProductProperties,
 								itemRestricted.getWebsiteInd());
 					}
 
 				});
 
 			} else {
-				TransformationOfProductProperties.addProductProperty(product, itemRestricted.getWebsiteInd(),
-						HhProductAttributeFqnConstants.Hh_Website_Ind_Attr_Fqn);
+				
+				addProductProperty(product, itemRestricted.getWebsiteInd(),
+						HhProductAttributeFqnConstants
+						.Hh_Website_Ind_Attr_Fqn);
 			}
 
 		} else {
 
-			TransformationOfProductProperties.addProductProperty(product, itemRestricted.getWebsiteInd(),
+			addProductProperty(product, itemRestricted.getWebsiteInd(),
 					HhProductAttributeFqnConstants.Hh_Website_Ind_Attr_Fqn);
 		}
 
 	}
 	
-	 public static void testTransformationFromHhPriceToKiboPrice(
-		      Product product,RetailMsrp retailMsrp) {
-		    
-		    // transform retail price obj to kibo retail price
-		    setRetailPrice(product,retailMsrp);
-		    
-		  }
+	/**
+	 * @param product.
+	 * @param retailMsrp.
+	 */
+	public static void testTransformationFromHhPriceToKiboPrice(
+		  	  final Product product,
+				final RetailMsrp retailMsrp) {
 
-		  @SuppressWarnings({ "unchecked" })
-		  protected static void setRetailPrice(Product product, RetailMsrp retailMsrp) {
-		    // TODO Auto-generated method stub
-		    ProductPrice productPrice =  product.getPrice();
-		    if(productPrice==null){
-		    	productPrice = new ProductPrice();
-		    }
-		   double d =retailMsrp.getRetailMsrp().doubleValue();
-		    productPrice.setPrice(d);
-		    productPrice.setSalePrice(d);
-		    product.setPrice(productPrice);
-		    
-		  
-		  }
+		// transform retail price obj to kibo retail price
+		setRetailPrice(product, retailMsrp);
 
-		  
-		  @SuppressWarnings({ "unchecked" })
-		  protected static void setRetailPrice1(Product product, RetailMsrp retailMsrp) {
-		    // TODO Auto-generated method stub
-		    List<ProductPrice> productPrice = (List<ProductPrice>) product.getPrice();
-		    if (productPrice != null && productPrice.size() != 0) {
-		      productPrice.forEach(price -> {
-		        price.setMsrp(Double.parseDouble(retailMsrp.getRetailMsrp().toString()));
-		      });
-		       
-		    } else {
-		      productPrice = new ArrayList<ProductPrice>();
-		      productPrice.forEach(price -> {
-		        price.setMsrp(Double.parseDouble(retailMsrp.getRetailMsrp().toString()));
-		      });
-		      product.setPrice((ProductPrice) productPrice);
-		    }
-		    
-		  }
+	}
+
+	/*@SuppressWarnings({ "unchecked" })*/
+	protected static void setRetailPrice(final Product product, final RetailMsrp retailMsrp) {
+		// TODO Auto-generated method stub
+		ProductPrice productPrice = product.getPrice();
+		if (productPrice == null) {
+			productPrice = new ProductPrice();
+		}
+		final double d = retailMsrp.getRetailMsrp().doubleValue();
+		productPrice.setPrice(d);
+		productPrice.setSalePrice(d);
+		product.setPrice(productPrice);
+
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	protected static void setRetailPrice1(final Product product, final RetailMsrp retailMsrp) {
+		// TODO Auto-generated method stub
+		List<ProductPrice> productPrice = (List<ProductPrice>) product.getPrice();
+		if (productPrice != null && productPrice.size() != 0) {
+			productPrice.forEach(price -> {
+				price.setMsrp(Double
+						.parseDouble(
+							retailMsrp.getRetailMsrp().toString()));
+			});
+
+		} else {
+			productPrice = new ArrayList<ProductPrice>();
+			productPrice.forEach(price -> {
+				price.setMsrp(Double.parseDouble(
+						retailMsrp.getRetailMsrp().toString()));
+			});
+			product.setPrice((ProductPrice) productPrice);
+		}
+
+	}
+
+	/**
+	 * @param productProperties.
+	 * @param attributeFqn.
+	 * @return.
+	 */
+	public static boolean isPropertyExists(final List<ProductProperty> productProperties,
+		final String attributeFqn) {
+		boolean isExist = false;
+		for (ProductProperty p : productProperties) {
+			if (p.getAttributeFQN().equalsIgnoreCase(attributeFqn)) {
+				isExist = true;
+				break;
+			}
+		}
+		return isExist;
+	}
+
+	/**
+	 * @param product.
+	 * @param productPropertyAttrValue.
+	 * @param productAttrFqn.
+	 */
+	public static void addProductProperty(
+			final Product product,
+			final String productPropertyAttrValue,final String productAttrFqn) {
 		
+			
+		final ProductProperty productPropertyAttr = new ProductProperty();
+		productPropertyAttr.setAttributeFQN(productAttrFqn);
+
+		final ProductPropertyValue productPropertyValueAttr = new ProductPropertyValue();
+		productPropertyValueAttr.setValue(productPropertyAttrValue);
+
+		final ProductPropertyValueLocalizedContent content 
+		    = new ProductPropertyValueLocalizedContent();
+		content.setStringValue(productPropertyAttrValue);
+		productPropertyValueAttr.setContent(content);
+
+		final List<ProductPropertyValue> productPropertyValue
+		    = new ArrayList<ProductPropertyValue>();
+		/*productPropertyValue.add(productPropertyValueAttr);
+		productPropertyAttr.setValues(productPropertyValue);*/
+		addProductPropertyValue(productPropertyValue,
+				productPropertyValueAttr, productPropertyAttr);
+		setProductProperties(product, productPropertyAttr);
+		
+		
+	}
+
+	/**
+	 * @param productPropertyValue.
+	 * @param productPropertyValueAttr.
+	 * @param productPropertyAttr.
+	 */
+	public static void addProductPropertyValue(final List<ProductPropertyValue> productPropertyValue,
+			final ProductPropertyValue productPropertyValueAttr,
+			final ProductProperty productPropertyAttr) {
+		productPropertyValue.add(productPropertyValueAttr);
+		productPropertyAttr.setValues(productPropertyValue);
+	}
+
+	/**
+	 * @param productPropertiesAction.
+	 * @param productPropertyAttrValue.
+	 */
+	public static void updateProductPropertiesAttribute(
+			final ProductProperty productPropertiesAction,
+			final String productPropertyAttrValue) {
+		// TODO Auto-generated method stub
+
+		final ProductPropertyValue productPropertyValue
+		    = productPropertiesAction.getValues().get(0);
+		if (productPropertyValue instanceof ProductPropertyValue 
+				&& productPropertyValue.getContent() != null) {
+			productPropertyValue.setValue(productPropertyAttrValue);
+			productPropertyValue.getContent().setStringValue(productPropertyAttrValue);
+
+		}
+
+	}
+  
+
 }

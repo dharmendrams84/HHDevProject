@@ -333,7 +333,7 @@ public final class ProductUtility {
 
 		// transform product description type object to kibo product description
 		// type obj
-		transformHhProductDescTypeToKiboProductDescType(product, extendedDesc);
+		//transformHhProductDescTypeToKiboProductDescType(product, extendedDesc);
 
 		return product;
 
@@ -382,16 +382,42 @@ public final class ProductUtility {
 
 	}
 
-	private static void transformHhProductContentToKiboProductContent(final Product product,
+	protected static void transformHhProductContentToKiboProductContent(final Product product,
 			final ExtDesc extendedDesc) {
 		// TODO Auto-generated method stub
-		if (extendedDesc != null) {
+		if (extendedDesc != null && extendedDesc.getType().equalsIgnoreCase("Fb")) {
 			final ProductLocalizedContent content = product.getContent();
 			content.setLocaleCode(extendedDesc.getLanguage());
 			content.setProductFullDescription(extendedDesc.getDescription());
 			product.setContent(content);
+		} else if (extendedDesc.getType().equalsIgnoreCase("Ingr")) {
+			final String propertyName = "tenant~ingredients";
+			
+			addOrUpdateProperty(product, propertyName, extendedDesc.getDescription());
+		} else if (extendedDesc.getType().equalsIgnoreCase("Mktg")) {
+			final String propertyName = "tenant~marketing-description";
+		
+			addOrUpdateProperty(product, propertyName, extendedDesc.getDescription());
 		}
 	}
+	
+	
+	protected static void addOrUpdateProperty(
+			final Product product,
+			final String propertyName,final String propertyValue) {
+		if (ProductUtility.isPropertyExists(product.getProperties(), propertyName)) {
+			for (ProductProperty pp : product.getProperties()) {
+				if (pp.getAttributeFQN().equalsIgnoreCase(propertyName)) {
+					ProductUtility
+					.updateProductPropertiesAttribute(pp, propertyValue);
+				}
+			}
+
+		} else {
+			ProductUtility.addProductProperty(product, propertyValue, propertyName);
+		}
+	}
+	
 
 	/*
 	 * private static void transformHhProductCodeToKiboProductCode( Product
@@ -485,9 +511,8 @@ public final class ProductUtility {
 							.equalsIgnoreCase(
 								HhProductAttributeFqnConstants
 								.Hh_VendorProductNumber_Attr_Fqn)) {
-
-						
-						    updateProductPropertiesAttribute(
+					
+					        updateProductPropertiesAttribute(
 						        updateProductProperties,
 								itemLoc.getVpn());
 					}

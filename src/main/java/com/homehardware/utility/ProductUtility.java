@@ -757,7 +757,8 @@ public final class ProductUtility {
 	 * @param productPropertyValueAttr.
 	 * @param productPropertyAttr.
 	 */
-	public static void addProductPropertyValue(final List<ProductPropertyValue> productPropertyValue,
+	public static void addProductPropertyValue(
+			final List<ProductPropertyValue> productPropertyValue,
 			final ProductPropertyValue productPropertyValueAttr,
 			final ProductProperty productPropertyAttr) {
 		productPropertyValue.add(productPropertyValueAttr);

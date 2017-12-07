@@ -9,6 +9,7 @@ import com.homehardware.model.ItemAffiliated;
 import com.homehardware.model.ItemLoc;
 import com.homehardware.model.ItemRestricted;
 import com.homehardware.model.RetailMsrp;
+import com.mozu.api.MozuApiContext;
 import com.mozu.api.contracts.core.Measurement;
 import com.mozu.api.contracts.productadmin.Product;
 import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
@@ -17,6 +18,8 @@ import com.mozu.api.contracts.productadmin.ProductPrice;
 import com.mozu.api.contracts.productadmin.ProductProperty;
 import com.mozu.api.contracts.productadmin.ProductPropertyValue;
 import com.mozu.api.contracts.productadmin.ProductPropertyValueLocalizedContent;
+import com.mozu.api.resources.commerce.catalog.admin.products.ProductPropertyResource;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -369,7 +372,9 @@ public final class ProductUtility {
 				addProductProperty(product, extendedDesc.getType(),
 						HhProductAttributeFqnConstants
 						.Hh_Extended_Desc_Type_Attr_Fqn);
-			}
+				/*addProductProperty(HhProductAttributeFqnConstants
+						.Hh_Extended_Desc_Type_Attr_Fqn, extendedDesc.getType(), product);*/
+						}
 
 		} else {
 
@@ -415,6 +420,7 @@ public final class ProductUtility {
 
 		} else {
 			ProductUtility.addProductProperty(product, propertyValue, propertyName);
+			
 		}
 	}
 	
@@ -537,13 +543,14 @@ public final class ProductUtility {
 	}
 
 	protected static void setProductMeasurment(final Product product, final ItemLoc itemLoc) {
-		product.getPackageWeight().getValue();
+		
 		// TODO Auto-generated method stub
-		if (product.getPackageWeight().getValue() != null && Double.SIZE != 0) {
+		if (product.getPackageWeight()!=null&&product.getPackageWeight().getValue() != null && Double.SIZE != 0) {
 			product.getPackageWeight().setValue(itemLoc.getWeight());
 		} else {
 			final Measurement measurement = new Measurement();
 			measurement.setValue(itemLoc.getWeight());
+			measurement.setUnit(itemLoc.getWeightUom());
 			product.setPackageWeight(measurement);
 
 		}
@@ -724,7 +731,7 @@ public final class ProductUtility {
 	 * @param product.
 	 * @param productPropertyAttrValue.
 	 * @param productAttrFqn.
-	 */
+	 *//*
 	public static void addProductProperty(
 			final Product product,
 			final String productPropertyAttrValue,final String productAttrFqn) {
@@ -743,14 +750,14 @@ public final class ProductUtility {
 
 		final List<ProductPropertyValue> productPropertyValue
 		    = new ArrayList<ProductPropertyValue>();
-		/*productPropertyValue.add(productPropertyValueAttr);
-		productPropertyAttr.setValues(productPropertyValue);*/
+		productPropertyValue.add(productPropertyValueAttr);
+		productPropertyAttr.setValues(productPropertyValue);
 		addProductPropertyValue(productPropertyValue,
 				productPropertyValueAttr, productPropertyAttr);
 		setProductProperties(product, productPropertyAttr);
 		
 		
-	}
+	}*/
 
 	/**
 	 * @param productPropertyValue.
@@ -770,20 +777,152 @@ public final class ProductUtility {
 	 * @param productPropertyAttrValue.
 	 */
 	public static void updateProductPropertiesAttribute(
-			final ProductProperty productPropertiesAction,
+			final ProductProperty productPropertiesAction,		
 			final String productPropertyAttrValue) {
 		// TODO Auto-generated method stub
 
 		final ProductPropertyValue productPropertyValue
 		    = productPropertiesAction.getValues().get(0);
-		if (productPropertyValue instanceof ProductPropertyValue 
-				&& productPropertyValue.getContent() != null) {
-			productPropertyValue.setValue(productPropertyAttrValue);
-			productPropertyValue.getContent().setStringValue(productPropertyAttrValue);
+		if (productPropertiesAction.getValues() != null 
+				&& productPropertiesAction.getValues().size() != 0
+				&& productPropertyValue instanceof ProductPropertyValue 
+		) {
+			if (productPropertyValue.getContent() != null) {
+				productPropertyValue.getContent()
+				        .setStringValue(productPropertyAttrValue);
+			} else {
+				final ProductPropertyValueLocalizedContent 
+				    content = new ProductPropertyValueLocalizedContent();
+				content.setStringValue(productPropertyAttrValue);
+				productPropertyValue.setContent(content);
+			}
 
+		} else {
+			final List<ProductPropertyValue> productPropertyValuesList
+				= new ArrayList<>();
+			productPropertyValuesList
+			.add(createProductProperty(productPropertyAttrValue));
+			productPropertyValue.setValue(productPropertyValue);
 		}
 
 	}
   
+	/**
+	 * @param product.
+	 * @param attributeValue.
+	 * @param attributeFqn.
+	 */
+	public static final void addProductProperty(final Product product,
+			final String attributeValue, final String attributeFqn) {
+		try {
+			final ProductProperty productProperty = new ProductProperty();
+			productProperty.setAttributeFQN(attributeFqn);
 
+			final ProductPropertyValue productPropertyValue 
+			    = new ProductPropertyValue();
+			final List<ProductPropertyValue> productPropertyValuesList 
+		            = new ArrayList<ProductPropertyValue>();
+			/*
+
+			final ProductPropertyValueLocalizedContent content
+			    = new ProductPropertyValueLocalizedContent();
+			
+			content.setStringValue(attributeValue);
+			productPropertyValue.setContent(content);
+
+			productPropertyValuesList.add(productPropertyValue);
+			productProperty.setValues(productPropertyValuesList);*/
+			
+			/*List<ProductProperty> productPropertiesList = product.getProperties();
+			if (productPropertiesList != null && productPropertiesList.size() != 0) {
+				product.getProperties().add(productProperty);
+			} else {
+				productPropertiesList = new ArrayList<ProductProperty>();
+				productPropertiesList.add(productProperty);
+				product.setProperties(productPropertiesList);
+			}*/
+			setPropertyValueContent(productPropertyValuesList,
+					productPropertyValue, productProperty, attributeValue);
+			setPropertiesList(product, productProperty, productPropertyValuesList);
+			System.out.println("Property " + attributeFqn + " added successfully ");
+
+		} catch (Exception e) {
+			System.out.println("Exception while adding property " + attributeFqn + " ");
+			e.printStackTrace();
+		}
+	}
+	
+	public static final void addProductPropertyValuesList(final Product product,
+			final ProductPropertyValue productPropertyValue,
+			final ProductProperty productProperty,
+			final String attributeValue) {
+		
+		final List<ProductPropertyValue> productPropertyValuesList 
+		    = new ArrayList<ProductPropertyValue>();
+
+		final ProductPropertyValueLocalizedContent content 
+		    = new ProductPropertyValueLocalizedContent();
+
+		content.setStringValue(attributeValue);
+		productPropertyValue.setContent(content);
+
+		productPropertyValuesList.add(productPropertyValue);
+		productProperty.setValues(productPropertyValuesList);
+		List<ProductProperty> productPropertiesList = product.getProperties();
+		if (productPropertiesList != null && productPropertiesList.size() != 0) {
+			product.getProperties().add(productProperty);
+		} else {
+			productPropertiesList = new ArrayList<ProductProperty>();
+			productPropertiesList.add(productProperty);
+			product.setProperties(productPropertiesList);
+		}
+
+	}
+	
+	
+	/**
+	 * @param product.
+	 * @param productProperty.
+	 * @param productPropertyValuesList.
+	 */
+	public static final void setPropertiesList(final Product product, 
+			final ProductProperty productProperty,
+			final List<ProductPropertyValue> productPropertyValuesList) {
+		
+		productProperty.setValues(productPropertyValuesList);
+		List<ProductProperty> productPropertiesList = product.getProperties();
+		if (productPropertiesList != null && productPropertiesList.size() != 0) {
+			product.getProperties().add(productProperty);
+		} else {
+			productPropertiesList = new ArrayList<ProductProperty>();
+			productPropertiesList.add(productProperty);
+			product.setProperties(productPropertiesList);
+		}
+	}
+	
+	/**
+	 * @param productPropertyValue.
+	 * @param productProperty.
+	 * @param attributeValue.
+	 */
+	public static final void setPropertyValueContent(
+			final List<ProductPropertyValue> productPropertyValuesList,
+			final ProductPropertyValue productPropertyValue,
+			final ProductProperty productProperty,
+			final String attributeValue) {
+
+		final ProductPropertyValueLocalizedContent content
+		    = new ProductPropertyValueLocalizedContent();
+
+		content.setStringValue(attributeValue);
+		productPropertyValue.setContent(content);
+		if (productProperty.getAttributeFQN()
+				.equalsIgnoreCase(HhProductAttributeFqnConstants
+						.Hh_Product_Class)) {
+			productPropertyValue.setValue(attributeValue);
+		}
+
+		productPropertyValuesList.add(productPropertyValue);
+		productProperty.setValues(productPropertyValuesList);
+	}
 }

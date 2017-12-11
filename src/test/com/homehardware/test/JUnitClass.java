@@ -40,9 +40,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 		"file:src/main/webapp/WEB-INF/spring/homehardware/spring-context.xml" })
 public final class JUnitClass {
 
-	@PersistenceUnit
+	/*@PersistenceUnit
 	EntityManagerFactory entityManagerFactory;
-	
+	*/
 	
 	@Autowired
 	private HhDaoObjectImpl hhDaoObjectImpl;
@@ -51,9 +51,9 @@ public final class JUnitClass {
 	public void testFetchHhProductFromDb() {
 		System.out.println("testEntityManager!!!!");
 		try {
-			final EntityManager entityManager = 
+			/*final EntityManager entityManager = 
 			    entityManagerFactory.createEntityManager();
-
+*/
 			final ProductResource productResource = new ProductResource(
 					new MozuApiContext(Constants.tenantId, Constants.siteId));
 
@@ -95,7 +95,10 @@ public final class JUnitClass {
 		product.setProductTypeId(Constant.int_7);
 
 		convertHhItemToMozuProduct(item, product);
-		productResource.addProduct(product);
+	    Product newProduct = productResource.addProduct(product);
+	    if(newProduct!=null){
+	    	System.out.println("New Product with product code "+newProduct.getProductCode()+" created successfully!!!!!");
+	    }
 	}
 	
 	/**
@@ -109,6 +112,7 @@ public final class JUnitClass {
 			ProductResource productResource, final Item item) throws Exception {
 		convertHhItemToMozuProduct(item, product);
 		productResource.updateProduct(product, product.getProductCode());
+		System.out.println("Product "+product.getProductCode()+ " updated successfully!!!!");
 	}
 	
 	

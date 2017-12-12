@@ -6,13 +6,20 @@ import com.homehardware.constants.HhProductAttributeFqnConstants;
 import com.homehardware.model.Brand;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Gtin;
+import com.homehardware.model.Images;
 import com.homehardware.model.Item;
 import com.homehardware.model.ItemAffiliated;
 import com.homehardware.model.ItemLoc;
 import com.homehardware.model.ItemRestricted;
 import com.homehardware.model.ProductItemAttributes;
 import com.homehardware.model.RetailMsrp;
+import com.mozu.api.ApiContext;
+import com.mozu.api.contracts.content.Document;
+import com.mozu.api.contracts.content.DocumentCollection;
 import com.mozu.api.contracts.core.Measurement;
+import com.mozu.api.contracts.productadmin.Attribute;
+import com.mozu.api.contracts.productadmin.AttributeInProductType;
+import com.mozu.api.contracts.productadmin.AttributeLocalizedContent;
 import com.mozu.api.contracts.productadmin.Product;
 import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
 import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
@@ -21,15 +28,21 @@ import com.mozu.api.contracts.productadmin.ProductPrice;
 import com.mozu.api.contracts.productadmin.ProductProperty;
 import com.mozu.api.contracts.productadmin.ProductPropertyValue;
 import com.mozu.api.contracts.productadmin.ProductPropertyValueLocalizedContent;
+import com.mozu.api.contracts.productadmin.ProductType;
 import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
-
+import com.mozu.api.resources.commerce.catalog.admin.attributedefinition.AttributeResource;
+import com.mozu.api.resources.commerce.catalog.admin.attributedefinition.ProductTypeResource;
+import com.mozu.api.resources.content.documentlists.DocumentResource;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.log4j.Logger;
 
 public final class ProductUtility {
 
+
+	
 	protected static final Logger logger = Logger.getLogger(ProductUtility.class);
 
 	/**
@@ -552,6 +565,10 @@ public final class ProductUtility {
 				&& product.getPackageWeight().getValue() != null 
 				&& Double.SIZE != 0) {
 			product.getPackageWeight().setValue(itemLoc.getWeight());
+			/*
+			 * product.getPackageLength().setValue(value);
+			 * product.getPackageHeight().setValue(value);
+			 */ 
 		} else {
 			final Measurement measurement = new Measurement();
 			measurement.setValue(itemLoc.getWeight());
@@ -693,7 +710,7 @@ public final class ProductUtility {
 
 	}
 
-	@SuppressWarnings({ "unchecked" })
+/*	@SuppressWarnings({ "unchecked" })
 	protected static void setRetailPrice1(final Product product, final RetailMsrp retailMsrp) {
 		// TODO Auto-generated method stub
 		List<ProductPrice> productPrice = (List<ProductPrice>) product.getPrice();
@@ -714,7 +731,7 @@ public final class ProductUtility {
 		}
 
 	}
-
+*/
 	/**
 	 * @param productProperties.
 	 * @param attributeFqn.
@@ -736,7 +753,8 @@ public final class ProductUtility {
 	 * @param product.
 	 * @param productPropertyAttrValue.
 	 * @param productAttrFqn.
-	 *//*
+	 */
+	/*
 	public static void addProductProperty(
 			final Product product,
 			final String productPropertyAttrValue,final String productAttrFqn) {
@@ -809,7 +827,7 @@ public final class ProductUtility {
 			.add(createProductProperty(productPropertyAttrValue));
 			productPropertyValue.setValue(productPropertyValue);
 		}
-
+		//System.out.println("property "+productPropertyValue+ " updated successfully!!");
 	}
   
 	/**
@@ -849,7 +867,7 @@ public final class ProductUtility {
 			setPropertyValueContent(productPropertyValuesList,
 					productPropertyValue, productProperty, attributeValue);
 			setPropertiesList(product, productProperty, productPropertyValuesList);
-			//System.out.println("Property " + attributeFqn + " added successfully ");
+			
 
 		} catch (Exception e) {
 			System.out.println("Exception while adding property " + attributeFqn + " ");
@@ -863,7 +881,7 @@ public final class ProductUtility {
 	 * @param productProperty.
 	 * @param attributeValue.
 	 */
-	public static final void addProductPropertyValuesList(final Product product,
+	/*public static final void addProductPropertyValuesList(final Product product,
 			final ProductPropertyValue productPropertyValue,
 			final ProductProperty productProperty,
 			final String attributeValue) {
@@ -890,7 +908,7 @@ public final class ProductUtility {
 
 	}
 	
-	
+*/	
 	/**
 	 * @param product.
 	 * @param productProperty.
@@ -948,6 +966,7 @@ public final class ProductUtility {
 		setProductItemRestricted(item, product);
 		setProductRetailMsrp(item, product);
                 setProductItemAttributes(item, product);
+                
 	}
 	
 	/**
@@ -985,7 +1004,7 @@ public final class ProductUtility {
 	protected void setProductContent(final Item item,final Product product) {
 		final ProductLocalizedContent productLocalizedContent
 		    = new ProductLocalizedContent();
-		productLocalizedContent.setLocaleCode("en-US");
+		productLocalizedContent.setLocaleCode(Constant.LOCALE);
 		productLocalizedContent.setProductName(item.getItemDesc());
 		product.setContent(productLocalizedContent);
 	}
@@ -1116,13 +1135,13 @@ public final class ProductUtility {
 		product.setProductTypeId(Constant.int_7);
 
 		convertHhItemToMozuProduct(item, product);
-	        final Product newProduct 
+	        /*final Product newProduct 
 	            = productResource.addProduct(product);
 		if (newProduct != null) {
 			System.out.println(
 					"New Product with product code " 
 			        + newProduct.getProductCode() + " created successfully!!!!!");
-		}
+		}*/
 	}
 	
 	/**
@@ -1135,9 +1154,356 @@ public final class ProductUtility {
 			final Product product,final 
 			ProductResource productResource, final Item item) throws Exception {
 		convertHhItemToMozuProduct(item, product);
-		productResource.updateProduct(product, product.getProductCode());
-		System.out.println("Product " 
-		        + product.getProductCode() + " updated successfully!!!!");
+		
 	}
 	
+	
+	/**
+	 * @param product.
+	 * @param images.
+	 * @param productResource.
+	 * @param apiContext.
+	 */
+	public static void transformHhImageToKiboImage(final Product product,
+               final List<Images> images,
+               final ProductResource productResource,final ApiContext apiContext) {
+		final ProductLocalizedContent content = product.getContent();
+		List<ProductLocalizedImage> productLocalizedImages = content.getProductImages();
+		if (productLocalizedImages == null) {
+			productLocalizedImages = new ArrayList<ProductLocalizedImage>();
+		}
+		product.getContent().setProductImages(productLocalizedImages);
+		if (images != null && images.size() != 0) {
+			for (Images img : images) {
+				final File file = new File(
+						Constant.IMAGES_FOLDER_LOC
+				        + img.getImageId() + ".jpg");
+				if (file.exists()) { 
+					/*
+				        final String cmsId = saveFileToFileManager(
+						file, new Integer(img.getImageId())
+						.toString(), apiContext);
+
+				
+
+					final ProductLocalizedImage productLocalizedImage
+					    = new ProductLocalizedImage();
+					productLocalizedImage.setLocaleCode(Constant.LOCALE);
+					productLocalizedImage.setCmsId(cmsId);
+					productLocalizedImages.add(productLocalizedImage);
+					*/
+					uploadImages(file, apiContext, img, productLocalizedImages);
+			        }
+			}
+			content.setProductImages(productLocalizedImages);
+		}
+         
+        }
+	
+	/**
+	 * @param file.
+	 * @param apiContext.
+	 * @param img.
+	 * @param productLocalizedImages.
+	 */
+	public static void uploadImages(
+			final File file, final ApiContext apiContext, final Images img,
+			final List<ProductLocalizedImage> productLocalizedImages) {
+	        final String cmsId = saveFileToFileManager(
+					file, new Integer(img.getImageId())
+					.toString(), apiContext);
+
+                final ProductLocalizedImage productLocalizedImage
+				    = new ProductLocalizedImage();
+		productLocalizedImage.setLocaleCode(Constant.LOCALE);
+		productLocalizedImage.setCmsId(cmsId);
+		productLocalizedImages.add(productLocalizedImage);
+	}
+	
+	
+	/**
+	 * @param file.
+	 * @param imageName.
+	 * @param context.
+	 * @return.
+	 */
+	public static String saveFileToFileManager(
+			final File file,final String imageName,final ApiContext context) {
+		Document retDoc = null;
+		try {
+			
+			final DocumentResource docResource = new DocumentResource(context);
+			
+			final Document doc = new Document();
+			/*doc.setContentMimeType("image/jpg");
+			doc.setExtension("jpg");
+			doc.setName(imageName);
+			doc.setDocumentTypeFQN("image@mozu");
+			if (file.exists()) {
+				final long length = Long.valueOf(file.length());
+				doc.setContentLength(length);
+				logger.info("Content length is " + length);
+			}*/
+			createDocumentObject(doc, imageName, file);
+			/*final DocumentCollection existingDoc 
+			    = docResource.getDocuments("files@mozu", "name eq " + imageName, null,
+					1, 0, Boolean.TRUE, null);
+			Document newDoc = null;
+			if (existingDoc == null || existingDoc.getItems().isEmpty()) {
+				newDoc = docResource.createDocument(doc, "files@mozu");
+				logger.info("Creating Document with name " + imageName);
+			} else {
+				newDoc = existingDoc.getItems().get(0);
+			}*/
+			final Document newDoc = createOrUpdateDocument(docResource, doc, imageName);
+			 
+			//Document newDoc = docResource.createDocument(doc, "files@mozu");
+			final FileInputStream fin = new FileInputStream(file);
+			docResource.updateDocumentContent(
+					fin, "files@mozu", newDoc.getId(), "image/jpg");
+			retDoc = docResource.getDocument("files@mozu", newDoc.getId());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return retDoc.getId();
+	}
+	
+	/**
+	 * @param doc.
+	 * @param imageName.
+	 * @param file.
+	 */
+	public static void createDocumentObject(
+			final Document doc,final String imageName,final File file) {
+		doc.setContentMimeType("image/jpg");
+		doc.setExtension("jpg");
+		doc.setName(imageName);
+		doc.setDocumentTypeFQN("image@mozu");
+		if (file.exists()) {
+			final long length = Long.valueOf(file.length());
+			doc.setContentLength(length);
+			logger.info("Content length is " + length);
+		}
+
+	}
+	
+	/**
+	 * @param docResource.
+	 * @param doc.
+	 * @param imageName.
+	 * @return.
+	 */
+	public static Document createOrUpdateDocument(
+			final DocumentResource docResource, final Document doc,
+			final String imageName) {
+		Document newDoc = null ;
+		try {
+			final DocumentCollection existingDoc 
+			    = docResource.getDocuments(
+					"files@mozu", "name eq " + imageName, null,
+					1, 0, Boolean.TRUE, null);
+
+			//Document newDoc = null;
+			if (existingDoc == null || existingDoc.getItems().isEmpty()) {
+				newDoc = docResource.createDocument(doc, "files@mozu");
+				logger.info("Creating Document with name " + imageName);
+			} else {
+				newDoc = existingDoc.getItems().get(0);
+			}
+						
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return newDoc;
+	}
+	/*
+	private Document saveFileToFileManager(File file, String imageName, ApiContext context, String recType)
+			throws Exception {
+		DocumentResource docResource = new DocumentResource(context);
+		
+		Document doc = new Document();
+		doc.setContentMimeType("image/jpg");
+		doc.setExtension("jpg");
+		doc.setName(imageName);
+
+		logger.info("Got image at " + imageName + " to process.");
+
+		if (file.exists()) {
+			long length = Long.valueOf(file.length());
+			doc.setContentLength(length);
+			logger.info("Content length is " + length);
+		}
+
+		doc.setDocumentTypeFQN("image@mozu");
+		Document newDoc = null;
+		DocumentCollection existingDoc = null;
+		
+		
+		try {
+			existingDoc = docResource.getDocuments(
+			Constants.FILES_AT_MOZU, Constants.QUERY_NAME_EQ + imageName, null,
+					1, 0, Boolean.TRUE, null);
+			
+			if (existingDoc == null || existingDoc.getItems().isEmpty()) {
+				newDoc = docResource.createDocument(doc, "files@mozu");
+				logger.info("Creating Document with name " + imageName);
+			} else {
+				newDoc = existingDoc.getItems().get(0);
+			}
+			
+			if("U".equalsIgnoreCase(recType)) {
+				docResource.deleteDocument("files@mozu", newDoc.getId());
+				logger.info("Deleted existing document with name " + imageName);
+				
+				newDoc = docResource.createDocument(doc, "files@mozu");
+				logger.info("Created new document with name " + imageName);
+			}
+		} catch (Exception e) {
+			logger.error("Error occurred while uploading the image. ", e);
+			throw e;
+		}
+
+		String docid = newDoc.getId();
+
+		FileInputStream fin = new FileInputStream(file);
+		docResource.updateDocumentContent(fin, "files@mozu", docid, "image/jpg");
+		Document retDoc = docResource.getDocument("files@mozu", docid);
+
+		// File's job is done. delete it.
+		file.delete();
+
+		logger.info("Image '" + imageName + "' uploaded");
+		return retDoc;
+	}
+*/
+	/**
+	 * @param apiContext.
+	 * @param attributeResource.
+	 * @param attributeName.
+	 */
+	public static final void createDynamicAttribute(
+			final ApiContext apiContext,
+			final AttributeResource attributeResource,final String attributeName) {
+			
+		try {
+			com.mozu.api.contracts.productadmin.Attribute 
+		        	attribute = attributeResource
+		        	.getAttribute(Constant.TENANT + attributeName);
+			if (attribute == null) {
+				attribute = new Attribute();
+				createNewAttribute(attributeName, attribute);
+				attribute = 
+						attributeResource.addAttribute(attribute);
+			}
+			final ProductTypeResource productTypeResource
+			    = new ProductTypeResource(apiContext);
+			final ProductType productType 
+			    = productTypeResource.getProductType(Constant.PRODUCT_TYPE);
+			final AttributeInProductType attrInProdType = new AttributeInProductType(); 
+			/*attrInProdType.setAttributeDetail(attribute);
+			attrInProdType.setAttributeFQN(attribute.getAttributeFQN());
+			attrInProdType.setIsAdminOnlyProperty(false);
+			attrInProdType.setIsHiddenProperty(false);
+			attrInProdType.setIsInheritedFromBaseType(false);
+			attrInProdType.setIsMultiValueProperty(false);
+			attrInProdType.setIsProductDetailsOnlyProperty(true);
+			attrInProdType.setIsRequiredByAdmin(false);
+			attrInProdType.setOrder(0);
+			*/
+			createAttributeInProductType(attribute, attrInProdType);
+			addAttributeInProductType(attrInProdType, productType, productTypeResource);
+			/*final List<AttributeInProductType> propertiesList 
+			    = productType.getProperties();
+			propertiesList.add(attrInProdType);
+			productType.setProperties(propertiesList);
+			productTypeResource.updateProductType(productType, 2);*/
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println("Exception while adding attribute " + attributeName);
+			
+		}
+
+	}
+
+	
+	
+	
+	/**
+	 * @param attributeName.
+	 * @param attribute.
+	 */
+	public static void createNewAttribute(final String attributeName,
+			 final Attribute attribute) {
+		
+		setAttributeValues(attributeName, attribute);
+		final AttributeLocalizedContent	attributeLocalizedContent
+		    = new AttributeLocalizedContent();
+		attributeLocalizedContent.setLocaleCode(Constant.LOCALE);
+		attributeLocalizedContent.setName(attributeName);
+		final List<com.mozu.api.contracts.productadmin.AttributeLocalizedContent> list
+		    = new ArrayList<>();
+		list.add(attributeLocalizedContent);
+		attribute.setLocalizedContent(list);
+		
+	}
+	
+	/**
+	 * @param attributeName.
+	 * @param attribute.
+	 */
+	public static void setAttributeValues(final String attributeName,
+			final Attribute attribute) {
+		attribute.setAdminName(attributeName);
+		attribute.setInputType(Constant.TEXT_BOX);
+		attribute.setDataType(Constant.STRING);
+		attribute.setMasterCatalogId(Constant.master_catalog_id);
+		attribute.setValueType(Constant.ADMIN_ENTERED);
+		attribute.setIsExtra(false);
+		attribute.setIsOption(false);
+		attribute.setIsProperty(true);
+		attribute.setAttributeCode(attributeName);
+		
+	}
+	
+	/**
+	 * @param attribute.
+	 * @param attrInProdType.
+	 */
+	public static void createAttributeInProductType(
+			final Attribute attribute,final AttributeInProductType attrInProdType){
+		
+		attrInProdType.setAttributeDetail(attribute);
+		attrInProdType.setAttributeFQN(attribute.getAttributeFQN());
+		attrInProdType.setIsAdminOnlyProperty(false);
+		attrInProdType.setIsHiddenProperty(false);
+		attrInProdType.setIsInheritedFromBaseType(false);
+		attrInProdType.setIsMultiValueProperty(false);
+		attrInProdType.setIsProductDetailsOnlyProperty(true);
+		attrInProdType.setIsRequiredByAdmin(false);
+		attrInProdType.setOrder(0);
+		
+	}
+	
+	/**
+	 * @param attrInProdType.
+	 * @param productType.
+	 * @param productTypeResource.
+	 */
+	public static void addAttributeInProductType(
+			final AttributeInProductType attrInProdType,
+			final ProductType productType,
+			final ProductTypeResource productTypeResource) {
+		try {
+			final List<AttributeInProductType> 
+			    propertiesList = productType.getProperties();
+			propertiesList.add(attrInProdType);
+			productType.setProperties(propertiesList);
+			productTypeResource.updateProductType(productType, 2);
+		} catch (Exception e) {
+			logger.error("Exception while updating product type "+productType + " error message "+e.getMessage());
+		}
+	}
 }

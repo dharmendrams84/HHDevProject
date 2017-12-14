@@ -4,11 +4,13 @@ import com.hh.integration.constants.Constant;
 import com.homehardware.constants.HhProductAttributeFqnConstants;
 
 import com.homehardware.model.Brand;
+import com.homehardware.model.DynAttrInfo;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Gtin;
 import com.homehardware.model.Images;
 import com.homehardware.model.Item;
 import com.homehardware.model.ItemAffiliated;
+import com.homehardware.model.ItemDynAttr;
 import com.homehardware.model.ItemLoc;
 import com.homehardware.model.ItemRestricted;
 import com.homehardware.model.ProductItemAttributes;
@@ -42,6 +44,7 @@ import org.apache.log4j.Logger;
 public final class ProductUtility {
 
 
+	
 	
 	protected static final Logger logger = Logger.getLogger(ProductUtility.class);
 
@@ -958,7 +961,8 @@ public final class ProductUtility {
 	protected void convertHhItemToMozuProduct(final Item item, final Product product) {
 		setProductBasicProperties(item, product);
 		final List<ItemAffiliated> itemAffiliateds = item.getItemAfffliated();
-		transformHhRelatedProductToKiboRelatedProductCode(product,itemAffiliateds);
+		ProductUtility
+		.transformHhRelatedProductToKiboRelatedProductCode(product,itemAffiliateds);
 		setProductBrandList(item, product);
 		setProductExtDesc(item, product);
 		setProductGtin(item, product);
@@ -979,7 +983,7 @@ public final class ProductUtility {
 		setProductContent(item, product);
 		product.setProductUsage("Standard");
 		product.setBaseProductCode(item.getHhCtrlBrandInd());
-		//setProductMeasurement(product);
+		
 		product.setIsValidForProductType(false);
 		
 	}
@@ -1121,26 +1125,31 @@ public final class ProductUtility {
 	}
 	
 	
+	
 	/**
 	 * @param product.
 	 * @param productResource.
 	 * @param item.
-	 * 
+	 * @param apiContext.
+	 * @.throws Exception
 	 */
-	public void createNewProduct(
+	public  void createNewProduct(
 			final Product product,final 
 			ProductResource productResource,
-			final Item item) throws Exception {
+			final Item item, final ApiContext apiContext) throws Exception {
 		
 		product.setProductTypeId(Constant.int_7);
 
 		convertHhItemToMozuProduct(item, product);
-	        /*final Product newProduct 
-	            = productResource.addProduct(product);
-		if (newProduct != null) {
-			System.out.println(
-					"New Product with product code " 
-			        + newProduct.getProductCode() + " created successfully!!!!!");
+		
+		/*transformHhImageToKiboImage(
+				product, item.getImages(),
+				productResource, apiContext);*/
+		//transformHhDynamicAttributes(product, item, apiContext);
+		//final Product newProduct = productResource.addProduct(product);
+		/*if (newProduct != null) {
+			logger.info("New Product with product code " + newProduct.getProductCode()
+					+ " created successfully!!!!!");
 		}*/
 	}
 	
@@ -1152,9 +1161,12 @@ public final class ProductUtility {
 	 */
 	public void updateProduct(
 			final Product product,final 
-			ProductResource productResource, final Item item) throws Exception {
+			ProductResource productResource,
+			final Item item,final ApiContext apiContext) throws Exception {
 		convertHhItemToMozuProduct(item, product);
-		
+		/*transformHhImageToKiboImage(product, item.getImages(), productResource, apiContext);
+		transformHhDynamicAttributes(product,item, apiContext);*/
+		productResource.updateProduct(product, product.getProductCode());
 	}
 	
 	
@@ -1193,6 +1205,8 @@ public final class ProductUtility {
 					productLocalizedImages.add(productLocalizedImage);
 					*/
 					uploadImages(file, apiContext, img, productLocalizedImages);
+			        } else {
+			        	logger.info("No image exists with image id " + img);
 			        }
 			}
 			content.setProductImages(productLocalizedImages);
@@ -1256,14 +1270,17 @@ public final class ProductUtility {
 				newDoc = existingDoc.getItems().get(0);
 			}*/
 			final Document newDoc = createOrUpdateDocument(docResource, doc, imageName);
-			 
+			
+			retDoc = docResource.getDocument(Constant.FILES_MOZU, newDoc.getId());
 			//Document newDoc = docResource.createDocument(doc, "files@mozu");
 			final FileInputStream fin = new FileInputStream(file);
 			docResource.updateDocumentContent(
-					fin, "files@mozu", newDoc.getId(), "image/jpg");
-			retDoc = docResource.getDocument("files@mozu", newDoc.getId());
+					fin, Constant.FILES_MOZU, retDoc.getId(), "jpg");
+			
 			
 		} catch (Exception e) {
+			System.out.println("Exception while uploading image "
+					+ imageName);
 			e.printStackTrace();
 		}
 		return retDoc.getId();
@@ -1301,12 +1318,12 @@ public final class ProductUtility {
 		try {
 			final DocumentCollection existingDoc 
 			    = docResource.getDocuments(
-					"files@mozu", "name eq " + imageName, null,
+			    		Constant.FILES_MOZU, "name eq " + imageName, null,
 					1, 0, Boolean.TRUE, null);
 
 			//Document newDoc = null;
 			if (existingDoc == null || existingDoc.getItems().isEmpty()) {
-				newDoc = docResource.createDocument(doc, "files@mozu");
+				newDoc = docResource.createDocument(doc, Constant.FILES_MOZU);
 				logger.info("Creating Document with name " + imageName);
 			} else {
 				newDoc = existingDoc.getItems().get(0);
@@ -1385,7 +1402,8 @@ public final class ProductUtility {
 	 */
 	public static final void createDynamicAttribute(
 			final ApiContext apiContext,
-			final AttributeResource attributeResource,final String attributeName) {
+			final AttributeResource attributeResource,
+			final String attributeName) throws Exception {
 			
 		try {
 			com.mozu.api.contracts.productadmin.Attribute 
@@ -1396,12 +1414,22 @@ public final class ProductUtility {
 				createNewAttribute(attributeName, attribute);
 				attribute = 
 						attributeResource.addAttribute(attribute);
+				
+				final ProductTypeResource productTypeResource
+				    = new ProductTypeResource(apiContext);
+				final ProductType productType 
+				    = productTypeResource.getProductType(Constant.PRODUCT_TYPE);
+				final AttributeInProductType attrInProdType
+				    = new AttributeInProductType();
+				createAttributeInProductType(attribute, attrInProdType);
+				addAttributeInProductType(
+						attrInProdType, productType, productTypeResource);
+				System.out.println("Dynamic attribute "
+						+ attributeName + " added successfully " 
+						+ " And Linked to product type "
+						+ Constant.PRODUCT_TYPE);
 			}
-			final ProductTypeResource productTypeResource
-			    = new ProductTypeResource(apiContext);
-			final ProductType productType 
-			    = productTypeResource.getProductType(Constant.PRODUCT_TYPE);
-			final AttributeInProductType attrInProdType = new AttributeInProductType(); 
+			
 			/*attrInProdType.setAttributeDetail(attribute);
 			attrInProdType.setAttributeFQN(attribute.getAttributeFQN());
 			attrInProdType.setIsAdminOnlyProperty(false);
@@ -1412,8 +1440,7 @@ public final class ProductUtility {
 			attrInProdType.setIsRequiredByAdmin(false);
 			attrInProdType.setOrder(0);
 			*/
-			createAttributeInProductType(attribute, attrInProdType);
-			addAttributeInProductType(attrInProdType, productType, productTypeResource);
+			
 			/*final List<AttributeInProductType> propertiesList 
 			    = productType.getProperties();
 			propertiesList.add(attrInProdType);
@@ -1423,7 +1450,7 @@ public final class ProductUtility {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			System.out.println("Exception while adding attribute " + attributeName);
-			
+			throw e;
 		}
 
 	}
@@ -1473,7 +1500,7 @@ public final class ProductUtility {
 	 * @param attrInProdType.
 	 */
 	public static void createAttributeInProductType(
-			final Attribute attribute,final AttributeInProductType attrInProdType){
+			final Attribute attribute,final AttributeInProductType attrInProdType) {
 		
 		attrInProdType.setAttributeDetail(attribute);
 		attrInProdType.setAttributeFQN(attribute.getAttributeFQN());
@@ -1503,7 +1530,140 @@ public final class ProductUtility {
 			productType.setProperties(propertiesList);
 			productTypeResource.updateProductType(productType, 2);
 		} catch (Exception e) {
-			logger.error("Exception while updating product type "+productType + " error message "+e.getMessage());
+			logger.error("Exception while updating product type "
+					+ productType + " error message "	+ e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * @param item.
+	 * @param product.
+	 * @param apiContext.
+	 */
+	public void addOrUpdateProductInMozu(
+			final Item item, final  ApiContext apiContext) {
+		try {
+			final ProductResource productResource = new ProductResource(apiContext);
+			Product product = productResource.getProduct(item.getId().getItem());
+
+		        if (product == null) {
+				product = new Product();
+
+				createNewProduct(product, productResource, item, apiContext);
+				transformHhImageToKiboImage(
+						product, item.getImages(),
+						productResource, apiContext);
+				transformHhDynamicAttributes(product, item, apiContext);
+				final Product newProduct = productResource.addProduct(product);
+				if (newProduct != null) {
+					/*logger.info("New Product with product code "
+							+ newProduct.getProductCode()
+							+ " created successfully!!!!!");*/
+				}
+			} else {
+
+				updateProduct(product, productResource, item,apiContext);
+				/*transformHhImageToKiboImage(
+						product, item.getImages(),
+						productResource, apiContext);
+
+				
+				transformHhDynamicAttributes(product, item, apiContext);*/
+				
+				productResource.updateProduct(product, product.getProductCode());
+				System.out.println(
+						"Product with product code "
+								+ item.getId().getItem()
+								+ " updated successfully!!!!");
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error(
+					"Exception while adding or updating product in Mozu "
+							+ e.getMessage());
+		}
+		System.out.println(
+				"Product with product code "
+						+ item.getId().getItem()
+						+ " added successfully!!!!");
+	}
+	
+	/**
+	 * @param item.
+	 * @param apiContext.
+	 */
+	public void transformHhDynamicAttributes(final Product product,
+			final Item item,final ApiContext apiContext)  throws Exception {
+		try {
+			final List<ItemDynAttr> itemDynAttrs = item.getItemDynAttr();
+			if (itemDynAttrs != null && itemDynAttrs.size() != 0) {
+				for (ItemDynAttr id : itemDynAttrs) {
+					final AttributeResource attributeResource 
+					    = new AttributeResource(apiContext);
+					final String attributeName 
+					    = Constant.ATTRIBUTE + "_" + id.getDynAttrId();
+
+					createDynamicAttribute(apiContext, 
+							attributeResource, attributeName);
+					addorupdateDynamicAttribute(item, attributeName, product);
+					/*for (DynAttrInfo dyn : item.getDynAttrInfo()) {
+						if (attributeName
+								.equalsIgnoreCase(
+										Constant.ATTRIBUTE 
+										+ "_" 
+										+ dyn.getDynAttrId()
+										)) {
+							addOrUpdateProperty(
+									product,
+									Constant
+									.TENANT + attributeName,
+									dyn.getDynAttrDesc());
+							System.out.println(
+									"Added or Updated"
+									+ " dynamic attribute " 
+									+ Constant
+									.TENANT
+									+ attributeName 
+									+ " sucessfully!!!!");
+						}
+					}*/
+				}
+			}
+		}catch(Exception e){
+			System.out.println("Exception while transoforming dynamic attribute "
+					+ e.getMessage());
+			throw e ;
+		}
+	}
+	
+	/**
+	 * @param item.
+	 * @param attributeName.
+	 */
+	public void addorupdateDynamicAttribute(
+			final Item item, final String attributeName,
+			final Product product) {
+		for (DynAttrInfo dyn : item.getDynAttrInfo()) {
+			if (attributeName
+					.equalsIgnoreCase(
+							Constant.ATTRIBUTE 
+							+ "_" 
+							+ dyn.getDynAttrId()
+							)) {
+				addOrUpdateProperty(
+						product,
+						Constant
+						.TENANT + attributeName,
+						dyn.getDynAttrDesc());
+				System.out.println(
+						"Added or Updated"
+						+ " dynamic attribute " 
+						+ Constant
+						.TENANT
+						+ attributeName 
+						+ " sucessfully!!!!");
+			}
 		}
 	}
 }

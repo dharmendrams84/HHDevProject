@@ -1,7 +1,5 @@
 package com.homehardware.dao;
 
-import java.util.List;
-
 import com.homehardware.beans.Store;
 import com.homehardware.model.EcoFees;
 import com.homehardware.model.ExtDesc;
@@ -9,6 +7,8 @@ import com.homehardware.model.Item;
 import com.homehardware.model.ItemAffiliated;
 import com.homehardware.model.ProductAttribute;
 import com.homehardware.model.ProductItemAttributes;
+
+import java.util.List;
 
 public interface HhDao {
 
@@ -18,7 +18,7 @@ public interface HhDao {
 
 	void getEcoFees();
 
-	Item getItem();
+	//Item getItem();
 
 	List<ProductAttribute> getProductAttributesList();
 	
@@ -36,9 +36,10 @@ public interface HhDao {
 	
 	public List<EcoFees> getEcoFes();
 
-	Item getProductDetailsFromDB();
+	Item getProductDetailsFromDb();
 
-	Item getItem(String itemId, String batchId ,String status);
+	public Item getItem(String itemId,
+			String batchId ,String status);
 
 	List<ItemAffiliated> getItemAffliated(String itemId, String batchId ,String status);
 

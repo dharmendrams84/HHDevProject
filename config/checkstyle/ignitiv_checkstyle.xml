@@ -197,7 +197,7 @@
     <module name="OuterTypeNumber"/>
     <module name="ExecutableStatementCount">
       <property name="severity" value="error"/>
-      <property name="max" value="10"/>
+      <property name="max" value="15"/>
       <property name="tokens" value="INSTANCE_INIT,STATIC_INIT,METHOD_DEF,CTOR_DEF"/>
     </module>
     <module name="AnonInnerLength">

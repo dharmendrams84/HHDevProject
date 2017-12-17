@@ -6,19 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hardware.constants.Constants;
 import com.homehardware.beans.Store;
 import com.homehardware.dao.HhDaoImpl;
-import com.homehardware.integration.transform.dataentity.TransformFromHhAffilatedItemToKiboAffilatedItem;
-import com.homehardware.integration.transform.dataentity.TransformFromHhBrandToKiboBrand;
-import com.homehardware.integration.transform.dataentity.TransformFromHhExtendedDescToKiboExtendedDesc;
-import com.homehardware.integration.transform.dataentity.TransformFromHhGtinToKiboGtin;
-import com.homehardware.integration.transform.dataentity.TransformFromHhItemLocToKiboItemLoc;
-import com.homehardware.integration.transform.dataentity.TransformFromHhItemRestrictedToKiboItemRestricted;
-import com.homehardware.integration.transform.dataentity.TransformFromHhPromotionToKiboPromotion;
-import com.homehardware.integration.transform.dataentity.TransformFromHhRetailMsrpToKiboRetailMsrp;
-import com.homehardware.integration.transform.dataentity.TransformationOfProductProperties;
+import com.homehardware.exception.AddUpdateProductException;
 import com.homehardware.model.Brand;
 import com.homehardware.model.EcoFees;
 import com.homehardware.model.ExtDesc;
-import com.homehardware.model.GlobalItem;
 import com.homehardware.model.Gtin;
 import com.homehardware.model.Item;
 import com.homehardware.model.ItemAffiliated;
@@ -26,14 +17,42 @@ import com.homehardware.model.ItemLoc;
 import com.homehardware.model.ItemRestricted;
 import com.homehardware.model.ProductAttribute;
 import com.homehardware.model.ProductItemAttributes;
-import com.homehardware.model.Promotion;
 import com.homehardware.model.RetailMsrp;
 import com.homehardware.model.TransformFromHhLocationToKiboLocation;
 import com.homehardware.utility.ProductUtility;
 
+import com.mozu.api.ApiContext;
+import com.mozu.api.MozuApiContext;
+import com.mozu.api.contracts.productadmin.ProductPrice;
+import com.mozu.api.contracts.core.Address;
+import com.mozu.api.contracts.core.Measurement;
+import com.mozu.api.contracts.location.Coordinates;
+import com.mozu.api.contracts.location.Location;
+import com.mozu.api.contracts.location.LocationType;
+import com.mozu.api.contracts.location.ShippingOriginContact;
+
+import com.mozu.api.contracts.productadmin.Attribute;
+import com.mozu.api.contracts.productadmin.AttributeLocalizedContent;
+import com.mozu.api.contracts.productadmin.Product;
+import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
+import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
+import com.mozu.api.contracts.productadmin.ProductProperty;
+import com.mozu.api.contracts.productadmin.ProductPropertyValue;
+
+import com.mozu.api.contracts.productadmin.ProductPropertyValueLocalizedContent;
+import com.mozu.api.resources.commerce.admin.LocationResource;
+import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
+import com.mozu.api.resources.commerce.catalog.admin.attributedefinition.AttributeResource;
+import com.mozu.api.resources.commerce.catalog.admin.products.ProductPropertyResource;
+
+import com.mozu.api.resources.platform.entitylists.EntityResource;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -46,43 +65,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.mozu.api.ApiContext;
-import com.mozu.api.ApiException;
-import com.mozu.api.MozuApiContext;
-import com.mozu.api.contracts.productadmin.ProductProperty;
-import com.mozu.api.contracts.productadmin.ProductPropertyValue;
-import com.mozu.api.contracts.productadmin.ProductPropertyValueLocalizedContent;
-import com.mozu.api.contracts.core.Address;
-import com.mozu.api.contracts.core.Measurement;
-import com.mozu.api.contracts.core.extensible.AttributeLocalizedContent;
-import com.mozu.api.contracts.location.Coordinates;
-import com.mozu.api.contracts.location.Location;
-import com.mozu.api.contracts.location.LocationType;
-import com.mozu.api.contracts.location.ShippingOriginContact;
-import com.mozu.api.contracts.mzdb.EntityCollection;
-import com.mozu.api.contracts.mzdb.EntityList;
-import com.mozu.api.resources.commerce.admin.LocationResource;
-import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
-import com.mozu.api.resources.commerce.catalog.admin.attributedefinition.AttributeResource;
-import com.mozu.api.resources.commerce.catalog.admin.products.ProductPropertyResource;
-import com.mozu.api.contracts.productadmin.Product;
-import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
-import com.mozu.api.contracts.productadmin.ProductInventoryInfo;
-import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
-import com.mozu.api.contracts.productadmin.ProductPrice;
-import com.mozu.api.resources.platform.EntityListResource;
-import com.mozu.api.resources.platform.entitylists.EntityContainerResource;
-import com.mozu.api.resources.platform.entitylists.EntityResource;
-import com.mozu.api.contracts.productadmin.Attribute;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 // @ContextConfiguration(locations = {
 // "file:src/main/webapp/WEB-INF/spring/homehardware/applicationContext.xml" })
-@ContextConfiguration(locations = { "file:src/main/webapp/WEB-INF/spring/homehardware/applicationContext.xml" })
+@ContextConfiguration(locations = { 
+		"file:src/main/webapp/WEB-INF/spring/homehardware/applicationContext.xml" 
+		})
 
-public class JUnitTest {
+public final class JUnitTest {
 
 	
 
+	private static final String TENANT = "tenant~";
+	private static final int master_catalog_id = 2;
+	private static final String TEXT_BOX = "TextBox";
+	private static final String STRING = "String";
+	private static final String ADMIN_ENTERED = "AdminEntered";
 	public static final int _7 = 7;
 
 	public JUnitTest() {
@@ -93,37 +92,66 @@ public class JUnitTest {
 	private HhDaoImpl hhDaoImpl;
 
 	// @Test
-	public void testFetchHHStoreObjectFromDB() throws Exception {
+	public final void testFetchHhStoreObjectFromDb()
+			throws Exception {
 		hhDaoImpl.getStore();
 
 	}
 
 	//@Test
-	public void testInsertOrUpdateLocationObjectIntoKibo() throws Exception {
-		LocationResource locationResource = new LocationResource(new MozuApiContext(Constants.tenantId, Constants.siteId));
-		Store store = hhDaoImpl.getStore();
-		String locationCode = store.getStoreNumber();
+	
+	/**.
+	 *. @throws Exception.
+	 */
+	public final void testInsertOrUpdateLocationObjectIntoKibo() throws Exception {
+		final LocationResource locationResource 
+		    = new LocationResource(
+				new MozuApiContext(Constants.tenantId, Constants.siteId));
+		final Store store = hhDaoImpl.getStore();
+		final String locationCode = hhDaoImpl.getStore().getStoreNumber();
 		Location location = locationResource.getLocation(locationCode);
 
-		store.setStoreName(locationCode);
+		//store.setStoreName(locationCode);
 		if (location == null) {
 			location = new Location();
 			// convertStoreTOMozuLocation(location, store);
-			TransformFromHhLocationToKiboLocation.testTransformHhLocationToKiboLocation(location, store);
+			TransformFromHhLocationToKiboLocation
+			.testTransformHhLocationToKiboLocation(location, store);
 			locationResource.addLocation(location);
 		} else {
-			TransformFromHhLocationToKiboLocation.testTransformHhLocationToKiboLocation(location, store);
+			TransformFromHhLocationToKiboLocation
+			.testTransformHhLocationToKiboLocation(location, store);
 			// convertStoreTOMozuLocation(location, store);
 			locationResource.updateLocation(location, locationCode);
 		}
 
 	}
 
-	public void convertStoreTOMozuLocation(Location location, Store store) {
-		location.setPhone("3333333334");
-		location.setName("Home Hardware Central Warehouse1");
+	/**
+	 * @param location.
+	 * @param store.
+	 */
+	public final void convertStoreToMozuLocation(
+			final Location location, final Store store) {
+		setLocationDefaultValues(location, store);
+		setAddress(location);
+		setCoordinates(location);
+		setShippingOriginContact(location);
+		final List<LocationType> list = new ArrayList<LocationType>();
+		final LocationType locationType = new LocationType();
+		locationType.setCode("WH1");
+		locationType.setName("WareHouse");
+		list.add(locationType);
+		location.setLocationTypes(list);
 
-		Address address = new Address();
+	}
+
+	/**
+	 * @param location.
+	 */
+	public void setAddress(final Location location) {
+
+		final Address address = new Address();
 		address.setAddress1("Clarke & Clarke Home Hardware Building Centre");
 		address.setCountryCode("CA");
 		address.setStateOrProvince("NL");
@@ -132,17 +160,29 @@ public class JUnitTest {
 		address.setAddressType("Commercial");
 		address.setIsValidated(false);
 		location.setAddress(address);
-		location.setAllowFulfillmentWithNoStock(false);
-		location.setCode(store.getStoreName());
-		location.setIsDisabled(false);
 
-		Coordinates coordinates = new Coordinates();
+	}
+	
+	/**
+	 * @param location.
+	 */
+	public final void setCoordinates(
+			final Location location) {
+		final Coordinates coordinates = new Coordinates();
 		coordinates.setLat(0.0);
 		coordinates.setLng(0.0);
 		location.setGeo(coordinates);
 
 		location.setDescription("description");
-		ShippingOriginContact shippingOriginContact = new ShippingOriginContact();
+
+	}
+	
+	
+	/**
+	 * @param location.
+	 */
+	public void setShippingOriginContact(final Location location) {
+		final ShippingOriginContact shippingOriginContact = new ShippingOriginContact();
 		shippingOriginContact.setFirstName("Alex");
 		shippingOriginContact.setLastNameOrSurname("Graham");
 		shippingOriginContact.setCompanyOrOrganization("HH");
@@ -150,20 +190,26 @@ public class JUnitTest {
 		shippingOriginContact.setPhoneNumber("1111111111");
 
 		location.setShippingOriginContact(shippingOriginContact);
-
-		List<LocationType> list = new ArrayList<LocationType>();
-		LocationType locationType = new LocationType();
-		locationType.setCode("WH1");
-		locationType.setName("WareHouse");
-		list.add(locationType);
-		location.setLocationTypes(list);
-
 	}
-
-	@Test
-	public void testFetcgHhProductFromDb() {
+	
+	/**
+	 * @param location.
+	 * @param store.
+	 */
+	public void setLocationDefaultValues(final Location location,final Store store) {
+		location.setPhone("3333333334");
+		location.setName("Home Hardware Central Warehouse1");
+		location.setAllowFulfillmentWithNoStock(false);
+		location.setCode(store.getStoreName());
+		location.setIsDisabled(false);
+	}
+	
+	//@Test
+	public void testFetcgHhProductFromDb() throws Exception {
 		try {
 
+		/*	final EntityManager entitymanager = hhDaoImpl.entityManagerFactory.createEntityManager();
+			entitymanager.createQuery("");*/
 			// Item item = hhDaoImpl.getItem();
 			final ProductResource productResource = new ProductResource(
 					new MozuApiContext(Constants.tenantId, Constants.siteId));
@@ -176,34 +222,72 @@ public class JUnitTest {
 
 				if (product == null) {
 					product = new Product();
-					product.setProductTypeId(_7);
+					/*product.setProductTypeId(_7);
 
 					convertHhItemToMozuProduct(item, product);
-					productResource.addProduct(product);
+					productResource.addProduct(product);*/
+					createNewProduct(product, productResource, item);
 
 				} else {
-					product.getInventoryInfo();
-					convertHhItemToMozuProduct(item, product);
+					//product.getInventoryInfo();
+					/*convertHhItemToMozuProduct(item, product);
 					productResource
-					.updateProduct(product, product.getProductCode());
+					.updateProduct(product, product.getProductCode());*/
+					updateProduct(product, productResource, item);
 					// setProductAttributes(product);
 				}
 			}
-		} catch (Exception e) {
+		} catch (AddUpdateProductException e) {
 			
-			e.printStackTrace();
+			System.out.println(e);
 		}
 	}
 	
-	//@Test
-	public void testFetchAttributes() {
-		String attributeName = "sample";
-		String attributeFqn =  "tenant~"+attributeName;
+	/**
+	 * @param product.
+	 * @param productResource.
+	 * @param item.
+	 * 
+	 */
+	public void createNewProduct(
+			final Product product,final 
+			ProductResource productResource,
+			final Item item) throws Exception {
+		
+		product.setProductTypeId(_7);
+
+		convertHhItemToMozuProduct(item, product);
+		productResource.addProduct(product);
+	}
+	
+	/**
+	 * @param product.
+	 * @param productResource.
+	 * @param item.
+	 * @.throws Exception
+	 */
+	public void updateProduct(
+			final Product product,final 
+			ProductResource productResource, final Item item) throws Exception {
+		convertHhItemToMozuProduct(item, product);
+		productResource.updateProduct(product, product.getProductCode());
+	}
+	
+	/**.
+	 * 
+	 */
+	@Test
+	public final void testFetchAttributes() {
+		final String attributeName = "sample";
+		final String attributeFqn =  TENANT + attributeName;
 		try {
-			ApiContext apiContext = new MozuApiContext(Constants.tenantId, Constants.siteId);
-			AttributeResource attributeResource = new AttributeResource(apiContext);
-			com.mozu.api.contracts.productadmin.Attribute attribute = new com.mozu.api.contracts.productadmin.Attribute();
-			//attribute.setMasterCatalogId(7);
+			final ApiContext apiContext =
+					new MozuApiContext(Constants.tenantId, Constants.siteId);
+			final AttributeResource attributeResource = 
+					new AttributeResource(apiContext);
+			com.mozu.api.contracts.productadmin.Attribute attribute = 
+					new com.mozu.api.contracts.productadmin.Attribute();
+			
 			
 			attribute = attributeResource.getAttribute(attributeFqn);
 			
@@ -212,50 +296,73 @@ public class JUnitTest {
 		
 				attribute = new Attribute();
 				createNewAttribute(attributeName, attribute);
-				Attribute newAttribute = attributeResource.addAttribute(attribute);
-				if(newAttribute!=null){
-					System.out.println("Attribute "+attributeFqn + " created successfully!!!! ");
-				}
+				final Attribute newAttribute = 
+						attributeResource.addAttribute(attribute);
+				/*if (newAttribute!=null) {
+					System.out.println("Attribute
+					 "+attributeFqn + " created successfully!!!! ");
+				}*/
 				
-			}/* else {
-				attribute.setAdminName("Watts");
-				attributeResource.updateAttribute(attribute, "tenant~Watts");
-			}*/
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			System.out.println("Exception while adding attribute "+attributeFqn);
-			e.printStackTrace();
+			System.out.println("Exception while adding attribute " + attributeFqn);
+			
 		}
 	}
 	
-	public void createNewAttribute(String attributeName,Attribute attribute) {
-		attribute.setAdminName(attributeName);
-		attribute.setInputType("TextBox");
-		attribute.setDataType("String");
-		attribute.setMasterCatalogId(2);
-		attribute.setValueType("AdminEntered");
-		attribute.setIsExtra(false);
-		attribute.setIsOption(false);
-		attribute.setIsProperty(true);
-		attribute.setAttributeCode(attributeName);
-		com.mozu.api.contracts.productadmin.AttributeLocalizedContent attributeLocalizedContent = new com.mozu.api.contracts.productadmin.AttributeLocalizedContent();
+	/**
+	 * @param attributeName.
+	 * @param attribute.
+	 */
+	public void createNewAttribute(final String attributeName,
+			final Attribute attribute) {
+		
+		setAttributeValues(attributeName, attribute);
+		final AttributeLocalizedContent	attributeLocalizedContent
+		    = new AttributeLocalizedContent();
 		attributeLocalizedContent.setLocaleCode("en-US");
 		attributeLocalizedContent.setName(attributeName);
-		List<com.mozu.api.contracts.productadmin.AttributeLocalizedContent> list = new ArrayList<>();
+		final List<com.mozu.api.contracts.productadmin.AttributeLocalizedContent> list
+		    = new ArrayList<>();
 		list.add(attributeLocalizedContent);
 		attribute.setLocalizedContent(list);
 		
 	}
 
+	/**
+	 * @param attributeName.
+	 * @param attribute.
+	 */
+	public void setAttributeValues(final String attributeName,
+			final Attribute attribute) {
+		attribute.setAdminName(attributeName);
+		attribute.setInputType(TEXT_BOX);
+		attribute.setDataType(STRING);
+		attribute.setMasterCatalogId(master_catalog_id);
+		attribute.setValueType(ADMIN_ENTERED);
+		attribute.setIsExtra(false);
+		attribute.setIsOption(false);
+		attribute.setIsProperty(true);
+		attribute.setAttributeCode(attributeName);
+		
+	}
+	
 	// @Test
-	public void testFetcgHhProductAttributesFromDb() {
+	/**.
+	 * 
+	 */
+	public final void testFetcgHhProductAttributesFromDb() {
 		try {
-			Item item = hhDaoImpl.getItem();
-			ProductResource productResource = new ProductResource(new MozuApiContext(Constants.tenantId, Constants.siteId));
-			Product product = productResource.getProduct(item.getId().getItem());
+			final Item item = hhDaoImpl.getItem("", "", "");
+			final ProductResource productResource 
+			    = new ProductResource(
+			    		new MozuApiContext(Constants.tenantId, Constants.siteId));
+			final Product product = productResource.getProduct(item.getId().getItem());
 
 			if (product == null) {
-				System.out.println("Product " + item.getId().getItem() + " is not existing ");
+				System.out.println("Product " 
+						+ item.getId().getItem() + " is not existing ");
 				
 			} else {
 
@@ -267,54 +374,84 @@ public class JUnitTest {
 	}
 
 	//@Test
-	public void testFetchHHEcoFeesFromDB() throws Exception {
-		Date d1 = new java.util.Date(); 
-		System.out.println(d1);
-		List<EcoFees> ecoFeesList = hhDaoImpl.getEcoFes();
-		int tenantId = Constants.tenantId, siteId = Constants.siteId;
-		MozuApiContext context = new MozuApiContext();
+	/**.
+	 *. @throws Exception
+	 */
+	public final void testFetchHhEcoFeesFromDb() throws Exception {
+		/*final Date d1 = new java.util.Date(); 
+		System.out.println(d1);*/
+		final List<EcoFees> ecoFeesList = hhDaoImpl.getEcoFes();
+		final int tenantId = Constants.tenantId;
+		final int siteId = Constants.siteId;
+		final MozuApiContext context = new MozuApiContext();
 		context.setTenantId(tenantId);
 		context.setSiteId(siteId);
 		for (EcoFees e : ecoFeesList) {
-			JsonNode ec = getEntity(context, tenantId, siteId, e.getItem(), e.getProv());
+			final JsonNode ec =
+					getEntity(context,
+							tenantId, siteId, e.getItem(), e.getProv());
 
 			if (ec == null) {
-				insertEntity(context, tenantId, siteId, e.getItem(), e.getProv(), new Double(e.getFeeAmt()).toString());
+				insertEntity(context, tenantId,
+						siteId, e.getItem(), e.getProv(),
+						new Double(e.getFeeAmt()).toString());
 			} else {
-			/*	updateEntity(context, tenantId, siteId, e.getItem(), e.getProv(), new Double(e.getFeeAmt()).toString(),
+		  /*	updateEntity(context, tenantId, siteId, e.getItem(), 
+			 * e.getProv(), new Double(e.getFeeAmt()).toString(),
 						null);*/
-				System.out.println("updating entity with productCode "+e.getItem()+ " province : "+e.getProv());
+				/*System.out.println("updating entity with productCode "
+						+ e.getItem() + " province : "
+						+ e.getProv());*/
 			}
 		}
-		Date d2 = new java.util.Date(); 
-		System.out.println(d2);
+		/*final Date d2 = new java.util.Date(); 
+		System.out.println(d2);*/
 	}
 
 	//@Test
-	public void testFetchHHProductDetails() throws Exception {
-		GlobalItem globalItem = new GlobalItem();
-		String itemId = "4466-443";
-		String batchId = "1";
-		String status = "INITIAL";
+	/**.
+	 *. @throws Exception
+	 */
+	public final void testFetchHhProductDetails() throws Exception {
+		/*final GlobalItem globalItem = new GlobalItem();
+		final String itemId = "4466-443";*/
+		final String batchId = "1";
+		final String status = "INITIAL";
 		/*Item item = hhDaoImpl.getItem(itemId, batchId,status);
 		globalItem.setItem(item);*/
 		hhDaoImpl.getItemsList(batchId, status);
 		
 		
 	}
-	public JsonNode getEntity(MozuApiContext context,int tenantId, int siteId, String productCode, String province) {
+	
+	/**
+	 * @param context.
+	 * @param tenantId.
+	 * @param siteId.
+	 * @param productCode.
+	 * @param province.
+	 * @return.
+	 */
+	public final JsonNode getEntity(
+			final MozuApiContext context,
+			final int tenantId, final int siteId, 
+			final String productCode, final String province) {
 		
 		JsonNode jsonNode = null;
 		try {
 			
-			EntityResource entityResource = new EntityResource(context);
+			final EntityResource entityResource = new EntityResource(context);
 			/*String filterString = "(productCode eq '";
-			filterString = filterString + productCode + "') and (province eq '" + province + "')";
+			filterString = filterString + productCode + 
+			"') and (province eq '" + province + "')";
 
 			System.out.println(filterString);*/
 
-			//entityCollection = entityResource.getEntities(Constants.FULL_PATH_NAME, null, null, filterString, null, null);
-			jsonNode = entityResource.getEntity(Constants.FULL_PATH_NAME, createIdForEntityList(productCode, province));
+			//entityCollection = entityResource.getEntities(
+			//Constants.FULL_PATH_NAME, null, null, filterString, null, null);
+			jsonNode = entityResource.getEntity(
+					Constants.FULL_PATH_NAME,
+					createIdForEntityList(productCode, province));
 			
 		} catch (Exception e) {
 			System.out.println("Exception while getting Entity");
@@ -349,18 +486,21 @@ public class JUnitTest {
 			// objectNode.put("productCode", "10003");
 			String productCode = "10003", province = "ON";
 			String filterString = "(productCode eq '";
-			filterString = filterString + productCode + "') and (province eq '" + province + "')";
+			filterString = filterString + 
+			productCode + "') and (province eq '" + province + "')";
 
 			System.out.println(filterString);
 			// EntityCollection entityCollection =
 			// entityResource.getEntities(fullName, null, null, "(productCode eq
 			// '10003') and (province eq 'ON')", null, null);
-			EntityCollection entityCollection = entityResource.getEntities(fullName, null, null, filterString, null,
+			EntityCollection entityCollection =
+			 entityResource.getEntities(fullName, null, null, filterString, null,
 					null);
 			// (productCode eq ”10003”) and (province eq ”ON”)
 
 			List<JsonNode> list = entityCollection.getItems();
-			EntityContainerResource entityContainerResource = new EntityContainerResource(context);
+			EntityContainerResource entityContainerResource = 
+			new EntityContainerResource(context);
 			entityContainerResource.getEntityContainer(Constants.FULL_PATH_NAME, "");
 			System.out.println(list);
 			
@@ -371,71 +511,124 @@ public class JUnitTest {
 			 * System.out.println("updated JSON "+jsonNode3.toString());
 			 
 		} catch (Exception e) {
-			System.out.println("Error processing Entity for : " + fitmentNode.get(ITEM));
+			System.out.println("Error processing Entity for : "
+			 + fitmentNode.get(ITEM));
 			e.printStackTrace();
 		}
 
 	}*/
 
 	// @Test
-	public void insertEntity(MozuApiContext context,int tenantId, int siteId, String productCode, String province, String feeAmount)
+	/**
+	 * @param context.
+	 * @param tenantId.
+	 * @param siteId.
+	 * @param productCode.
+	 * @param province.
+	 * @param feeAmount.
+	 * @.throws Exception
+	 */
+	public void insertEntity(final MozuApiContext context,final int tenantId,
+			final int siteId, final String productCode, 
+			final String province, final String feeAmount)
 			throws Exception {
 		
-		EntityResource entityResource = new EntityResource(context);
-		ObjectMapper mapper = new ObjectMapper();
-		ObjectNode fitmentNode = mapper.getNodeFactory().objectNode();
+		final EntityResource entityResource = new EntityResource(context);
+		final ObjectMapper mapper = new ObjectMapper();
+		final ObjectNode fitmentNode = mapper.getNodeFactory().objectNode();
+		/*fitmentNode.put(Constants.ID,  createIdForEntityList(productCode,province));
+		fitmentNode.put(Constants.PRODUCT_CODE, productCode);
+		fitmentNode.put(Constants.PROVINCE, province);
+		fitmentNode.put(Constants.FEE_AMT, feeAmount);*/
+		setObjectNodeValues(fitmentNode, productCode, province, feeAmount);
+		try {
+			entityResource.insertEntity(fitmentNode, Constants.FULL_PATH_NAME);
+			//System.out.println("Entity with product code : "
+			//+ productCode+ " and province :  "+province+ " added successfully!!!!!");
+		} catch (Exception e) {
+			//System.out.println("Error while adding Entity for 
+			//product code : " + productCode+ " and province : "+province);
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @param fitmentNode.
+	 * @param productCode.
+	 * @param province.
+	 * @param feeAmount.
+	 */
+	public void setObjectNodeValues(final ObjectNode fitmentNode,final String productCode, 
+			final String province, final String feeAmount) {
 		fitmentNode.put(Constants.ID,  createIdForEntityList(productCode,province));
 		fitmentNode.put(Constants.PRODUCT_CODE, productCode);
 		fitmentNode.put(Constants.PROVINCE, province);
 		fitmentNode.put(Constants.FEE_AMT, feeAmount);
-		
-		try {
-			entityResource.insertEntity(fitmentNode, Constants.FULL_PATH_NAME);
-			System.out.println("Entity with product code : " + productCode+ " and province :  "+province+ " added successfully!!!!!");
-		} catch (Exception e) {
-			System.out.println("Error while adding Entity for product code : " + productCode+ " and province : "+province);
-			e.printStackTrace();
-		}
 	}
-
-	public void updateEntity(MozuApiContext context,int tenantId, int siteId, String productCode, String province, String feeAmount,
-			ObjectNode fitmentNode1) {
+	
+	/**
+	 * @param context.
+	 * @param tenantId.
+	 * @param siteId.
+	 * @param productCode.
+	 * @param province.
+	 * @param feeAmount.
+	 * @param fitmentNode1.
+	 */
+	public final void updateEntity(final MozuApiContext context,
+			final int tenantId, final int siteId,
+			final String productCode, final String province, final String feeAmount,
+			final ObjectNode fitmentNode1) {
 			
-		EntityResource entityResource = new EntityResource(context);
+		final EntityResource entityResource = new EntityResource(context);
 		try {
 			
-			ObjectMapper mapper = new ObjectMapper();
-			ObjectNode fitmentNode = mapper.getNodeFactory().objectNode();
+			final ObjectMapper mapper = new ObjectMapper();
+			final ObjectNode fitmentNode = mapper.getNodeFactory().objectNode();
 		
-			final String ID = createIdForEntityList(productCode, province); 
-			fitmentNode.put(Constants.ID, ID);
+			final String id = createIdForEntityList(productCode, province); 
+			fitmentNode.put(Constants.ID, id);
 			fitmentNode.put(Constants.PRODUCT_CODE, productCode);
 			fitmentNode.put(Constants.PROVINCE,province);
 			fitmentNode.put(Constants.FEE_AMT, feeAmount);
-			entityResource.updateEntity(fitmentNode, Constants.FULL_PATH_NAME, ID);
-			System.out.println("Enity with product code : "+productCode+ " and province : "+province+" updated successfully!!!!! ");
+			entityResource.updateEntity(fitmentNode, Constants.FULL_PATH_NAME, id);
+			System.out.println("Enity with product code : "
+			        + productCode + " and province : " 
+					+ province + " updated successfully!!!!! ");
 		} catch (Exception e) {
-			System.out.println("Error while updating Entity for productCode : " + productCode+" and province : "+province);
+			System.out.println(
+					"Error while updating Entity for productCode : "
+			        + productCode + " and province : " + province);
 			e.printStackTrace();
 		}
 	}
 
-	// @Test
-	public void testFetchExtendedDescriptionFromDB() {
+	//@Test
+	public final void testFetchExtendedDescriptionFromDB() {
 		try {
-			String productCode = "4466-443";
-			List<ExtDesc> extDescs = hhDaoImpl.geExtendedDescription(productCode);
-			ProductResource productResource = new ProductResource(new MozuApiContext(Constants.tenantId, Constants.siteId));
-			Product product = productResource.getProduct(productCode);
-			final int tenantId = Constants.tenantId, siteId = Constants.siteId;
+			final String productCode = "4466-444";
+			final List<ExtDesc> extDescs = hhDaoImpl.geExtendedDescription(productCode);
+			final ProductResource productResource = 
+					new ProductResource(
+							new MozuApiContext(
+									Constants.tenantId,
+									Constants.siteId));
+			final Product product = productResource.getProduct(productCode);
+			final int tenantId =
+					Constants.tenantId;
+			final int siteId = Constants.siteId;
 			if (product != null) {
 				if (extDescs != null && extDescs.size() != 0) {
 					for (ExtDesc e : extDescs) {
-						String type = e.getType();
-						String description = e.getDescription();
-						if (!isEmpty(description) && description.trim().length() != 0) {
-							if (!isEmpty(type) && type.equalsIgnoreCase(Constants.MKTG)) {
-								if (isProductPropertyExist(product.getProperties(),
+						final String type = e.getType();
+						final String description = e.getDescription();
+						if (!isEmpty(description) 
+								&& description.trim().length() != 0){
+							if (!isEmpty(type) 
+									&&	type.equalsIgnoreCase(
+											Constants.MKTG)) {
+								if (isProductPropertyExist(
+										product.getProperties(),
 										Constants.tenant_marketing_description)) {
 									updateProductproperty(Constants.tenant_marketing_description, e.getDescription(),
 											product, tenantId, siteId);
@@ -470,12 +663,12 @@ public class JUnitTest {
 		}
 	}
 
-	protected void setProductAttributes(Product product) {
-		List<ProductAttribute> productAttributes = hhDaoImpl.getProductAttributesList();
+	protected final void setProductAttributes(final Product product) {
+		final List<ProductAttribute> productAttributes = hhDaoImpl.getProductAttributesList();
 		List<ProductProperty> productProperties = product.getProperties();
 		if (productProperties != null && productProperties.size() != 0) {
 			for (ProductAttribute p : productAttributes) {
-				ProductItemAttributes productItemAttributes = hhDaoImpl.getProductItemAttribute(p.getProductAttrId(),
+				final ProductItemAttributes productItemAttributes = hhDaoImpl.getProductItemAttribute(p.getProductAttrId(),
 						product.getProductCode());
 				if (productItemAttributes != null && isStatusInitial(productItemAttributes.getStatus())
 						&& isProductPropertyExist(product.getProperties(), p.getProductAttrId())) {
@@ -493,18 +686,20 @@ public class JUnitTest {
 			productProperties = new ArrayList<>();
 			product.setProperties(productProperties);
 			for (ProductAttribute p : productAttributes) {
-				ProductItemAttributes productItemAttributes = hhDaoImpl.getProductItemAttribute(p.getProductAttrId(),
+				final ProductItemAttributes productItemAttributes = hhDaoImpl.getProductItemAttribute(p.getProductAttrId(),
 						product.getProductCode());
-				if (productItemAttributes != null && isStatusInitial(productItemAttributes.getStatus()))
+				if (productItemAttributes != null && isStatusInitial(productItemAttributes.getStatus())) {
 					addProductProperty(productItemAttributes, product);
+				}
 			}
 			product.setProperties(productProperties);
 		}
 	}
 
-	protected static void convertItemToMozuProduct(Item item, final Product product) {
+	
+	public static void convertItemToMozuProduct(final Item item, final Product product) {
 		product.setProductCode(item.getId().getItem());
-		ProductLocalizedContent productLocalizedContent = new ProductLocalizedContent();
+		final ProductLocalizedContent productLocalizedContent = new ProductLocalizedContent();
 		productLocalizedContent.setLocaleCode("en-US");
 		// productLocalizedContent.setProductName("29 Espresso Adelaide Swivel
 		// Stool3");
@@ -517,13 +712,13 @@ public class JUnitTest {
 
 		// product.getPr
 
-		ProductPrice price = new ProductPrice();
+		final ProductPrice price = new ProductPrice();
 		price.setPrice(209.99);
 		price.setIsoCurrencyCode("CAD");
 		price.setSalePrice(209.99);
 		product.setPrice(price);
-		List list = new ArrayList<ProductInCatalogInfo>();
-		ProductInCatalogInfo productInCatalogInfo = new ProductInCatalogInfo();
+		final List list = new ArrayList<ProductInCatalogInfo>();
+		final ProductInCatalogInfo productInCatalogInfo = new ProductInCatalogInfo();
 		productInCatalogInfo.setCatalogId(2);
 
 		productInCatalogInfo.setPrice(price);
@@ -534,7 +729,7 @@ public class JUnitTest {
 		list.add(productInCatalogInfo);
 		product.setProductInCatalogs(list);
 
-		Measurement measurement = new Measurement();
+		final Measurement measurement = new Measurement();
 		measurement.setUnit("lbs");
 		measurement.setValue(new Double(2));
 		product.setPackageWeight(measurement);
@@ -710,7 +905,7 @@ public class JUnitTest {
 	protected void setProductBrandList(final Item item, final Product product) {
 		final List<Brand> brandsList = item.getBrand();
 		for (Brand b : brandsList) {
-			ProductUtility.testTransformationFromHhBrandToKiboBrand(product, b);
+			ProductUtility.transformHhBrandToKiboBrand(product, b);
 		}
 	}
 	
@@ -761,7 +956,7 @@ public class JUnitTest {
 		if (item.getItemRestricted() != null && item.getItemRestricted().size() != 0) {
 			for (ItemRestricted i : item.getItemRestricted()) {
 				ProductUtility
-				.testTransformFromHhItemRestrictedToKiboItemRestricted(product, i);
+				.transformFromHhItemRestrictedToKiboItemRestricted(product, i);
 			}
 		}
 	}
@@ -773,7 +968,7 @@ public class JUnitTest {
 	protected void setProductRetailMsrp(final Item item, final Product product) {
 		if (item.getRetailMsrp() != null && item.getRetailMsrp().size() != 0) {
 			for (RetailMsrp r : item.getRetailMsrp()) {
-				ProductUtility.testTransformationFromHhPriceToKiboPrice(product, r);
+				ProductUtility.transformationFromHhPriceToKiboPrice(product, r);
 			}
 		}
 	}
@@ -811,21 +1006,23 @@ public class JUnitTest {
 	
 	
 	
-	protected void convertProductAttribute(String attrFqnId, ProductItemAttributes productItemAttributes,
+	protected final void convertProductAttribute(
+			final String attrFqnId, final ProductItemAttributes productItemAttributes,
 			final Product product) {
 		try {
-			List<ProductProperty> productProperties = product.getProperties();
+			final List<ProductProperty> productProperties = product.getProperties();
 			if (productProperties != null && productProperties.size() != 0) {
 				for (ProductProperty p : productProperties) {
 					if (p.getAttributeFQN().equalsIgnoreCase(attrFqnId)) {
-						ProductPropertyValue productPropertyValue = p.getValues().get(0);
+						final ProductPropertyValue productPropertyValue = p.getValues().get(0);
 						if (productPropertyValue instanceof ProductPropertyValue
 								&& productPropertyValue.getContent() != null) {
 
 							productPropertyValue.getContent().setStringValue(productItemAttributes.getAttributeValue());
 						}
 						productPropertyValue.setValue(productItemAttributes.getAttributeValue());
-						ProductPropertyResource productPropertyResource = new ProductPropertyResource(
+						final ProductPropertyResource productPropertyResource 
+						= new ProductPropertyResource(
 								new MozuApiContext(Constants.tenantId, Constants.siteId));
 						productPropertyResource.updateProperty(p, product.getProductCode(), p.getAttributeFQN());
 					}
@@ -835,7 +1032,8 @@ public class JUnitTest {
 			productItemAttributes.setStatus("SUCCESS");
 			hhDaoImpl.updateProductItemAttributes(productItemAttributes);
 			System.out
-					.println("Property " + productItemAttributes.getId().getProductAttrId() + " updated successfully ");
+					.println("Property " +
+			productItemAttributes.getId().getProductAttrId() + " updated successfully ");
 		} catch (Exception e) {
 
 			productItemAttributes.setStatus("ERROR");
@@ -846,21 +1044,21 @@ public class JUnitTest {
 
 	}
 
-	protected void updateProductproperty(String attributeFqn, String attributeValue, final Product product,
-			int tenantId, int siteId) {
+	protected final void updateProductproperty(final String attributeFqn, final String attributeValue, final Product product,
+			final int tenantId, final int siteId) {
 		try {
-			List<ProductProperty> productProperties = product.getProperties();
+			final List<ProductProperty> productProperties = product.getProperties();
 			if (productProperties != null && productProperties.size() != 0) {
 				for (ProductProperty p : productProperties) {
 					if (p.getAttributeFQN().equalsIgnoreCase(attributeFqn)) {
-						ProductPropertyValue productPropertyValue = p.getValues().get(0);
+						final ProductPropertyValue productPropertyValue = p.getValues().get(0);
 						if (productPropertyValue instanceof ProductPropertyValue
 								&& productPropertyValue.getContent() != null) {
 
 							productPropertyValue.getContent().setStringValue(attributeValue);
 						}
 						// productPropertyValue.setValue(attributeValue);
-						ProductPropertyResource productPropertyResource = new ProductPropertyResource(
+						final ProductPropertyResource productPropertyResource = new ProductPropertyResource(
 								new MozuApiContext(tenantId, siteId));
 						productPropertyResource.updateProperty(p, product.getProductCode(), p.getAttributeFQN());
 					}
@@ -875,16 +1073,16 @@ public class JUnitTest {
 
 	}
 
-	protected void addProductProperty(ProductItemAttributes productItemAttributes, final Product product) {
+	protected final void addProductProperty(final ProductItemAttributes productItemAttributes, final Product product) {
 		try {
-			ProductProperty productProperty = new ProductProperty();
+			final ProductProperty productProperty = new ProductProperty();
 			productProperty.setAttributeFQN(productItemAttributes.getId().getProductAttrId());
 
-			ProductPropertyValue productPropertyValueAttr = new ProductPropertyValue();
-			List<ProductPropertyValue> productPropertyValue = new ArrayList<ProductPropertyValue>();
+			final ProductPropertyValue productPropertyValueAttr = new ProductPropertyValue();
+			final List<ProductPropertyValue> productPropertyValue = new ArrayList<ProductPropertyValue>();
 			productPropertyValueAttr.setValue(productItemAttributes.getAttributeValue());
 
-			ProductPropertyValueLocalizedContent content = new ProductPropertyValueLocalizedContent();
+			final ProductPropertyValueLocalizedContent content = new ProductPropertyValueLocalizedContent();
 			content.setLocaleCode("En-US");
 			content.setStringValue(productItemAttributes.getAttributeValue());
 			productPropertyValueAttr.setContent(content);
@@ -892,7 +1090,7 @@ public class JUnitTest {
 			productPropertyValue.add(productPropertyValueAttr);
 			productProperty.setValues(productPropertyValue);
 			product.getProperties().add(productProperty);
-			ProductPropertyResource productPropertyResource = new ProductPropertyResource(
+			final ProductPropertyResource productPropertyResource = new ProductPropertyResource(
 					new MozuApiContext(Constants.tenantId, Constants.siteId));
 			productPropertyResource.addProperty(productProperty, product.getProductCode());
 			productItemAttributes.setStatus("SUCCESS");
@@ -907,17 +1105,16 @@ public class JUnitTest {
 		}
 	}
 
-	protected void addProductProperty(String attributeFqn, String attributeValue, final Product product, int tenantId,
-			int siteId) {
+	protected final void addProductProperty(final String attributeFqn, final String attributeValue, final Product product, final int tenantId,
+			final int siteId) {
 		try {
-			ProductProperty productProperty = new ProductProperty();
+			final ProductProperty productProperty = new ProductProperty();
 			productProperty.setAttributeFQN(attributeFqn);
 
-			ProductPropertyValue productPropertyValue = new ProductPropertyValue();
-			List<ProductPropertyValue> productPropertyValuesList = new ArrayList<ProductPropertyValue>();
-			// productPropertyValueAttr.setValue("");
-
-			ProductPropertyValueLocalizedContent content = new ProductPropertyValueLocalizedContent();
+			final ProductPropertyValue productPropertyValue = new ProductPropertyValue();
+			final List<ProductPropertyValue> productPropertyValuesList = new ArrayList<ProductPropertyValue>();
+			
+			final ProductPropertyValueLocalizedContent content = new ProductPropertyValueLocalizedContent();
 			content.setLocaleCode("en-US");
 			content.setStringValue(attributeValue);
 			productPropertyValue.setContent(content);
@@ -925,7 +1122,7 @@ public class JUnitTest {
 			productPropertyValuesList.add(productPropertyValue);
 			productProperty.setValues(productPropertyValuesList);
 			product.getProperties().add(productProperty);
-			ProductPropertyResource productPropertyResource = new ProductPropertyResource(
+			final ProductPropertyResource productPropertyResource = new ProductPropertyResource(
 					new MozuApiContext(tenantId, siteId));
 			productPropertyResource.addProperty(productProperty, product.getProductCode());
 			System.out.println("Property " + attributeFqn + " added successfully ");
@@ -936,7 +1133,7 @@ public class JUnitTest {
 		}
 	}
 
-	protected static boolean isProductPropertyExist(List<ProductProperty> productProperties, String produtFqn) {
+	protected static boolean isProductPropertyExist(final List<ProductProperty> productProperties, final String produtFqn) {
 		boolean productPropertyExist = false;
 		if (productProperties != null && productProperties.size() != 0) {
 			for (ProductProperty pp : productProperties) {
@@ -949,7 +1146,7 @@ public class JUnitTest {
 		return productPropertyExist;
 	}
 
-	protected static boolean isStatusInitial(String itemAttributeStatus) {
+	protected static boolean isStatusInitial(final String itemAttributeStatus) {
 		boolean isStatusInitial = false;
 		if (!isEmpty(itemAttributeStatus) && itemAttributeStatus.equalsIgnoreCase("INITIAL")) {
 			isStatusInitial = true;
@@ -957,7 +1154,7 @@ public class JUnitTest {
 		return isStatusInitial;
 	}
 
-	protected static boolean isEmpty(String str) {
+	protected static boolean isEmpty(final String str) {
 		if (str == null || str.length() == 0) {
 			return true;
 		} else {
@@ -965,7 +1162,7 @@ public class JUnitTest {
 		}
 	}
 	
-	public String createIdForEntityList(String productCode,String province){
+	public final String createIdForEntityList( String productCode, String province){
 		productCode = productCode.toLowerCase();
 		productCode = productCode.replaceAll("\\W", ""); 
 		province = province.toLowerCase();

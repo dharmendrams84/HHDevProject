@@ -1,6 +1,8 @@
 // default package
 // Generated Nov 29, 2017 10:39:48 PM by Hibernate Tools 5.2.6.Final
+
 package com.homehardware.model;
+
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +21,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.CascadeType;
+
+import com.hh.integration.constants.Constant;
 import com.homehardware.model.Brand;
 import com.homehardware.model.Gtin;
 /**
@@ -26,7 +30,7 @@ import com.homehardware.model.Gtin;
  */
 @Entity
 @Table(name = "item", catalog = "ignitiv")
-public class Item implements java.io.Serializable {
+public final class Item implements java.io.Serializable {
 	
 	private int id_1;
 
@@ -35,7 +39,7 @@ public class Item implements java.io.Serializable {
 		return id_1;
 	}
 
-	public void setId_1(int id_1) {
+	public void setId_1(final int id_1) {
 		this.id_1 = id_1;
 	}
 
@@ -78,38 +82,82 @@ public class Item implements java.io.Serializable {
 	
 	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
-		    @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
-		    @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
+		    @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+		    @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
 		    })
 	public List<Gtin> getGtin() {
 		return gtin;
 	}
 
-	public void setGtin(List<Gtin> gtin) {
+	public void setGtin(final List<Gtin> gtin) {
 		this.gtin = gtin;
 	}
 
 	public Item() {
 	}
 
-	public Item(ItemId id) {
+	public Item(final ItemId id) {
 		this.id = id;
 	}
 	
 	
-	public Item(ItemId id, int id_1) {
+	public Item(final ItemId id,final int id_1) {
 		this.id = id;
 		this.id_1 = id_1;
 	}
 
 
-	public Item(ItemId id, String itemDesc, String hhSellingUom, String sellingUomFr, Integer productClass,
-			Integer category, Integer finelineClass, String itemDescFr, String brandDesc, String codeDesc,
-			String hhExclusiveToHomeInd, String hhRetailResponsibilityCode, String hhLumberInd, String hhHardwareInd,
-			String hhFurnitureInd, String hhEnergyStarInd, String hhItemSourceCode, String hhHomeExpressionsInd,
-			String hhWarrantyExchangeInd, String comments, String hhCtrlBrandInd, String hhConsumerItemDesc,
-			String hhConsumerItemDescFr, String gstInd, String ecommerceInd, String isProcessSuccess, Integer errorCode,
-			String errorDesc, String status, String createBy, Date createDate, String updateBy, Date updateDate) {
+	/**
+	 * @param id.
+	 * @param itemDesc.
+	 * @param hhSellingUom.
+	 * @param sellingUomFr.
+	 * @param productClass.
+	 * @param category.
+	 * @param finelineClass.
+	 * @param itemDescFr.
+	 * @param brandDesc.
+	 * @param codeDesc.
+	 * @param hhExclusiveToHomeInd.
+	 * @param hhRetailResponsibilityCode.
+	 * @param hhLumberInd.
+	 * @param hhHardwareInd.
+	 * @param hhFurnitureInd.
+	 * @param hhEnergyStarInd.
+	 * @param hhItemSourceCode.
+	 * @param hhHomeExpressionsInd.
+	 * @param hhWarrantyExchangeInd.
+	 * @param comments.
+	 * @param hhCtrlBrandInd.
+	 * @param hhConsumerItemDesc.
+	 * @param hhConsumerItemDescFr.
+	 * @param gstInd.
+	 * @param ecommerceInd.
+	 * @param isProcessSuccess.
+	 * @param errorCode.
+	 * @param errorDesc.
+	 * @param status.
+	 * @param createBy.
+	 * @param createDate.
+	 * @param updateBy.
+	 * @param updateDate.
+	 */
+	public Item(final ItemId id,final String itemDesc,final String hhSellingUom,
+			final String sellingUomFr,final Integer productClass,
+			final Integer category,final Integer finelineClass,
+			final String itemDescFr,final String brandDesc,final String codeDesc,
+			final String hhExclusiveToHomeInd,final String hhRetailResponsibilityCode,
+			final String hhLumberInd,final String hhHardwareInd,
+			final String hhFurnitureInd,final String hhEnergyStarInd,
+			final String hhItemSourceCode,final String hhHomeExpressionsInd,
+			final String hhWarrantyExchangeInd,final String comments,
+			final String hhCtrlBrandInd,final String hhConsumerItemDesc,
+			final String hhConsumerItemDescFr,final String gstInd,
+			final String ecommerceInd,final String isProcessSuccess,
+			final Integer errorCode,
+			final String errorDesc,final String status,final String createBy,
+			final Date createDate,final String updateBy,
+			final Date updateDate) {
 		this.id = id;
 		this.id_1 = id_1;
 		this.itemDesc = itemDesc;
@@ -149,40 +197,44 @@ public class Item implements java.io.Serializable {
 	@EmbeddedId
 
 	@AttributeOverrides({
-			@AttributeOverride(name = "item", column = @Column(name = "ITEM", nullable = false, length = 45)),
-			@AttributeOverride(name = "batchId", column = @Column(name = "BATCH_ID", nullable = false, length = 50)) })
+			@AttributeOverride(name = "item",
+			column = @Column(name = "ITEM", 
+			nullable = false, length = Constant.int_45)),
+			@AttributeOverride(name = "batchId",
+			column = @Column(name = "BATCH_ID",
+			nullable = false, length = Constant.int_50)) })
 	public ItemId getId() {
 		return this.id;
 	}
 
-	public void setId(ItemId id) {
+	public void setId(final ItemId id) {
 		this.id = id;
 	}
 
-	@Column(name = "ITEM_DESC", length = 100)
+	@Column(name = "ITEM_DESC", length = Constant.int_100)
 	public String getItemDesc() {
 		return this.itemDesc;
 	}
 
-	public void setItemDesc(String itemDesc) {
+	public void setItemDesc(final String itemDesc) {
 		this.itemDesc = itemDesc;
 	}
 
-	@Column(name = "HH_SELLING_UOM", length = 45)
+	@Column(name = "HH_SELLING_UOM", length = Constant.int_45)
 	public String getHhSellingUom() {
 		return this.hhSellingUom;
 	}
 
-	public void setHhSellingUom(String hhSellingUom) {
+	public void setHhSellingUom(final String hhSellingUom) {
 		this.hhSellingUom = hhSellingUom;
 	}
 
-	@Column(name = "SELLING_UOM_FR", length = 45)
+	@Column(name = "SELLING_UOM_FR", length = Constant.int_45)
 	public String getSellingUomFr() {
 		return this.sellingUomFr;
 	}
 
-	public void setSellingUomFr(String sellingUomFr) {
+	public void setSellingUomFr(final String sellingUomFr) {
 		this.sellingUomFr = sellingUomFr;
 	}
 
@@ -191,7 +243,7 @@ public class Item implements java.io.Serializable {
 		return this.productClass;
 	}
 
-	public void setProductClass(Integer productClass) {
+	public void setProductClass(final Integer productClass) {
 		this.productClass = productClass;
 	}
 
@@ -200,7 +252,7 @@ public class Item implements java.io.Serializable {
 		return this.category;
 	}
 
-	public void setCategory(Integer category) {
+	public void setCategory(final Integer category) {
 		this.category = category;
 	}
 
@@ -209,178 +261,178 @@ public class Item implements java.io.Serializable {
 		return this.finelineClass;
 	}
 
-	public void setFinelineClass(Integer finelineClass) {
+	public void setFinelineClass(final Integer finelineClass) {
 		this.finelineClass = finelineClass;
 	}
 
-	@Column(name = "ITEM_DESC_FR", length = 45)
+	@Column(name = "ITEM_DESC_FR", length = Constant.int_45)
 	public String getItemDescFr() {
 		return this.itemDescFr;
 	}
 
-	public void setItemDescFr(String itemDescFr) {
+	public void setItemDescFr(final String itemDescFr) {
 		this.itemDescFr = itemDescFr;
 	}
 
-	@Column(name = "BRAND_DESC", length = 45)
+	@Column(name = "BRAND_DESC", length = Constant.int_45)
 	public String getBrandDesc() {
 		return this.brandDesc;
 	}
 
-	public void setBrandDesc(String brandDesc) {
+	public void setBrandDesc(final String brandDesc) {
 		this.brandDesc = brandDesc;
 	}
 
-	@Column(name = "CODE_DESC", length = 45)
+	@Column(name = "CODE_DESC", length = Constant.int_45)
 	public String getCodeDesc() {
 		return this.codeDesc;
 	}
 
-	public void setCodeDesc(String codeDesc) {
+	public void setCodeDesc(final String codeDesc) {
 		this.codeDesc = codeDesc;
 	}
 
-	@Column(name = "HH_EXCLUSIVE_TO_HOME_IND", length = 1)
+	@Column(name = "HH_EXCLUSIVE_TO_HOME_IND", length = Constant.int_1)
 	public String getHhExclusiveToHomeInd() {
 		return this.hhExclusiveToHomeInd;
 	}
 
-	public void setHhExclusiveToHomeInd(String hhExclusiveToHomeInd) {
+	public void setHhExclusiveToHomeInd(final String hhExclusiveToHomeInd) {
 		this.hhExclusiveToHomeInd = hhExclusiveToHomeInd;
 	}
 
-	@Column(name = "HH_RETAIL_RESPONSIBILITY_CODE", length = 1)
+	@Column(name = "HH_RETAIL_RESPONSIBILITY_CODE", length = Constant.int_1)
 	public String getHhRetailResponsibilityCode() {
 		return this.hhRetailResponsibilityCode;
 	}
 
-	public void setHhRetailResponsibilityCode(String hhRetailResponsibilityCode) {
+	public void setHhRetailResponsibilityCode(final String hhRetailResponsibilityCode) {
 		this.hhRetailResponsibilityCode = hhRetailResponsibilityCode;
 	}
 
-	@Column(name = "HH_LUMBER_IND", length = 1)
+	@Column(name = "HH_LUMBER_IND", length = Constant.int_1)
 	public String getHhLumberInd() {
 		return this.hhLumberInd;
 	}
 
-	public void setHhLumberInd(String hhLumberInd) {
+	public void setHhLumberInd(final String hhLumberInd) {
 		this.hhLumberInd = hhLumberInd;
 	}
 
-	@Column(name = "HH_HARDWARE_IND", length = 1)
+	@Column(name = "HH_HARDWARE_IND", length = Constant.int_1)
 	public String getHhHardwareInd() {
 		return this.hhHardwareInd;
 	}
 
-	public void setHhHardwareInd(String hhHardwareInd) {
+	public void setHhHardwareInd(final String hhHardwareInd) {
 		this.hhHardwareInd = hhHardwareInd;
 	}
 
-	@Column(name = "HH_FURNITURE_IND", length = 1)
+	@Column(name = "HH_FURNITURE_IND", length = Constant.int_1)
 	public String getHhFurnitureInd() {
 		return this.hhFurnitureInd;
 	}
 
-	public void setHhFurnitureInd(String hhFurnitureInd) {
+	public void setHhFurnitureInd(final String hhFurnitureInd) {
 		this.hhFurnitureInd = hhFurnitureInd;
 	}
 
-	@Column(name = "HH_ENERGY_STAR_IND", length = 1)
+	@Column(name = "HH_ENERGY_STAR_IND", length = Constant.int_1)
 	public String getHhEnergyStarInd() {
 		return this.hhEnergyStarInd;
 	}
 
-	public void setHhEnergyStarInd(String hhEnergyStarInd) {
+	public void setHhEnergyStarInd(final String hhEnergyStarInd) {
 		this.hhEnergyStarInd = hhEnergyStarInd;
 	}
 
-	@Column(name = "HH_ITEM_SOURCE_CODE", length = 1)
+	@Column(name = "HH_ITEM_SOURCE_CODE", length = Constant.int_1)
 	public String getHhItemSourceCode() {
 		return this.hhItemSourceCode;
 	}
 
-	public void setHhItemSourceCode(String hhItemSourceCode) {
+	public void setHhItemSourceCode(final String hhItemSourceCode) {
 		this.hhItemSourceCode = hhItemSourceCode;
 	}
 
-	@Column(name = "HH_HOME_EXPRESSIONS_IND", length = 1)
+	@Column(name = "HH_HOME_EXPRESSIONS_IND", length = Constant.int_1)
 	public String getHhHomeExpressionsInd() {
 		return this.hhHomeExpressionsInd;
 	}
 
-	public void setHhHomeExpressionsInd(String hhHomeExpressionsInd) {
+	public void setHhHomeExpressionsInd(final String hhHomeExpressionsInd) {
 		this.hhHomeExpressionsInd = hhHomeExpressionsInd;
 	}
 
-	@Column(name = "HH_WARRANTY_EXCHANGE_IND", length = 1)
+	@Column(name = "HH_WARRANTY_EXCHANGE_IND", length = Constant.int_1)
 	public String getHhWarrantyExchangeInd() {
 		return this.hhWarrantyExchangeInd;
 	}
 
-	public void setHhWarrantyExchangeInd(String hhWarrantyExchangeInd) {
+	public void setHhWarrantyExchangeInd(final String hhWarrantyExchangeInd) {
 		this.hhWarrantyExchangeInd = hhWarrantyExchangeInd;
 	}
 
-	@Column(name = "COMMENTS", length = 100)
+	@Column(name = "COMMENTS", length = Constant.int_100)
 	public String getComments() {
 		return this.comments;
 	}
 
-	public void setComments(String comments) {
+	public void setComments(final String comments) {
 		this.comments = comments;
 	}
 
-	@Column(name = "HH_CTRL_BRAND_IND", length = 1)
+	@Column(name = "HH_CTRL_BRAND_IND", length = Constant.int_1)
 	public String getHhCtrlBrandInd() {
 		return this.hhCtrlBrandInd;
 	}
 
-	public void setHhCtrlBrandInd(String hhCtrlBrandInd) {
+	public void setHhCtrlBrandInd(final String hhCtrlBrandInd) {
 		this.hhCtrlBrandInd = hhCtrlBrandInd;
 	}
 
-	@Column(name = "HH_CONSUMER_ITEM_DESC", length = 100)
+	@Column(name = "HH_CONSUMER_ITEM_DESC", length = Constant.int_100)
 	public String getHhConsumerItemDesc() {
 		return this.hhConsumerItemDesc;
 	}
 
-	public void setHhConsumerItemDesc(String hhConsumerItemDesc) {
+	public void setHhConsumerItemDesc(final String hhConsumerItemDesc) {
 		this.hhConsumerItemDesc = hhConsumerItemDesc;
 	}
 
-	@Column(name = "HH_CONSUMER_ITEM_DESC_FR", length = 100)
+	@Column(name = "HH_CONSUMER_ITEM_DESC_FR", length = Constant.int_100)
 	public String getHhConsumerItemDescFr() {
 		return this.hhConsumerItemDescFr;
 	}
 
-	public void setHhConsumerItemDescFr(String hhConsumerItemDescFr) {
+	public void setHhConsumerItemDescFr(final String hhConsumerItemDescFr) {
 		this.hhConsumerItemDescFr = hhConsumerItemDescFr;
 	}
 
-	@Column(name = "GST_IND", length = 1)
+	@Column(name = "GST_IND", length = Constant.int_1)
 	public String getGstInd() {
 		return this.gstInd;
 	}
 
-	public void setGstInd(String gstInd) {
+	public void setGstInd(final String gstInd) {
 		this.gstInd = gstInd;
 	}
 
-	@Column(name = "ECOMMERCE_IND", length = 1)
+	@Column(name = "ECOMMERCE_IND", length = Constant.int_1)
 	public String getEcommerceInd() {
 		return this.ecommerceInd;
 	}
 
-	public void setEcommerceInd(String ecommerceInd) {
+	public void setEcommerceInd(final String ecommerceInd) {
 		this.ecommerceInd = ecommerceInd;
 	}
 
-	@Column(name = "IS_PROCESS_SUCCESS", length = 1)
+	@Column(name = "IS_PROCESS_SUCCESS", length = Constant.int_1)
 	public String getIsProcessSuccess() {
 		return this.isProcessSuccess;
 	}
 
-	public void setIsProcessSuccess(String isProcessSuccess) {
+	public void setIsProcessSuccess(final String isProcessSuccess) {
 		this.isProcessSuccess = isProcessSuccess;
 	}
 
@@ -389,63 +441,63 @@ public class Item implements java.io.Serializable {
 		return this.errorCode;
 	}
 
-	public void setErrorCode(Integer errorCode) {
+	public void setErrorCode(final Integer errorCode) {
 		this.errorCode = errorCode;
 	}
 
-	@Column(name = "ERROR_DESC", length = 65535)
+	@Column(name = "ERROR_DESC", length = Constant.int_65535)
 	public String getErrorDesc() {
 		return this.errorDesc;
 	}
 
-	public void setErrorDesc(String errorDesc) {
+	public void setErrorDesc(final String errorDesc) {
 		this.errorDesc = errorDesc;
 	}
 
-	@Column(name = "STATUS", length = 45)
+	@Column(name = "STATUS", length = Constant.int_45)
 	public String getStatus() {
 		return this.status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(final String status) {
 		this.status = status;
 	}
 
-	@Column(name = "CREATE_BY", length = 50)
+	@Column(name = "CREATE_BY", length = Constant.int_50)
 	public String getCreateBy() {
 		return this.createBy;
 	}
 
-	public void setCreateBy(String createBy) {
+	public void setCreateBy(final String createBy) {
 		this.createBy = createBy;
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "CREATE_DATE", length = 19)
+	@Column(name = "CREATE_DATE", length = Constant.int_19)
 	public Date getCreateDate() {
 		return this.createDate;
 	}
 
-	public void setCreateDate(Date createDate) {
+	public void setCreateDate(final Date createDate) {
 		this.createDate = createDate;
 	}
 
-	@Column(name = "UPDATE_BY", length = 50)
+	@Column(name = "UPDATE_BY", length = Constant.int_50)
 	public String getUpdateBy() {
 		return this.updateBy;
 	}
 
-	public void setUpdateBy(String updateBy) {
+	public void setUpdateBy(final String updateBy) {
 		this.updateBy = updateBy;
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "UPDATE_DATE", length = 19)
+	@Column(name = "UPDATE_DATE", length = Constant.int_19)
 	public Date getUpdateDate() {
 		return this.updateDate;
 	}
 
-	public void setUpdateDate(Date updateDate) {
+	public void setUpdateDate(final Date updateDate) {
 		this.updateDate = updateDate;
 	}
 
@@ -453,14 +505,14 @@ public class Item implements java.io.Serializable {
 	
 	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
-         @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
-         @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
+             @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
          })
 	public List<ExtDesc> getExtDesc() {
 		return extDesc;
 	}
 
-	public void setExtDesc(List<ExtDesc> extDesc) {
+	public void setExtDesc(final List<ExtDesc> extDesc) {
 		this.extDesc = extDesc;
 	}
 	
@@ -468,14 +520,14 @@ public class Item implements java.io.Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
-        @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
-        @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
-        })
+             @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
+         })
 	public List<ItemDynAttr> getItemDynAttr() {
 		return itemDynAttr;
 	}
 
-	public void setItemDynAttr(List<ItemDynAttr> itemDynAttr) {
+	public void setItemDynAttr(final List<ItemDynAttr> itemDynAttr) {
 		this.itemDynAttr = itemDynAttr;
 	}
 	
@@ -484,14 +536,14 @@ public class Item implements java.io.Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
-        @JoinColumn(name="D_ITEM", referencedColumnName = "ITEM"),
-        @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
-        })
+             @JoinColumn(name = "D_ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
+         })
 	public List<Promotion> getPromotion() {
 		return promotion;
 	}
 
-	public void setPromotion(List<Promotion> promotion) {
+	public void setPromotion(final List<Promotion> promotion) {
 		this.promotion = promotion;
 	}
 
@@ -500,14 +552,14 @@ public class Item implements java.io.Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
-        @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
-        @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
-        })
+             @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
+         })
 	public List<RetailMsrp> getRetailMsrp() {
 		return retailMsrp;
 	}
 
-	public void setRetailMsrp(List<RetailMsrp> retailMsrp) {
+	public void setRetailMsrp(final List<RetailMsrp> retailMsrp) {
 		this.retailMsrp = retailMsrp;
 	}
 	
@@ -515,14 +567,14 @@ public class Item implements java.io.Serializable {
 	
 	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
-       @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
-       @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
-       })
+             @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
+         })
 	public List<ItemInventory> getItemInventory() {
 		return itemInventory;
 	}
 
-	public void setItemInventory(List<ItemInventory> itemInventory) {
+	public void setItemInventory(final List<ItemInventory> itemInventory) {
 		this.itemInventory = itemInventory;
 	}
 
@@ -531,28 +583,29 @@ public class Item implements java.io.Serializable {
 	
 	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
-      @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
-      @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
-      })
+             @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
+         })
 	public List<ItemLoc> getItemLoc() {
 		return itemLoc;
 	}
 
-	public void setItemLoc(List<ItemLoc> itemLoc) {
+	public void setItemLoc(final List<ItemLoc> itemLoc) {
 		this.itemLoc = itemLoc;
 	}
 
 	private List<Brand> brand ;
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	
+    	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
-    @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
-    @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
-    })
+             @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
+         })
 	public List<Brand> getBrand() {
 		return brand;
 	}
 
-	public void setBrand(List<Brand> brand) {
+	public void setBrand(final List<Brand> brand) {
 		this.brand = brand;
 	}
 
@@ -560,14 +613,14 @@ public class Item implements java.io.Serializable {
 	
 	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.EAGER)
 	 @JoinColumns({
-     @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
-     @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
-     })
+             @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
+         })
 	public List<ItemAffiliated> getItemAfffliated() {
 		return itemAfffliated;
 	}
 
-	public void setItemAfffliated(List<ItemAffiliated> itemAfffliated) {
+	public void setItemAfffliated(final List<ItemAffiliated> itemAfffliated) {
 		this.itemAfffliated = itemAfffliated;
 	}
 	
@@ -575,14 +628,14 @@ public class Item implements java.io.Serializable {
 	
 	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
-    @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
-    @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
-    })
+             @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
+         })
 	public List<ItemRestricted> getItemRestricted() {
 		return itemRestricted;
 	}
 
-	public void setItemRestricted(List<ItemRestricted> itemRestricted) {
+	public void setItemRestricted(final List<ItemRestricted> itemRestricted) {
 		this.itemRestricted = itemRestricted;
 	}
 
@@ -590,14 +643,15 @@ public class Item implements java.io.Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
-   @JoinColumn(name="ITEM", referencedColumnName = "ITEM"),
-   @JoinColumn(name="BATCH_ID", referencedColumnName = "BATCH_ID")
-   })
+             @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
+         })
 	public List<ProductItemAttributes> getProductItemAttributes() {
 		return productItemAttributes;
 	}
 
-	public void setProductItemAttributes(List<ProductItemAttributes> productItemAttributes) {
+	public void setProductItemAttributes(
+			final List<ProductItemAttributes> productItemAttributes) {
 		this.productItemAttributes = productItemAttributes;
 	}
 	
@@ -651,4 +705,40 @@ public class Item implements java.io.Serializable {
 		returnToString+="\n";
 		return returnToString;
 	}
-*/}
+*/
+	
+
+	
+	private List<Images> images ;
+
+	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	 @JoinColumns({
+             @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+             @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
+         })
+	public List<Images> getImages() {
+		return images;
+	}
+
+	public void setImages(final List<Images> images) {
+		this.images = images;
+	}
+
+	
+	private List<DynAttrInfo> dynAttrInfo ;
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumns({ 
+			@JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
+			@JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID") })
+	public List<DynAttrInfo> getDynAttrInfo() {
+		return dynAttrInfo;
+	}
+
+	public void setDynAttrInfo(final List<DynAttrInfo> dynAttrInfo) {
+		this.dynAttrInfo = dynAttrInfo;
+	}
+
+
+
+}

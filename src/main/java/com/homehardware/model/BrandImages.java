@@ -49,8 +49,7 @@ public class BrandImages implements java.io.Serializable {
         public BrandImages() {
         }
 
-        public BrandImages(final String brandCode,
-        	final Integer imageId, final String brandDesc,
+        public BrandImages(final String brandCode, final Integer imageId, final String brandDesc,
             final String homeExclusiveInd, final String language, final String isProcessSuccess, 
             final Integer errorCode, final String errorDesc,
             final String batchId, final String status, final String createBy,

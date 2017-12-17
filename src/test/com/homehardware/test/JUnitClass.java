@@ -2,7 +2,7 @@ package com.homehardware.test;
 
 import com.hardware.constants.Constants;
 import com.hh.integration.constants.Constant;
-import com.homehardware.dao.HhDaoObjectImpl;
+import com.homehardware.dao.HhDaoObject;
 import com.homehardware.model.Brand;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Gtin;
@@ -13,21 +13,26 @@ import com.homehardware.model.ItemRestricted;
 import com.homehardware.model.ProductItemAttributes;
 import com.homehardware.model.RetailMsrp;
 import com.homehardware.utility.ProductUtility;
+import com.mozu.api.ApiContext;
 import com.mozu.api.MozuApiContext;
 import com.mozu.api.contracts.core.Measurement;
+import com.mozu.api.contracts.productadmin.PriceList;
+import com.mozu.api.contracts.productadmin.PriceListCollection;
 import com.mozu.api.contracts.productadmin.Product;
 import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
 import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
 import com.mozu.api.contracts.productadmin.ProductProperty;
+import com.mozu.api.resources.commerce.catalog.admin.PriceListResource;
 import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
+/*import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
+import javax.persistence.PersistenceUnit;*/
 
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import org.junit.runner.RunWith;
@@ -40,27 +45,28 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 		"file:src/main/webapp/WEB-INF/spring/homehardware/spring-context.xml" })
 public final class JUnitClass {
 
-	/*@PersistenceUnit
-	EntityManagerFactory entityManagerFactory;
-	*/
+	protected static final Logger logger = Logger.getLogger(ProductUtility.class);
 	
 	@Autowired
-	private HhDaoObjectImpl hhDaoObjectImpl;
+	private HhDaoObject hhDaoObjectImpl;
 
 	@Test
 	public void testFetchHhProductFromDb() {
-		System.out.println("testEntityManager!!!!");
+		
 		try {
 			/*final EntityManager entityManager = 
 			    entityManagerFactory.createEntityManager();
 */
-			final ProductResource productResource = new ProductResource(
-					new MozuApiContext(Constants.tenantId, Constants.siteId));
-
+			final ApiContext apiContext
+			    = new MozuApiContext(Constants.tenantId,
+					Constants.siteId);
+			//final ProductResource productResource = new ProductResource(apiContext);
+			addOrUpdatePriceList();
 			final List list = hhDaoObjectImpl.getItemsList("1", "INITIAL");
 			for (Object o : list) {
 				final Item item = (Item) o;
-				Product product =
+				new ProductUtility().addOrUpdateProductInMozu(item, apiContext);
+				/*Product product =
 						productResource.getProduct(item.getId().getItem());
 
 				if (product == null) {
@@ -70,15 +76,18 @@ public final class JUnitClass {
 
 				} else {
 					
-					updateProduct(product, productResource, item);
-					
+					//updateProduct(product, productResource, item);
+					//new ProductUtility().transformHhDynamicAttributes(product, item, apiContext);
+					//productResource.updateProduct(product, product.getProductCode());
+					System.out.println("Product "+product.getProductCode()+ " updated successfully!!!!");
 				}
+*/		
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("testEntityManager!!!!");
+		
 	}
 	
 	/**
@@ -95,10 +104,12 @@ public final class JUnitClass {
 		product.setProductTypeId(Constant.int_7);
 
 		convertHhItemToMozuProduct(item, product);
-	    Product newProduct = productResource.addProduct(product);
-	    if(newProduct!=null){
-	    	System.out.println("New Product with product code "+newProduct.getProductCode()+" created successfully!!!!!");
-	    }
+	       /* final Product newProduct
+	            = productResource.addProduct(product);*/
+		/*if (newProduct != null) {
+			logger.info(
+					"New Product with product code " + newProduct.getProductCode() + " created successfully!!!!!");
+		}*/
 	}
 	
 	/**
@@ -109,15 +120,21 @@ public final class JUnitClass {
 	 */
 	public void updateProduct(
 			final Product product,final 
-			ProductResource productResource, final Item item) throws Exception {
+			ApiContext apiContext, final Item item) throws Exception {
 		convertHhItemToMozuProduct(item, product);
-		productResource.updateProduct(product, product.getProductCode());
+		//new ProductUtility().transformHhDynamicAttributes(product, item, apiContext);
+		
+		//productResource.updateProduct(product, product.getProductCode());
 		System.out.println("Product "+product.getProductCode()+ " updated successfully!!!!");
 	}
 	
 	
 	
 	protected void convertHhItemToMozuProduct(final Item item, final Product product) {
+		if(product.getProperties()==null || product.getProperties().size()==0){
+			final List<ProductProperty> productProperties = new ArrayList<>();
+			product.setProperties(productProperties);
+		}
 		setProductBasicProperties(item, product);
 		final List<ItemAffiliated> itemAffiliateds = item.getItemAfffliated();
 		ProductUtility
@@ -191,7 +208,7 @@ public final class JUnitClass {
 	protected void setProductBrandList(final Item item, final Product product) {
 		final List<Brand> brandsList = item.getBrand();
 		for (Brand b : brandsList) {
-			ProductUtility.testTransformationFromHhBrandToKiboBrand(product, b);
+			ProductUtility.transformHhBrandToKiboBrand(product, b);
 		}
 	}
 	
@@ -242,7 +259,7 @@ public final class JUnitClass {
 		if (item.getItemRestricted() != null && item.getItemRestricted().size() != 0) {
 			for (ItemRestricted i : item.getItemRestricted()) {
 				ProductUtility
-				.testTransformFromHhItemRestrictedToKiboItemRestricted(product, i);
+				.transformFromHhItemRestrictedToKiboItemRestricted(product, i);
 			}
 		}
 	}
@@ -254,7 +271,7 @@ public final class JUnitClass {
 	protected void setProductRetailMsrp(final Item item, final Product product) {
 		if (item.getRetailMsrp() != null && item.getRetailMsrp().size() != 0) {
 			for (RetailMsrp r : item.getRetailMsrp()) {
-				ProductUtility.testTransformationFromHhPriceToKiboPrice(product, r);
+				ProductUtility.transformationFromHhPriceToKiboPrice(product, r);
 			}
 		}
 	}
@@ -287,5 +304,14 @@ public final class JUnitClass {
 						p.getId().getProductAttrId());
 			}
 		}
+	}
+	
+	void addOrUpdatePriceList() throws Exception{
+		final ApiContext apiContext
+	    = new MozuApiContext(Constants.tenantId,
+			Constants.siteId);
+		PriceListResource priceListResource = new PriceListResource(apiContext);
+		PriceListCollection priceList = priceListResource.getPriceLists();
+		System.out.println("after getting PriceList");
 	}
 }

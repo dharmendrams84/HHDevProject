@@ -32,4 +32,5 @@ public interface HhProductAttributeFqnConstants {
   final String Hh_Ecomm_Ind_Attr_Fqn = "tenant~isecommitems";
   final String Hh_Website_Ind_Attr_Fqn = "tenant~iswebsiteind";
   final String Hh_Product_CrossSell_Attr_Fqn = "tenant~product-crosssell";
+  final String Hh_Product_Class = "tenant~product-class";
 }

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!DOCTYPE hibernate-configuration PUBLIC
     "-//Hibernate/Hibernate Configuration DTD//EN"
-    "http://hibernate.sourceforge.net/hibernate-configuration-5.0.dtd">
+    "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
  
 <hibernate-configuration>
     <session-factory>
@@ -14,6 +14,15 @@
         <mapping class="com.homehardware.model.ProductItemAttributes" />
         <mapping class="com.homehardware.model.ExtDesc" />
         <mapping class="com.homehardware.model.EcoFees" />
+        <mapping class="com.homehardware.model.ItemAffiliated" />
+        <mapping class="com.homehardware.model.ItemDynAttr" />
+        <mapping class="com.homehardware.model.RetailMsrp" />
+        <mapping class="com.homehardware.model.Promotion" />
+        <mapping class="com.homehardware.model.ItemInventory" />
+         <mapping class="com.homehardware.model.ItemLoc" />
+          <mapping class="com.homehardware.model.Brand" />
+          <mapping class="com.homehardware.model.Gtin" />
+          <mapping class="com.homehardware.model.ItemRestricted" />
     </session-factory>
        
 </hibernate-configuration>

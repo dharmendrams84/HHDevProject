@@ -46,6 +46,11 @@ public final class ProductUtility {
 	
 	protected static final Logger logger = Logger.getLogger(ProductUtility.class);
 
+	public static enum Status {
+	    INITIAL , SUCCESS
+	}
+
+	
 	/**
 	 * transform related product.
 	 */

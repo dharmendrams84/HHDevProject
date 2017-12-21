@@ -41,10 +41,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
 
-public final class ProductUtility {
+public final class ProductUtilityOld {
 
 	
-	protected static final Logger logger = Logger.getLogger(ProductUtility.class);
+	protected static final Logger logger = Logger.getLogger(ProductUtilityOld.class);
 
 	public static enum Status {
 	    INITIAL , SUCCESS

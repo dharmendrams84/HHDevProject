@@ -6,5 +6,9 @@ public interface HhDaoObject {
 
 	List getItemsList(String batchId, String status);
 
-	//List getDynAttrList(final String batchId, final String status, final String itemId);
+	List getRetail(String batchId,String status);
+	
+	List getPromotion(String batchId,String status,String store);
+
+	
 }

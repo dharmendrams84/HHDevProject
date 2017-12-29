@@ -65,7 +65,9 @@ public class Constant {
 	public static final int PRODUCT_TYPE = 2;
 	public static final String FILES_MOZU = "files@mozu";
 	public static final String STANDARD_PRODUCT = "Standard";
-	public static final String MKTG = "Mktg";
-	public static final String INGR = "Ingr";
-	public static final String FB = "Fb";
+	
+	public static final String EXTENSION_JPG = "jpg";
+	public static final String IMAGE_JPG = "image/jpg";
+	public static final String IMAGE_MOZU = "image@mozu";
+	
 }

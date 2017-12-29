@@ -1,6 +1,6 @@
 package com.homehardware.model;
 
-public class Retail {
+public class Retail1 {
 
 	private int item;
 	

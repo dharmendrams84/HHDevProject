@@ -77,15 +77,15 @@ public final class Item implements java.io.Serializable {
 	private String updateBy;
 	private Date updateDate;
 
-	private List<Gtin> gtin;
+	/*private List<Gtin> gtin;*/
 	
 	
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
 		    @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
 		    @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-		    })
-	public List<Gtin> getGtin() {
+		    })*/
+	/*public List<Gtin> getGtin() {
 		return gtin;
 	}
 
@@ -93,14 +93,15 @@ public final class Item implements java.io.Serializable {
 		this.gtin = gtin;
 	}
 
+*/
+	
+	
 	public Item() {
 	}
 
 	public Item(final ItemId id) {
 		this.id = id;
 	}
-	
-	
 	public Item(final ItemId id,final int id_1) {
 		this.id = id;
 		this.id_1 = id_1;
@@ -501,14 +502,14 @@ public final class Item implements java.io.Serializable {
 		this.updateDate = updateDate;
 	}
 
-	private List<ExtDesc> extDesc;
+	//private List<ExtDesc> extDesc;
 	
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
              @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<ExtDesc> getExtDesc() {
+         })*/
+	/*public List<ExtDesc> getExtDesc() {
 		return extDesc;
 	}
 
@@ -516,107 +517,107 @@ public final class Item implements java.io.Serializable {
 		this.extDesc = extDesc;
 	}
 	
-	private List<ItemDynAttr> itemDynAttr;
+	private List<ItemDynAttr> itemDynAttr;*/
 
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
              @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<ItemDynAttr> getItemDynAttr() {
+         })*/
+	/*public List<ItemDynAttr> getItemDynAttr() {
 		return itemDynAttr;
 	}
 
 	public void setItemDynAttr(final List<ItemDynAttr> itemDynAttr) {
 		this.itemDynAttr = itemDynAttr;
 	}
-	
-	private List<Promotion> promotion;
+*/	
+	//private List<Promotion> promotion;
 	
 
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
              @JoinColumn(name = "D_ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<Promotion> getPromotion() {
+         })*/
+	/*public List<Promotion> getPromotion() {
 		return promotion;
 	}
 
 	public void setPromotion(final List<Promotion> promotion) {
 		this.promotion = promotion;
-	}
+	}*/
 
-	private List<RetailMsrp> retailMsrp;
+	//private List<RetailMsrp> retailMsrp;
 	
 
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
              @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<RetailMsrp> getRetailMsrp() {
+         })*/
+	/*public List<RetailMsrp> getRetailMsrp() {
 		return retailMsrp;
 	}
 
 	public void setRetailMsrp(final List<RetailMsrp> retailMsrp) {
 		this.retailMsrp = retailMsrp;
-	}
+	}*/
 	
-	private List<ItemInventory> itemInventory;
+	//private List<ItemInventory> itemInventory;
 	
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
              @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<ItemInventory> getItemInventory() {
+         })*/
+/*	public List<ItemInventory> getItemInventory() {
 		return itemInventory;
 	}
 
 	public void setItemInventory(final List<ItemInventory> itemInventory) {
 		this.itemInventory = itemInventory;
-	}
+	}*/
 
 	
-	private List<ItemLoc> itemLoc;
+	//private List<ItemLoc> itemLoc;
 	
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
              @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<ItemLoc> getItemLoc() {
+         })*/
+	/*public List<ItemLoc> getItemLoc() {
 		return itemLoc;
 	}
 
 	public void setItemLoc(final List<ItemLoc> itemLoc) {
 		this.itemLoc = itemLoc;
-	}
+	}*/
 
-	private List<Brand> brand ;
+	/*private List<Brand> brand ;*/
 	
-    	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+    	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
              @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<Brand> getBrand() {
+         })*/
+	/*public List<Brand> getBrand() {
 		return brand;
 	}
 
 	public void setBrand(final List<Brand> brand) {
 		this.brand = brand;
-	}
+	}*/
 
-	private List<ItemAffiliated> itemAfffliated;
+	//private List<ItemAffiliated> itemAfffliated;
 	
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.EAGER)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.EAGER)
 	 @JoinColumns({
              @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<ItemAffiliated> getItemAfffliated() {
+         })*/
+	/*public List<ItemAffiliated> getItemAfffliated() {
 		return itemAfffliated;
 	}
 
@@ -624,36 +625,36 @@ public final class Item implements java.io.Serializable {
 		this.itemAfffliated = itemAfffliated;
 	}
 	
-	private List<ItemRestricted> itemRestricted;
+	private List<ItemRestricted> itemRestricted;*/
 	
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
              @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<ItemRestricted> getItemRestricted() {
+         })*/
+	/*public List<ItemRestricted> getItemRestricted() {
 		return itemRestricted;
 	}
 
 	public void setItemRestricted(final List<ItemRestricted> itemRestricted) {
 		this.itemRestricted = itemRestricted;
 	}
+*/
+	//List<ProductItemAttributes> productItemAttributes;
 
-	List<ProductItemAttributes> productItemAttributes;
-
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
              @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<ProductItemAttributes> getProductItemAttributes() {
+         })*/
+	/*public List<ProductItemAttributes> getProductItemAttributes() {
 		return productItemAttributes;
 	}
 
 	public void setProductItemAttributes(
 			final List<ProductItemAttributes> productItemAttributes) {
 		this.productItemAttributes = productItemAttributes;
-	}
+	}*/
 	
 	/*public String toString(){
 		String returnToString= " Item Id : "+this.getId().getItem() + " : batch Id : "+this.getId().getBatchId()+" \n ";
@@ -709,35 +710,35 @@ public final class Item implements java.io.Serializable {
 	
 
 	
-	private List<Images> images ;
+	//private List<Images> images ;
 
-	@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
 	 @JoinColumns({
              @JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
              @JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID")
-         })
-	public List<Images> getImages() {
+         })*/
+	/*public List<Images> getImages() {
 		return images;
 	}
 
 	public void setImages(final List<Images> images) {
 		this.images = images;
-	}
+	}*/
 
 	
-	private List<DynAttrInfo> dynAttrInfo ;
+	//private List<DynAttrInfo> dynAttrInfo ;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumns({ 
 			@JoinColumn(name = "ITEM", referencedColumnName = "ITEM"),
-			@JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID") })
-	public List<DynAttrInfo> getDynAttrInfo() {
+			@JoinColumn(name = "BATCH_ID", referencedColumnName = "BATCH_ID") })*/
+	/*public List<DynAttrInfo> getDynAttrInfo() {
 		return dynAttrInfo;
 	}
 
 	public void setDynAttrInfo(final List<DynAttrInfo> dynAttrInfo) {
 		this.dynAttrInfo = dynAttrInfo;
-	}
+	}*/
 
 
 

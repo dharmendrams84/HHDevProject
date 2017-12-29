@@ -47,6 +47,7 @@
 			<beans:list>
 				<beans:value>com.homehardware.model</beans:value>
 				<beans:value>com.homehardware.dao</beans:value>
+				<beans:value>com.homehardware.processor</beans:value>
 
 			</beans:list>
 		</beans:property>
@@ -66,5 +67,29 @@
 	<beans:bean
 		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
 	<beans:bean id="hhDaoObjectImpl" class="com.homehardware.dao.HhDaoObjectImpl"></beans:bean>
+	<beans:bean id="hhRetailDao" class="com.homehardware.dao.HhRetailDaoImpl"></beans:bean>
+	<beans:bean id="hhItemAffiliatedDao" class="com.homehardware.dao.HhItemAffiliatedDaoImpl"></beans:bean>
+	<beans:bean id="hhBrandDao" class="com.homehardware.dao.HhBrandDaoImpl"></beans:bean>
+	<beans:bean id="hhExtDescDao" class="com.homehardware.dao.HhExtDescDaoImpl"></beans:bean>
+	<beans:bean id="hhGtinDao" class="com.homehardware.dao.HhGtinDaoImpl"></beans:bean>
+	<beans:bean id="hhItemLocDao" class="com.homehardware.dao.HhItemLocDaoImpl"></beans:bean>
+	<beans:bean id="hhItemRestrictedDao" class="com.homehardware.dao.HhItemRestrictedDaoImpl"></beans:bean>
+	<beans:bean id="hhItemAttributesDao" class="com.homehardware.dao.HhItemAttributesDaoImpl"></beans:bean>
+	<beans:bean id="hhItemImagesDao" class="com.homehardware.dao.HhItemImagesDaoImpl"></beans:bean>
+	<beans:bean id="hhDynamicAttributesDao" class="com.homehardware.dao.HhDynamicAttributesDaoImpl"></beans:bean>
+	<beans:bean id="hhGtinProcessor" class="com.homehardware.processor.HhGtinProcessor"></beans:bean>
+	<beans:bean id="hhProductBrandProcesser" class="com.homehardware.processor.HhProductBrandProcesser"></beans:bean>
+	<beans:bean id="hhProdItemAttributeProcessor" class="com.homehardware.processor.HhProdItemAttributeProcessor"></beans:bean>
+	<beans:bean id="hhDynAttributeProcessor" class="com.homehardware.processor.HhDynAttributeProcessor"></beans:bean>
+	<beans:bean id="hhAffiliatedItemProcessor" class="com.homehardware.processor.HhAffiliatedItemProcessor"></beans:bean>
+	<beans:bean id="hhImagesProcessor" class="com.homehardware.processor.HhImagesProcessor"></beans:bean>
+	
+	<beans:bean id="hhItemLocProcessor" class="com.homehardware.processor.HhItemLocProcessor"></beans:bean>
+	
+	<beans:bean id="hhExtDescProcessor" class="com.homehardware.processor.HhExtDescProcessor"></beans:bean>
+	<beans:bean id="hhItemProcessor" class="com.homehardware.processor.HhItemProcessor"></beans:bean>
+	
+	
+		
 	
 </beans:beans>

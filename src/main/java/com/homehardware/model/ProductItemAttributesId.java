@@ -1,6 +1,7 @@
 // default package
-// Generated Nov 20, 2017 3:39:29 PM by Hibernate Tools 5.2.6.Final
+// Generated Dec 27, 2017 12:53:18 PM by Hibernate Tools 5.2.6.Final
 package com.homehardware.model;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 

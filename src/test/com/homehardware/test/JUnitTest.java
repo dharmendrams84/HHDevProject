@@ -19,7 +19,7 @@ import com.homehardware.model.ProductAttribute;
 import com.homehardware.model.ProductItemAttributes;
 import com.homehardware.model.RetailMsrp;
 import com.homehardware.model.TransformFromHhLocationToKiboLocation;
-import com.homehardware.utility.ProductUtility;
+import com.homehardware.utility.ProductUtilityOld;
 
 import com.mozu.api.ApiContext;
 import com.mozu.api.MozuApiContext;
@@ -748,7 +748,7 @@ public final class JUnitTest {
 	protected void convertHhItemToMozuProduct(final Item item, final Product product) {
 		setProductBasicProperties(item, product);
 		final List<ItemAffiliated> itemAffiliateds = item.getItemAfffliated();
-		ProductUtility
+		ProductUtilityOld
 		.transformHhRelatedProductToKiboRelatedProductCode(product,itemAffiliateds);
 		setProductBrandList(item, product);
 		setProductExtDesc(item, product);
@@ -905,7 +905,7 @@ public final class JUnitTest {
 	protected void setProductBrandList(final Item item, final Product product) {
 		final List<Brand> brandsList = item.getBrand();
 		for (Brand b : brandsList) {
-			ProductUtility.transformHhBrandToKiboBrand(product, b);
+			ProductUtilityOld.transformHhBrandToKiboBrand(product, b);
 		}
 	}
 	
@@ -917,7 +917,7 @@ public final class JUnitTest {
 		if (item.getExtDesc() != null && item.getExtDesc().size() != 0) {
 
 			for (ExtDesc e : item.getExtDesc()) {
-				ProductUtility
+				ProductUtilityOld
 				.testTransformationFromHhExtendedDescToKiboExtendedDesc(product, e);
 			}
 		}
@@ -931,7 +931,7 @@ public final class JUnitTest {
 		if (item.getGtin() != null && item.getGtin().size() != 0) {
 			for (Gtin g : item.getGtin()) {
 
-				ProductUtility.transformHhProductGtinToKiboProductGtin(product, g);
+				ProductUtilityOld.transformHhProductGtinToKiboProductGtin(product, g);
 			}
 		}
 	}
@@ -943,7 +943,7 @@ public final class JUnitTest {
 	protected void setProductLocation(final Item item, final Product product) {
 		if (item.getItemLoc() != null && item.getItemLoc().size() != 0) {
 			final ItemLoc itemLoc = item.getItemLoc().get(0);
-			ProductUtility
+			ProductUtilityOld
 			.testTransformationFromHhItemLocToKiboItemLoc(product, itemLoc);
 		}
 	}
@@ -955,7 +955,7 @@ public final class JUnitTest {
 	protected void setProductItemRestricted(final Item item, final Product product) {
 		if (item.getItemRestricted() != null && item.getItemRestricted().size() != 0) {
 			for (ItemRestricted i : item.getItemRestricted()) {
-				ProductUtility
+				ProductUtilityOld
 				.transformFromHhItemRestrictedToKiboItemRestricted(product, i);
 			}
 		}
@@ -968,7 +968,7 @@ public final class JUnitTest {
 	protected void setProductRetailMsrp(final Item item, final Product product) {
 		if (item.getRetailMsrp() != null && item.getRetailMsrp().size() != 0) {
 			for (RetailMsrp r : item.getRetailMsrp()) {
-				ProductUtility.transformationFromHhPriceToKiboPrice(product, r);
+				ProductUtilityOld.transformationFromHhPriceToKiboPrice(product, r);
 			}
 		}
 	}
@@ -979,7 +979,7 @@ public final class JUnitTest {
 	 */
 	protected void setProductItemAttributes(final Item item, final Product product) {
 		for (ProductItemAttributes p : item.getProductItemAttributes()) {
-			if (ProductUtility
+			if (ProductUtilityOld
 					.isPropertyExists(
 							product.getProperties(),
 							p.getId().getProductAttrId())) {
@@ -988,14 +988,14 @@ public final class JUnitTest {
 							.equalsIgnoreCase(
 									p.getId()
 									.getProductAttrId())) {
-						ProductUtility
+						ProductUtilityOld
 						    .updateProductPropertiesAttribute(
 								pp, p.getAttributeValue());
 					}
 				}
 
 			} else {
-				ProductUtility
+				ProductUtilityOld
 				    .addProductProperty(
 						product, p.getAttributeValue(), 
 						p.getId().getProductAttrId());

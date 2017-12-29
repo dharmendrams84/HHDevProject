@@ -14,6 +14,7 @@ import com.homehardware.model.ItemDynAttr;
 import com.homehardware.model.ItemLoc;
 import com.homehardware.model.ItemRestricted;
 import com.homehardware.model.ProductItemAttributes;
+import com.homehardware.model.Retail;
 import com.homehardware.model.RetailMsrp;
 import com.mozu.api.ApiContext;
 import com.mozu.api.contracts.content.Document;
@@ -737,6 +738,8 @@ public final class ProductUtilityOld {
 		product.setPrice(productPrice);
 
 	}
+	
+	
 
 /*	@SuppressWarnings({ "unchecked" })
 	protected static void setRetailPrice1(final Product product, final RetailMsrp retailMsrp) {
@@ -1632,7 +1635,7 @@ public final class ProductUtilityOld {
 
 					createDynamicAttribute(apiContext, 
 							attributeResource, attributeName);
-					addorupdateDynamicAttribute(item, attributeName, product);
+					addorUpdateDynamicAttribute(item, attributeName, product);
 					/*for (DynAttrInfo dyn : item.getDynAttrInfo()) {
 						if (attributeName
 								.equalsIgnoreCase(
@@ -1667,16 +1670,14 @@ public final class ProductUtilityOld {
 	 * @param item.
 	 * @param attributeName.
 	 */
-	public void addorupdateDynamicAttribute(
+	public void addorUpdateDynamicAttribute(
 			final Item item, final String attributeName,
 			final Product product) {
 		for (DynAttrInfo dyn : item.getDynAttrInfo()) {
 			if (attributeName
-					.equalsIgnoreCase(
-							Constant.ATTRIBUTE 
+					.equalsIgnoreCase(Constant.ATTRIBUTE 
 							+ "_" 
-							+ dyn.getDynAttrId()
-							)) {
+							+ dyn.getDynAttrId())) {
 				addOrUpdateProperty(
 						product,
 						Constant

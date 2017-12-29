@@ -1,6 +1,7 @@
 // default package
-// Generated Dec 1, 2017 7:07:00 PM by Hibernate Tools 5.2.6.Final
+// Generated Dec 26, 2017 7:02:02 PM by Hibernate Tools 5.2.6.Final
 package com.homehardware.model;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,6 +23,7 @@ public class Gtin implements java.io.Serializable {
 	private String isProcessSuccess;
 	private Integer errorCode;
 	private String errorDesc;
+	private String status;
 
 	public Gtin() {
 	}
@@ -30,14 +32,15 @@ public class Gtin implements java.io.Serializable {
 		this.gtin = gtin;
 	}
 
-	public Gtin(String item, String gtin, String batchId, String isProcessSuccess, Integer errorCode,
-			String errorDesc) {
+	public Gtin(String item, String gtin, String batchId, String isProcessSuccess, Integer errorCode, String errorDesc,
+			String status) {
 		this.item = item;
 		this.gtin = gtin;
 		this.batchId = batchId;
 		this.isProcessSuccess = isProcessSuccess;
 		this.errorCode = errorCode;
 		this.errorDesc = errorDesc;
+		this.status = status;
 	}
 
 	@Id
@@ -104,6 +107,15 @@ public class Gtin implements java.io.Serializable {
 
 	public void setErrorDesc(String errorDesc) {
 		this.errorDesc = errorDesc;
+	}
+
+	@Column(name = "STATUS", length = 45)
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

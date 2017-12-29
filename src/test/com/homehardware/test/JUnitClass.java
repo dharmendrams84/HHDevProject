@@ -2,7 +2,19 @@ package com.homehardware.test;
 
 import com.hardware.constants.Constants;
 import com.hh.integration.constants.Constant;
+import com.homehardware.constants.HhProductAttributeFqnConstants;
+import com.homehardware.dao.HhBrandDao;
 import com.homehardware.dao.HhDaoObject;
+import com.homehardware.dao.HhDynamicAttributesDao;
+import com.homehardware.dao.HhExtDescDao;
+import com.homehardware.dao.HhGtinDao;
+import com.homehardware.dao.HhItemAffiliatedDao;
+import com.homehardware.dao.HhItemAttributesDao;
+import com.homehardware.dao.HhItemImagesDao;
+import com.homehardware.dao.HhItemLocDao;
+import com.homehardware.dao.HhItemRestrictedDao;
+import com.homehardware.dao.HhRetailDao;
+import com.homehardware.dao.HhRetailDaoImpl;
 import com.homehardware.model.Brand;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Gtin;
@@ -11,19 +23,42 @@ import com.homehardware.model.ItemAffiliated;
 import com.homehardware.model.ItemLoc;
 import com.homehardware.model.ItemRestricted;
 import com.homehardware.model.ProductItemAttributes;
+import com.homehardware.model.Promotion;
+import com.homehardware.model.Retail;
 import com.homehardware.model.RetailMsrp;
+import com.homehardware.processor.HhAffiliatedItemProcessor;
+import com.homehardware.processor.HhDynAttributeProcessor;
+import com.homehardware.processor.HhExtDescProcessor;
+import com.homehardware.processor.HhGtinProcessor;
+import com.homehardware.processor.HhImagesProcessor;
+import com.homehardware.processor.HhItemLocProcessor;
+import com.homehardware.processor.HhItemProcessor;
+import com.homehardware.processor.HhProdItemAttributeProcessor;
+import com.homehardware.processor.HhProductBrandProcesser;
+import com.homehardware.utility.PriceListUtility;
 import com.homehardware.utility.ProductUtility;
+import com.homehardware.utility.ProductUtilityOld;
 import com.mozu.api.ApiContext;
 import com.mozu.api.MozuApiContext;
 import com.mozu.api.contracts.core.Measurement;
+import com.mozu.api.contracts.productadmin.Attribute;
+import com.mozu.api.contracts.productadmin.AttributeInProductType;
+import com.mozu.api.contracts.productadmin.AttributeLocalizedContent;
 import com.mozu.api.contracts.productadmin.PriceList;
 import com.mozu.api.contracts.productadmin.PriceListCollection;
+import com.mozu.api.contracts.productadmin.PriceListEntry;
+import com.mozu.api.contracts.productadmin.PriceListEntryCollection;
+import com.mozu.api.contracts.productadmin.PriceListEntryPrice;
 import com.mozu.api.contracts.productadmin.Product;
 import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
 import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
+import com.mozu.api.contracts.productadmin.ProductPrice;
 import com.mozu.api.contracts.productadmin.ProductProperty;
+import com.mozu.api.contracts.productadmin.ProductType;
 import com.mozu.api.resources.commerce.catalog.admin.PriceListResource;
 import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
+import com.mozu.api.resources.commerce.catalog.admin.pricelists.PriceListEntryResource;
+import com.mozu.api.resources.commerce.catalog.admin.products.ProductPropertyResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,16 +75,77 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.mozu.api.resources.commerce.catalog.admin.attributedefinition.AttributeResource;
+import com.mozu.api.resources.commerce.catalog.admin.attributedefinition.ProductTypeResource;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { 
 		"file:src/main/webapp/WEB-INF/spring/homehardware/spring-context.xml" })
 public final class JUnitClass {
 
-	protected static final Logger logger = Logger.getLogger(ProductUtility.class);
+	protected static final Logger logger = Logger.getLogger(JUnitClass.class);
 	
 	@Autowired
 	private HhDaoObject hhDaoObjectImpl;
-
+	
+	@Autowired
+	private HhRetailDao hhRetailDao;
+	
+	@Autowired
+	private HhItemAffiliatedDao hhItemAffiliatedDao;
+	
+	@Autowired
+	private HhBrandDao hhBrandDao;
+	
+	@Autowired
+	private HhExtDescDao hhExtDescDao;
+	
+	@Autowired
+	private HhGtinDao hhGtinDao;
+	
+	@Autowired
+	private HhItemLocDao hhItemLocDao;
+	
+	@Autowired
+	private HhItemRestrictedDao hhItemRestrictedDao;
+	
+	@Autowired
+	private HhItemAttributesDao hhItemAttributesDao;
+	
+	@Autowired
+	private HhItemImagesDao hhItemImagesDao;
+	
+	@Autowired
+	private HhDynamicAttributesDao hhDynamicAttributesDao;
+	
+	@Autowired
+	private HhGtinProcessor hhGtinProcessor;
+	
+	@Autowired
+	private HhProductBrandProcesser hhProductBrandProcesser;
+	
+	@Autowired
+	private HhProdItemAttributeProcessor HhProdItemAttributeProcessor;
+	
+	@Autowired
+	private HhDynAttributeProcessor hhDynAttributeProcessor;
+	
+	@Autowired
+	private HhAffiliatedItemProcessor hhAffiliatedItemProcessor;
+	
+	@Autowired
+	private HhImagesProcessor hhImagesProcessor;
+	
+	@Autowired
+	private HhItemLocProcessor hhItemLocProcessor;
+	
+	@Autowired
+	private HhExtDescProcessor hhExtDescProcessor;
+	
+	@Autowired
+	private HhItemProcessor hhItemProcessor;
+	
+	
 	@Test
 	public void testFetchHhProductFromDb() {
 		
@@ -57,31 +153,152 @@ public final class JUnitClass {
 			/*final EntityManager entityManager = 
 			    entityManagerFactory.createEntityManager();
 */
+			
+			
 			final ApiContext apiContext
 			    = new MozuApiContext(Constants.tenantId,
 					Constants.siteId);
-			//final ProductResource productResource = new ProductResource(apiContext);
-			addOrUpdatePriceList();
-			final List list = hhDaoObjectImpl.getItemsList("1", "INITIAL");
-			for (Object o : list) {
-				final Item item = (Item) o;
-				new ProductUtility().addOrUpdateProductInMozu(item, apiContext);
-				/*Product product =
-						productResource.getProduct(item.getId().getItem());
-
-				if (product == null) {
-					product = new Product();
+			
+			
+			
+			final String batchId = "1";
+			final String status = ProductUtilityOld.Status.INITIAL.toString();
+			final List list = hhDaoObjectImpl.getItemsList(
+					batchId, ProductUtilityOld.Status.INITIAL.toString());
+			final ProductUtility productUtility = new ProductUtility();
+			if (list != null && list.size() != 0) {
+				for (Object o : list) {
+					final Item item = (Item) o;
+					final String productCode = item.getId().getItem();
+					final ProductPropertyResource productPropertyResource
+						= new ProductPropertyResource(apiContext);
+					final List<ProductProperty> listproperty 
+						= productPropertyResource.
+							getProperties(productCode);
 					
-					createNewProduct(product, productResource, item);
-
-				} else {
 					
-					//updateProduct(product, productResource, item);
-					//new ProductUtility().transformHhDynamicAttributes(product, item, apiContext);
-					//productResource.updateProduct(product, product.getProductCode());
-					System.out.println("Product "+product.getProductCode()+ " updated successfully!!!!");
+					//productPropertyResource.updateProperty(productProperty, productCode, attributeFQN);
+					Product product = 	hhItemProcessor.addOrUpdateProduct(item, apiContext);
+					
+					if (product.getProperties() == null) {
+						product.setProperties(
+								new ArrayList<ProductProperty>());
+					}
+					final ProductResource productResource 
+					= new ProductResource(apiContext);
+					/*
+					Product product = productResource
+							.getProduct(productCode);
+					if (product == null) {
+						product = new Product();
+						productUtility
+						.createNewProduct(product, productResource, item);
+					}
+					if (product.getProperties() == null) {
+						product.setProperties(
+								new ArrayList<ProductProperty>());
+					}*/
+					
+					//micro service
+					List<ProductItemAttributes> productItemAttributes = hhItemAttributesDao.getItemAttributes(batchId, status, productCode);
+					//productUtility.setProductItemAttributes(productItemAttributes, product);
+					HhProdItemAttributeProcessor.transformProductItemAttributes(productItemAttributes, apiContext);
+					final List<ItemAffiliated> itemAffiliateds 
+						= hhItemAffiliatedDao.getItemAffiliated(batchId,
+								status, productCode);
+					
+					if (!itemAffiliateds.isEmpty()) {
+						hhAffiliatedItemProcessor.setProductAffiliatedItems(itemAffiliateds, apiContext,
+								HhProductAttributeFqnConstants.Hh_Product_CrossSell_Attr_Fqn, productCode);
+
+					}
+					
+					
+					List itemDynAttrs = hhDynamicAttributesDao.getDynamicAttributes(batchId, status, productCode);
+					List dynAttrInfos = hhDynamicAttributesDao.getDynamicAttributesInfo(batchId, status);
+					final List dynAttrTypes = hhDynamicAttributesDao.getDynamicAttributesType(batchId, status);
+					hhDynAttributeProcessor.transformHhDynamicAttributes(itemDynAttrs, dynAttrInfos, dynAttrTypes, apiContext);
+
+					
+					List gtins = hhGtinDao.getGtin(batchId, status, productCode);
+					
+					Gtin gtin = (Gtin)gtins.get(0);
+					//productUtility.setProductGtin(gtins, product);
+					
+					String attributeFQN = "tenant~gtin" ;
+					hhGtinProcessor.addOrUpdateGtin(gtin, apiContext,attributeFQN);
+					
+					
+					
+					
+					
+					
+					//micro
+					final List<Brand> brandsList = hhBrandDao.getBrands(batchId, status, productCode);
+					if (!brandsList.isEmpty()) {
+						//productUtility.setProductBrandList(brands, product);
+						hhProductBrandProcesser.setProductBrandList(brandsList, apiContext);
+					}
+					
+					
+					
+				
+					
+					/*final List<Retail> retailList 
+						=  hhRetailDao
+						.getRetailForItem(batchId, status,productCode);
+					for(Retail retail : retailList ){
+						productCode = retail.getItem();
+						product = productResource.getProduct(productCode);
+						if(product!=null){
+						productUtility.setItemRetailPrice(product, retail);
+						}
+					}*/
+					
+					//update product
+					/*final List<ItemAffiliated> itemAffiliateds 
+					= hhItemAffiliatedDao.getItemAffiliated(batchId, status, productCode);
+					
+					if(!itemAffiliateds.isEmpty()){
+						for(ItemAffiliated itemAffiliated :itemAffiliateds){
+							productUtility.setProductAffiliatedItems(product, itemAffiliateds);
+						}
+					}*/
+					
+					
+					product = productResource.getProduct(productCode);
+					//update product
+					List extDescs = hhExtDescDao.getExtDesc(batchId, status, productCode);
+					//hhExtDescProcessor.set
+					hhExtDescProcessor.setProductExtDesc(extDescs, product);
+					productResource.updateProduct(product, productCode);
+					
+					product = productResource.getProduct(productCode);
+					//update product 
+					List itemLocs = hhItemLocDao.getItemLocs(batchId, status, productCode);
+					hhItemLocProcessor.setProductItemLocation(product, itemLocs);
+					productResource.updateProduct(product, productCode);
+					//to check
+					/*List itemRestricteds = hhItemRestrictedDao.getItemRestricted(batchId, status, productCode);
+					productUtility.setProductItemRestricted(itemRestricteds, product);*/
+					//nothing to do
+					/*List retails = hhRetailDao.getRetailForItem(batchId, status,productCode);
+					productUtility.setProductRetailMsrp(retails, product);
+					*/
+					product = productResource.getProduct(productCode);
+					//update product
+					List images = hhItemImagesDao.getItemImages(batchId, status, productCode);
+					//productUtility.transformHhImageToKiboImage(product, images, productResource, apiContext);
+					hhImagesProcessor.transformHhImageToKiboImage(product, images, productResource, apiContext);
+					
+					/*List itemDynAttrs = hhDynamicAttributesDao.getDynamicAttributes(batchId, status, productCode);
+					List dynAttrInfos = hhDynamicAttributesDao.getDynamicAttributesInfo(batchId, status);
+					final List dynAttrTypes = hhDynamicAttributesDao.getDynamicAttributesType(batchId, status);*/
+					//productUtility.transformHhDynamicAttributes(product, itemDynAttrs,dynAttrInfos,dynAttrTypes, apiContext);
+					productResource.updateProduct(product, productCode);
+					logger.info("Product with product code "+productCode+" added or updated successfully!!!!");
 				}
-*/		
+				
 			}
 
 		} catch (Exception e) {
@@ -90,6 +307,133 @@ public final class JUnitClass {
 		
 	}
 	
+	
+	
+	//@Test
+	public void testFetchDynamicAttribute() {
+		
+		try {
+				
+			final ApiContext apiContext
+			    = new MozuApiContext(Constants.tenantId,
+					Constants.siteId);
+			AttributeResource attributeResource = new AttributeResource(apiContext);
+		  Attribute attribute1 =	attributeResource.getAttribute("tenant~iswarrexchitem");
+		  Attribute attribute2 =	attributeResource.getAttribute("tenant~islumberitem");
+			Attribute attribute = new Attribute();
+			createNewAttribute("attribute_29", attribute);
+			
+			attribute = attributeResource.addAttribute(attribute);
+		   logger.info("After adding attribute "+attribute);
+		   final ProductTypeResource productTypeResource
+		    = new ProductTypeResource(apiContext);
+		final ProductType productType 
+		    = productTypeResource.getProductType(Constant.PRODUCT_TYPE);
+		final AttributeInProductType attrInProdType
+		    = new AttributeInProductType();
+		createAttributeInProductType(attribute, attrInProdType);
+		addAttributeInProductType(
+				attrInProdType, productType, productTypeResource);
+		logger.info("Dynamic attribute "
+				+  " added successfully " 
+				+ " And Linked to product type "
+				+ Constant.PRODUCT_TYPE);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+	
+	/**
+	 * @param attribute.
+	 * @param attrInProdType.
+	 */
+	public static void createAttributeInProductType(
+			final Attribute attribute,final AttributeInProductType attrInProdType) {
+		
+		attrInProdType.setAttributeDetail(attribute);
+		attrInProdType.setAttributeFQN(attribute.getAttributeFQN());
+		attrInProdType.setIsAdminOnlyProperty(false);
+		attrInProdType.setIsHiddenProperty(false);
+		attrInProdType.setIsInheritedFromBaseType(false);
+		attrInProdType.setIsMultiValueProperty(false);
+		attrInProdType.setIsProductDetailsOnlyProperty(true);
+		attrInProdType.setIsRequiredByAdmin(false);
+		attrInProdType.setOrder(0);
+		
+	}
+	
+	/**
+	 * @param attrInProdType.
+	 * @param productType.
+	 * @param productTypeResource.
+	 */
+	public static void addAttributeInProductType(
+			final AttributeInProductType attrInProdType,
+			final ProductType productType,
+			final ProductTypeResource productTypeResource) {
+		try {
+			final List<AttributeInProductType> 
+			    propertiesList = productType.getProperties();
+			propertiesList.add(attrInProdType);
+			productType.setProperties(propertiesList);
+			productTypeResource.updateProductType(productType, 2);
+		} catch (Exception e) {
+			logger.error("Exception while updating product type "
+					+ productType + " error message "	+ e.getMessage());
+		}
+	}
+
+	
+	public static void createNewAttribute(final String attributeName,
+			 final Attribute attribute) {
+		
+		setAttributeValues(attributeName, attribute);
+		final AttributeLocalizedContent	attributeLocalizedContent
+		    = new AttributeLocalizedContent();
+		attributeLocalizedContent.setLocaleCode(Constant.LOCALE);
+		attributeLocalizedContent.setName(attributeName);
+		final List<com.mozu.api.contracts.productadmin.AttributeLocalizedContent> list
+		    = new ArrayList<>();
+		list.add(attributeLocalizedContent);
+		attribute.setLocalizedContent(list);
+		
+	}
+	
+	
+	public static void setAttributeValues(final String attributeName,
+			final Attribute attribute) {
+		attribute.setAdminName(attributeName);
+		/*attribute.setInputType("YesNo");
+		attribute.setDataType("Bool");*/
+		/*attribute.setInputType("List");
+		attribute.setDataType("String");
+		attribute.setValueType("Predefined");*/
+		
+		attribute.setMasterCatalogId(Constant.master_catalog_id);
+		attribute.setValueType(Constant.ADMIN_ENTERED);
+		attribute.setIsExtra(false);
+		attribute.setIsOption(false);
+		attribute.setIsProperty(true);
+		attribute.setAttributeCode(attributeName);
+		
+	}
+	
+	
+	public void setAttributeType(final Attribute attribute, String type) {
+		if (type.equalsIgnoreCase("YesNo")) {
+			attribute.setInputType("YesNo");
+			attribute.setDataType("Bool");
+		} else if (type.equalsIgnoreCase("TextArea")) {
+			attribute.setInputType("TextArea");
+			attribute.setDataType("String");
+		} else if (type.equalsIgnoreCase("List")) {
+			attribute.setInputType("List");
+			attribute.setDataType("String");
+			attribute.setValueType("Predefined");
+		}
+	}
+
 	/**
 	 * @param product.
 	 * @param productResource.
@@ -103,7 +447,7 @@ public final class JUnitClass {
 		
 		product.setProductTypeId(Constant.int_7);
 
-		convertHhItemToMozuProduct(item, product);
+	//	convertHhItemToMozuProduct(item, product);
 	       /* final Product newProduct
 	            = productResource.addProduct(product);*/
 		/*if (newProduct != null) {
@@ -111,207 +455,7 @@ public final class JUnitClass {
 					"New Product with product code " + newProduct.getProductCode() + " created successfully!!!!!");
 		}*/
 	}
-	
-	/**
-	 * @param product.
-	 * @param productResource.
-	 * @param item.
-	 * @.throws Exception
-	 */
-	public void updateProduct(
-			final Product product,final 
-			ApiContext apiContext, final Item item) throws Exception {
-		convertHhItemToMozuProduct(item, product);
-		//new ProductUtility().transformHhDynamicAttributes(product, item, apiContext);
 		
-		//productResource.updateProduct(product, product.getProductCode());
-		System.out.println("Product "+product.getProductCode()+ " updated successfully!!!!");
-	}
 	
 	
-	
-	protected void convertHhItemToMozuProduct(final Item item, final Product product) {
-		if(product.getProperties()==null || product.getProperties().size()==0){
-			final List<ProductProperty> productProperties = new ArrayList<>();
-			product.setProperties(productProperties);
-		}
-		setProductBasicProperties(item, product);
-		final List<ItemAffiliated> itemAffiliateds = item.getItemAfffliated();
-		ProductUtility
-		.transformHhRelatedProductToKiboRelatedProductCode(product,itemAffiliateds);
-		setProductBrandList(item, product);
-		setProductExtDesc(item, product);
-		setProductGtin(item, product);
-		setProductLocation(item, product);
-		setProductItemRestricted(item, product);
-		setProductRetailMsrp(item, product);
-                setProductItemAttributes(item, product);
-	}
-	
-	/**
-	 * @param item.
-	 * @param product.
-	 */
-	protected void setProductBasicProperties(final Item item, final Product product) {
-		product.setProductCode(item.getId().getItem());
-		setProductCatalogInfo(product);
-		setProductContent(item, product);
-		product.setProductUsage("Standard");
-		product.setBaseProductCode(item.getHhCtrlBrandInd());
-		//setProductMeasurement(product);
-		product.setIsValidForProductType(false);
-		
-	}
-	
-	/**
-	 * @param product.
-	 */
-	protected void setProductMeasurement(final Product product) {
-
-		final Measurement measurement = new Measurement();
-		measurement.setUnit("lbs");
-		measurement.setValue(new Double(2));
-		product.setPackageWeight(measurement);
-
-	}
-	
-	
-	/**
-	 * @param item.
-	 * @param product.
-	 */
-	protected void setProductContent(final Item item,final Product product) {
-		final ProductLocalizedContent productLocalizedContent
-		    = new ProductLocalizedContent();
-		productLocalizedContent.setLocaleCode("en-US");
-		productLocalizedContent.setProductName(item.getItemDesc());
-		product.setContent(productLocalizedContent);
-	}
-	
-	/**
-	 * @param product.
-	 */
-	protected void setProductCatalogInfo(final Product product) {
-		product.setMasterCatalogId(2);
-		final List list = new ArrayList<ProductInCatalogInfo>();
-		final ProductInCatalogInfo productInCatalogInfo = new ProductInCatalogInfo();
-		productInCatalogInfo.setCatalogId(2);
-		productInCatalogInfo.setIsActive(true);
-		list.add(productInCatalogInfo);
-		product.setProductInCatalogs(list);
-	}
-	
-	/**
-	 * @param item.
-	 * @param product.
-	 */
-	protected void setProductBrandList(final Item item, final Product product) {
-		final List<Brand> brandsList = item.getBrand();
-		for (Brand b : brandsList) {
-			ProductUtility.transformHhBrandToKiboBrand(product, b);
-		}
-	}
-	
-	/**
-	 * @param item.
-	 * @param product.
-	 */
-	protected void setProductExtDesc(final Item item, final Product product) {
-		if (item.getExtDesc() != null && item.getExtDesc().size() != 0) {
-
-			for (ExtDesc e : item.getExtDesc()) {
-				ProductUtility
-				.testTransformationFromHhExtendedDescToKiboExtendedDesc(product, e);
-			}
-		}
-	}
-	
-	/**
-	 * @param item.
-	 * @param product.
-	 */
-	protected void setProductGtin(final Item item, final Product product) {
-		if (item.getGtin() != null && item.getGtin().size() != 0) {
-			for (Gtin g : item.getGtin()) {
-
-				ProductUtility.transformHhProductGtinToKiboProductGtin(product, g);
-			}
-		}
-	}
-	
-	/**
-	 * @param item.
-	 * @param product.
-	 */
-	protected void setProductLocation(final Item item, final Product product) {
-		if (item.getItemLoc() != null && item.getItemLoc().size() != 0) {
-			final ItemLoc itemLoc = item.getItemLoc().get(0);
-			ProductUtility
-			.testTransformationFromHhItemLocToKiboItemLoc(product, itemLoc);
-		}
-	}
-	
-	/**
-	 * @param item.
-	 * @param product.
-	 */
-	protected void setProductItemRestricted(final Item item, final Product product) {
-		if (item.getItemRestricted() != null && item.getItemRestricted().size() != 0) {
-			for (ItemRestricted i : item.getItemRestricted()) {
-				ProductUtility
-				.transformFromHhItemRestrictedToKiboItemRestricted(product, i);
-			}
-		}
-	}
-	
-	/**
-	 * @param item.
-	 * @param product.
-	 */
-	protected void setProductRetailMsrp(final Item item, final Product product) {
-		if (item.getRetailMsrp() != null && item.getRetailMsrp().size() != 0) {
-			for (RetailMsrp r : item.getRetailMsrp()) {
-				ProductUtility.transformationFromHhPriceToKiboPrice(product, r);
-			}
-		}
-	}
-	
-	/**
-	 * @param item.
-	 * @param product.
-	 */
-	protected void setProductItemAttributes(final Item item, final Product product) {
-		for (ProductItemAttributes p : item.getProductItemAttributes()) {
-			if (ProductUtility
-					.isPropertyExists(
-							product.getProperties(),
-							p.getId().getProductAttrId())) {
-				for (ProductProperty pp : product.getProperties()) {
-					if (pp.getAttributeFQN()
-							.equalsIgnoreCase(
-									p.getId()
-									.getProductAttrId())) {
-						ProductUtility
-						    .updateProductPropertiesAttribute(
-								pp, p.getAttributeValue());
-					}
-				}
-
-			} else {
-				ProductUtility
-				    .addProductProperty(
-						product, p.getAttributeValue(), 
-						p.getId().getProductAttrId());
-			}
-		}
-	}
-	
-	void addOrUpdatePriceList() throws Exception{
-		final ApiContext apiContext
-	    = new MozuApiContext(Constants.tenantId,
-			Constants.siteId);
-		PriceListResource priceListResource = new PriceListResource(apiContext);
-		PriceListCollection priceList = priceListResource.getPriceLists();
-		System.out.println("after getting PriceList");
-	}
 }

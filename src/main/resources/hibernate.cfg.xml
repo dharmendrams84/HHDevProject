@@ -23,6 +23,7 @@
           <mapping class="com.homehardware.model.Brand" />
           <mapping class="com.homehardware.model.Gtin" />
           <mapping class="com.homehardware.model.ItemRestricted" />
+          <mapping class="com.homehardware.model.Retail" />
     </session-factory>
        
 </hibernate-configuration>

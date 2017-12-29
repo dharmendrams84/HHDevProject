@@ -1,5 +1,6 @@
 // default package
-// Generated Dec 19, 2017 4:04:33 PM by Hibernate Tools 5.2.6.Final
+// Generated Dec 19, 2017 4:21:22 PM by Hibernate Tools 5.2.6.Final
+
 package com.homehardware.model;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class Retail implements java.io.Serializable {
 
 	private Integer id;
 	private String item;
-	private Integer store;
+	private String store;
 	private BigDecimal retail;
 	private String isProcessSuccess;
 	private Integer errorCode;
@@ -37,7 +38,7 @@ public class Retail implements java.io.Serializable {
 	public Retail() {
 	}
 
-	public Retail(String item, Integer store, BigDecimal retail, String isProcessSuccess, Integer errorCode,
+	public Retail(String item, String store, BigDecimal retail, String isProcessSuccess, Integer errorCode,
 			String errorDesc, String batchId, String status, String createBy, Date createDate, String updateBy,
 			Date updateDate) {
 		this.item = item;
@@ -75,12 +76,12 @@ public class Retail implements java.io.Serializable {
 		this.item = item;
 	}
 
-	@Column(name = "STORE")
-	public Integer getStore() {
+	@Column(name = "STORE", length = 10)
+	public String getStore() {
 		return this.store;
 	}
 
-	public void setStore(Integer store) {
+	public void setStore(String store) {
 		this.store = store;
 	}
 

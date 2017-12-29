@@ -2,7 +2,7 @@
 <!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.org/dtd/hibernate-reverse-engineering-3.0.dtd" >
 
 <hibernate-reverse-engineering>
-<table-filter match-catalog="ignitiv" match-name="dyn_attr_info"/>
+<table-filter match-catalog="ignitiv" match-name="dyn_attr_type"/>
 
 
 </hibernate-reverse-engineering>

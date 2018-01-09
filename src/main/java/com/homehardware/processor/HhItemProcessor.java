@@ -63,7 +63,8 @@ public class HhItemProcessor {
 
 		convertHhItemToMozuProduct(item, product);
 	        productResource.addProduct(product);
-	    logger.info("product with product code"+ item.getId().getItem()+ "added successfully");    
+	        logger.info("product with product code"+
+	        		item.getId().getItem()+ "added successfully" );    
 	}
 	
 	/**

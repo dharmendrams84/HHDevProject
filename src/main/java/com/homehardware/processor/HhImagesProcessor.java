@@ -69,13 +69,40 @@ public class HhImagesProcessor {
 					file, new Integer(img.getImageId())
 					.toString(), apiContext);
 
-                final ProductLocalizedImage productLocalizedImage
-				    = new ProductLocalizedImage();
-		productLocalizedImage.setLocaleCode(Constant.LOCALE);
-		productLocalizedImage.setCmsId(cmsId);
-		productLocalizedImages.add(productLocalizedImage);
+		if (!containsImage(productLocalizedImages, cmsId)) {
+			logger.info("Image wth cms id " 
+					+ cmsId + " not existing in product so adding image !!!!");
+			final ProductLocalizedImage productLocalizedImage 
+				= new ProductLocalizedImage();
+			productLocalizedImage.setLocaleCode(Constant.LOCALE);
+			productLocalizedImage.setCmsId(cmsId);
+			productLocalizedImages.add(productLocalizedImage);
+		} else {
+			logger.info("Image wth cms id " 
+					+ cmsId + " already existing in product"
+							+ " so not adding image to product !!!!");
+		}
 	}
 
+	/**
+	 * @param productLocalizedImages.
+	 * @param cmsId.
+	 * @.return
+	 */
+	public boolean containsImage(
+			final List<ProductLocalizedImage> productLocalizedImages,
+			final String cmsId) {
+		boolean containsImage = false;
+		if (productLocalizedImages != null && productLocalizedImages.size() != 0) {
+			for (ProductLocalizedImage productLocalizedImage : productLocalizedImages) {
+				if (productLocalizedImage.getCmsId().equalsIgnoreCase(cmsId)) {
+					containsImage = true;
+					break;
+				}
+			}
+		}
+		return containsImage;
+	}
 	/**
 	 * @param file.
 	 * @param imageName.
@@ -89,6 +116,7 @@ public class HhImagesProcessor {
 			
 			final DocumentResource docResource = new DocumentResource(context);
 			
+		
 			final Document doc = new Document();
 			
 			createDocumentObject(doc, imageName, file);

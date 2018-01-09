@@ -69,5 +69,6 @@ public class Constant {
 	public static final String EXTENSION_JPG = "jpg";
 	public static final String IMAGE_JPG = "image/jpg";
 	public static final String IMAGE_MOZU = "image@mozu";
+	public static final String TENANT_FINISH = "tenant~finish";
 	
 }

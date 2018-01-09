@@ -28,7 +28,7 @@ public class HhDaoObjectImpl implements HhDaoObject {
 		query.setParameter("batchId", batchId);
 		query.setParameter("status", status);
 		final List list = query.getResultList();
-		
+		entityManager.close();
 		return list;
 	}
 	
@@ -48,7 +48,7 @@ public class HhDaoObjectImpl implements HhDaoObject {
 		query.setParameter("batchId", batchId);
 		query.setParameter("status", status);
 		final List list = query.getResultList();
-		
+		entityManagerFactory.close();
 		return list;
 	}
 	
@@ -67,7 +67,7 @@ public class HhDaoObjectImpl implements HhDaoObject {
 		query.setParameter("batchId", batchId);
 		query.setParameter("status", status);
 		final List list = (List<Promotion>)query.getResultList();
-		
+		entityManagerFactory.close();
 		return list;
 	}
 

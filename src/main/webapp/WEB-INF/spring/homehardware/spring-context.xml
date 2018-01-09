@@ -89,6 +89,8 @@
 	<beans:bean id="hhExtDescProcessor" class="com.homehardware.processor.HhExtDescProcessor"></beans:bean>
 	<beans:bean id="hhItemProcessor" class="com.homehardware.processor.HhItemProcessor"></beans:bean>
 	
+	<beans:bean id="hhItemRestrictedProcessor" class="com.homehardware.processor.HhItemRestrictedProcessor"></beans:bean>
+	
 	
 		
 	

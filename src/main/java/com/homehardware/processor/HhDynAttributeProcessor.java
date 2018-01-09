@@ -34,7 +34,8 @@ public class HhDynAttributeProcessor {
 			final List<ItemDynAttr> itemDynAttrs,
 			final List<DynAttrInfo> dynAttrInfos,
 			final List<DynAttrType> dynAttrTypes,
-			final ApiContext apiContext)  throws Exception {
+			final ApiContext apiContext,
+			final int productType)  throws Exception {
 		try {
 			/*final List<ItemDynAttr> itemDynAttrs = item.getItemDynAttr();*/
 			if (itemDynAttrs != null && itemDynAttrs.size() != 0) {
@@ -45,7 +46,7 @@ public class HhDynAttributeProcessor {
 					    = Constant.ATTRIBUTE + "_" + id.getDynAttrId();
 					String attributeType = getDynAttrType(attributeName, dynAttrTypes);
 					createDynamicAttribute(apiContext, 
-							attributeResource, attributeName,attributeType);
+							attributeResource, attributeName,attributeType,Constant.PRODUCT_TYPE);
 					if (attributeType != null && !attributeType.equalsIgnoreCase("YesNo")
 							&& !attributeType.equalsIgnoreCase("List")) {
 						//addOrUpdateDynamicAttribute(dynAttrInfos, attributeName, product);
@@ -56,6 +57,7 @@ public class HhDynAttributeProcessor {
 					}
 				}
 			}
+			logger.info("All Dynamic attributes processed successfully!!!!!");
 		} catch (Exception e) {
 			logger.info("Exception while transoforming dynamic attribute "
 					+ e.getMessage());
@@ -72,8 +74,8 @@ public class HhDynAttributeProcessor {
 	public final void createDynamicAttribute(
 			final ApiContext apiContext,
 			final AttributeResource attributeResource,
-			final String attributeName,String attributeType
-			) throws Exception {
+			final String attributeName,final String attributeType,
+			final int productTypeCode) throws Exception {
 			
 		try {
 			com.mozu.api.contracts.productadmin.Attribute 
@@ -94,11 +96,11 @@ public class HhDynAttributeProcessor {
 						
 			final ProductTypeResource productTypeResource
 				    = new ProductTypeResource(apiContext);
-			if (!isAttributeInProductType(productTypeResource, Constant.PRODUCT_TYPE,
+			if (!isAttributeInProductType(productTypeResource, productTypeCode,
 					Constant.TENANT + attributeName)) {
 				final ProductType productType = 
 						productTypeResource
-						.getProductType(Constant.PRODUCT_TYPE);
+						.getProductType(productTypeCode);
 				productType.getExtras();
 				final AttributeInProductType attrInProdType 
 					= new AttributeInProductType();

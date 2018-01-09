@@ -22,6 +22,8 @@ import com.homehardware.model.Item;
 import com.homehardware.model.ItemAffiliated;
 import com.homehardware.model.ItemLoc;
 import com.homehardware.model.ItemRestricted;
+import com.homehardware.model.ProductAttr;
+import com.homehardware.model.ProductItemAttr;
 import com.homehardware.model.ProductItemAttributes;
 import com.homehardware.model.Promotion;
 import com.homehardware.model.Retail;
@@ -33,17 +35,22 @@ import com.homehardware.processor.HhGtinProcessor;
 import com.homehardware.processor.HhImagesProcessor;
 import com.homehardware.processor.HhItemLocProcessor;
 import com.homehardware.processor.HhItemProcessor;
+import com.homehardware.processor.HhItemRestrictedProcessor;
 import com.homehardware.processor.HhProdItemAttributeProcessor;
 import com.homehardware.processor.HhProductBrandProcesser;
 import com.homehardware.utility.PriceListUtility;
 import com.homehardware.utility.ProductUtility;
 import com.homehardware.utility.ProductUtilityOld;
+import com.homehardware.utility.ProductUtilityOld.Status;
 import com.mozu.api.ApiContext;
 import com.mozu.api.MozuApiContext;
 import com.mozu.api.contracts.core.Measurement;
+import com.mozu.api.contracts.core.extensible.AttributeValueLocalizedContent;
 import com.mozu.api.contracts.productadmin.Attribute;
 import com.mozu.api.contracts.productadmin.AttributeInProductType;
 import com.mozu.api.contracts.productadmin.AttributeLocalizedContent;
+import com.mozu.api.contracts.productadmin.AttributeVocabularyValue;
+import com.mozu.api.contracts.productadmin.AttributeVocabularyValueLocalizedContent;
 import com.mozu.api.contracts.productadmin.PriceList;
 import com.mozu.api.contracts.productadmin.PriceListCollection;
 import com.mozu.api.contracts.productadmin.PriceListEntry;
@@ -52,14 +59,18 @@ import com.mozu.api.contracts.productadmin.PriceListEntryPrice;
 import com.mozu.api.contracts.productadmin.Product;
 import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
 import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
+import com.mozu.api.contracts.productadmin.ProductOption;
+import com.mozu.api.contracts.productadmin.ProductOptionValue;
 import com.mozu.api.contracts.productadmin.ProductPrice;
 import com.mozu.api.contracts.productadmin.ProductProperty;
 import com.mozu.api.contracts.productadmin.ProductType;
 import com.mozu.api.resources.commerce.catalog.admin.PriceListResource;
 import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
 import com.mozu.api.resources.commerce.catalog.admin.pricelists.PriceListEntryResource;
+import com.mozu.api.resources.commerce.catalog.admin.products.ProductOptionResource;
 import com.mozu.api.resources.commerce.catalog.admin.products.ProductPropertyResource;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +93,8 @@ import com.mozu.api.resources.commerce.catalog.admin.attributedefinition.Product
 @ContextConfiguration(locations = { 
 		"file:src/main/webapp/WEB-INF/spring/homehardware/spring-context.xml" })
 public final class JUnitClass {
+
+	public static final String TENANT_FINISH = "tenant~finish";
 
 	protected static final Logger logger = Logger.getLogger(JUnitClass.class);
 	
@@ -145,6 +158,130 @@ public final class JUnitClass {
 	@Autowired
 	private HhItemProcessor hhItemProcessor;
 	
+	@Autowired
+	private HhItemRestrictedProcessor hhItemRestrictedProcessor;
+	
+	@Autowired
+	private HhProdItemAttributeProcessor hhProdItemAttributeProcessor;
+	
+	//@Test
+	public void testFetchHhVarProductFromDb() throws Exception {
+		try {
+			
+			final ApiContext apiContext
+				= new MozuApiContext(Constants.tenantId,
+						Constants.siteId);
+			final ProductResource productResource = new ProductResource(apiContext);
+			//final Product product = productResource.getProduct("4466-446");
+			final String batchId ="1";
+			final String status = Status.INITIAL.toString();
+			final List<Item> list = hhDaoObjectImpl
+					.getItemsList("1", Status.INITIAL.toString());
+			final ProductUtility productUtility = new ProductUtility();
+			if (!list.isEmpty()) {
+				for (Item item : list) {
+					final String productCode = item.getId().getItem();
+					Product product 
+						= productResource.getProduct(productCode);
+					
+						if (product == null) {
+						logger.info("Going to add new product with product code "+productCode);
+						product = new Product();
+						product.setProductTypeId(Constant.int_5);
+						productUtility.convertHhItemToMozuProduct(
+								list.get(0), product);
+						product.setProductUsage("Configurable");
+
+						product.setProductCode(productCode);
+						product
+							= productResource.addProduct(product);
+						logger.info("Product with product code "+productCode+ " added successfully!!!!");
+						List images = hhItemImagesDao.getItemImages(batchId, status, productCode);
+						hhImagesProcessor.transformHhImageToKiboImage(product, images, productResource, apiContext);
+						productResource.updateProduct(product, productCode);
+						addOrUpdateProductOption(productCode, apiContext);
+						
+					}else{
+						logger.info("Before updating product!!!!");
+						/*List images = hhItemImagesDao.getItemImages(batchId, status, productCode);
+						hhImagesProcessor.transformHhImageToKiboImage(product, images, productResource, apiContext);
+						productResource.updateProduct(product, productCode);*/
+						//addOrUpdateProductOption(productCode, apiContext);
+						
+						final List dynAttrTypes 
+							= hhDynamicAttributesDao
+							.getDynamicAttributesType(batchId, status);
+						
+						List<ProductAttr> productAttributes = hhItemAttributesDao.getProdAttributes(batchId, status);
+						List<ProductItemAttr> productItemAttributes = hhItemAttributesDao.getProdItemAttributes(batchId, status, productCode);
+																
+						hhProdItemAttributeProcessor.
+							transformProdItemAttributes(
+									productItemAttributes,
+									productAttributes, 
+									dynAttrTypes, apiContext);
+						
+						/*List<ProductItemAttributes> productItemAttributes = hhItemAttributesDao.getItemAttributes(batchId, status, productCode);
+						HhProdItemAttributeProcessor.transformProductItemAttributes(productItemAttributes, apiContext);*/
+
+						final List<ItemAffiliated> itemAffiliateds = hhItemAffiliatedDao.getItemAffiliated(batchId,
+								status, productCode);
+
+						if (!itemAffiliateds.isEmpty()) {
+							hhAffiliatedItemProcessor.setProductAffiliatedItems(itemAffiliateds, apiContext,
+							HhProductAttributeFqnConstants.Hh_Product_CrossSell_Attr_Fqn, productCode);
+							logger.info("Product crossell transformed successfully!!!!");
+						}
+
+						List gtins = hhGtinDao.getGtin(batchId, status, productCode);
+						
+						Gtin gtin = (Gtin)gtins.get(0);
+												
+						String attributeFQN = "tenant~gtin" ;
+						hhGtinProcessor.addOrUpdateGtin(gtin, apiContext,attributeFQN);
+						
+						final List<Brand> brandsList = hhBrandDao.getBrands(batchId, status, productCode);
+						if (!brandsList.isEmpty()) {
+							hhProductBrandProcesser.setProductBrandList(brandsList, apiContext);
+							
+						}
+						
+						//update product
+						product = productResource.getProduct(productCode);
+						List extDescs = hhExtDescDao.getExtDesc(batchId, status, productCode);
+						hhExtDescProcessor.setProductExtDesc(extDescs, product);
+						productResource.updateProduct(product, productCode);
+						logger.info("Product "+productCode+ " extended description details processed successfully!!!!");
+						
+						product = productResource.getProduct(productCode);
+						//update product 
+						List itemLocs = hhItemLocDao.getItemLocs(batchId, status, productCode);
+						hhItemLocProcessor.setProductItemLocation(product, itemLocs);
+						productResource.updateProduct(product, productCode);
+						logger.info("Product "+productCode+ " item location details processed successfully!!!!");
+						
+						List<ItemRestricted> itemRestricteds = hhItemRestrictedDao.getItemRestricted(batchId, status, productCode);
+						hhItemRestrictedProcessor.transformHhItemRestricted(itemRestricteds, apiContext);
+						logger.info("Product "+productCode+ " item restricted details processed successfully!!!!");
+						
+						
+						List itemDynAttrs = hhDynamicAttributesDao.getDynamicAttributes(batchId, status, productCode);
+						List dynAttrInfos = hhDynamicAttributesDao.getDynamicAttributesInfo(batchId, status);
+						
+						hhDynAttributeProcessor.transformHhDynamicAttributes(itemDynAttrs, dynAttrInfos, dynAttrTypes, apiContext,Constant.PRODUCT_TYPE);
+					}
+				}
+
+			} else {
+				logger.info("No Objects for batch id " + 1);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
 	
 	@Test
 	public void testFetchHhProductFromDb() {
@@ -178,14 +315,15 @@ public final class JUnitClass {
 					
 					
 					//productPropertyResource.updateProperty(productProperty, productCode, attributeFQN);
-					Product product = 	hhItemProcessor.addOrUpdateProduct(item, apiContext);
+					Product product = hhItemProcessor.
+							addOrUpdateProduct(item, apiContext);
 					
 					if (product.getProperties() == null) {
 						product.setProperties(
 								new ArrayList<ProductProperty>());
 					}
 					final ProductResource productResource 
-					= new ProductResource(apiContext);
+						= new ProductResource(apiContext);
 					/*
 					Product product = productResource
 							.getProduct(productCode);
@@ -203,6 +341,7 @@ public final class JUnitClass {
 					List<ProductItemAttributes> productItemAttributes = hhItemAttributesDao.getItemAttributes(batchId, status, productCode);
 					//productUtility.setProductItemAttributes(productItemAttributes, product);
 					HhProdItemAttributeProcessor.transformProductItemAttributes(productItemAttributes, apiContext);
+					
 					final List<ItemAffiliated> itemAffiliateds 
 						= hhItemAffiliatedDao.getItemAffiliated(batchId,
 								status, productCode);
@@ -217,7 +356,7 @@ public final class JUnitClass {
 					List itemDynAttrs = hhDynamicAttributesDao.getDynamicAttributes(batchId, status, productCode);
 					List dynAttrInfos = hhDynamicAttributesDao.getDynamicAttributesInfo(batchId, status);
 					final List dynAttrTypes = hhDynamicAttributesDao.getDynamicAttributesType(batchId, status);
-					hhDynAttributeProcessor.transformHhDynamicAttributes(itemDynAttrs, dynAttrInfos, dynAttrTypes, apiContext);
+					hhDynAttributeProcessor.transformHhDynamicAttributes(itemDynAttrs, dynAttrInfos, dynAttrTypes, apiContext,Constant.PRODUCT_TYPE);
 
 					
 					List gtins = hhGtinDao.getGtin(batchId, status, productCode);
@@ -456,6 +595,54 @@ public final class JUnitClass {
 		}*/
 	}
 		
+	public ProductOptionValue createProductOptionValue(){
+		ProductOptionValue productOptionValue = new ProductOptionValue();
+		AttributeVocabularyValue attributeVocabularyValue = new AttributeVocabularyValue();
+		AttributeVocabularyValueLocalizedContent attributeValueLocalizedContent = new AttributeVocabularyValueLocalizedContent();
+		attributeValueLocalizedContent.setLocaleCode(Constant.LOCALE);
+		attributeValueLocalizedContent.setStringValue("Bronze");;
+		attributeVocabularyValue.setContent(attributeValueLocalizedContent);
+		attributeVocabularyValue.setValue("Bronze");
+		productOptionValue.setAttributeVocabularyValueDetail(attributeVocabularyValue);
+		productOptionValue.setValue("Bronze");
+		return productOptionValue;
+	}
 	
-	
+	/**
+	 * @param productCode.
+	 * @param apiContext.
+	 */
+	public void addOrUpdateProductOption(
+			final String productCode,
+			final ApiContext apiContext) {
+		try {
+			final ProductOptionResource productOptionResource 
+				= new ProductOptionResource(apiContext);
+			
+			final String attributeFqN = TENANT_FINISH;
+			/*productOptionResource.deleteOption(productCode, attributeFqN);*/
+			ProductOption productOption 
+				= productOptionResource.getOption(productCode, attributeFqN);
+			if (productOption == null) {
+				productOption = new ProductOption();
+				productOption.setAttributeFQN(attributeFqN);
+				productOption = productOptionResource.addOption(productOption, productCode);
+				logger.info("After Adding productOption " + attributeFqN + " !!!!! ");
+			}
+			
+			List<ProductOptionValue> values = productOption.getValues();
+			if (values == null) {
+				values = new ArrayList<ProductOptionValue>();
+				productOption.setValues(values);
+			}
+			final ProductOptionValue productOptionValue = createProductOptionValue();
+			values.add(productOptionValue);
+			final ProductOption productOptionUpdated 
+				= productOptionResource.updateOption(productOption, productCode,
+					attributeFqN);
+			logger.info("After updating productOption !!!!");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

@@ -32,16 +32,19 @@ public class PropertyUtility {
 			ProductProperty productProperty = productPropertyResource.getProperty(productCode, attributeFqn);
 			if (productProperty == null) {
 				final ProductPropertyValue productPropertyValue
-					= createProductProperty(value);
-				if(attributeFqn.equalsIgnoreCase(HhProductAttributeFqnConstants.Hh_Product_Class)){
+					= createProductPropertyValue(value);
+				if (attributeFqn
+						.equalsIgnoreCase(
+						HhProductAttributeFqnConstants.Hh_Product_Class)){
 					productPropertyValue.setValue(value);
 				}
-				final List<ProductPropertyValue> productPropertyValues
+				/*final List<ProductPropertyValue> productPropertyValues
 					= new ArrayList<ProductPropertyValue>();
 				productPropertyValues.add(productPropertyValue);
 				productProperty = new ProductProperty();
 				productProperty.setAttributeFQN(attributeFqn);
-				productProperty.setValues(productPropertyValues);
+				productProperty.setValues(productPropertyValues);*/
+				productProperty = getProductProperty(productPropertyValue, attributeFqn);
 				productPropertyResource.addProperty(productProperty, productCode);
 				logger.info("Property "+ attributeFqn + " added successfully!!!!" );
 			} else {
@@ -76,7 +79,7 @@ public class PropertyUtility {
 	 * @param value.
 	 * @.return
 	 */
-	public static ProductPropertyValue createProductProperty(final String value) {
+	public static ProductPropertyValue createProductPropertyValue(final String value) {
 		final ProductPropertyValue productPropertyValue = new ProductPropertyValue();
 		final ProductPropertyValueLocalizedContent content;
 		content = new ProductPropertyValueLocalizedContent();
@@ -86,4 +89,19 @@ public class PropertyUtility {
 		return productPropertyValue;
 	}
 
+	/**
+	 * @param productPropertyValue.
+	 * @param attributeFqn.
+	 */
+	public static ProductProperty getProductProperty(
+			final ProductPropertyValue productPropertyValue,
+			final String attributeFqn) {
+		final List<ProductPropertyValue> productPropertyValues
+			= new ArrayList<ProductPropertyValue>();
+		productPropertyValues.add(productPropertyValue);
+		final ProductProperty productProperty = new ProductProperty();
+		productProperty.setAttributeFQN(attributeFqn);
+		productProperty.setValues(productPropertyValues);
+		return productProperty;
+	}
 }

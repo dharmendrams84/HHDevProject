@@ -25,7 +25,7 @@ public class HhBrandDaoImpl implements HhBrandDao{
 		//query.setParameter("status", status);
 		query.setParameter("item", item);
 		final List list = query.getResultList();
-
+		entityManager.close();
 		return list;
 	}
 

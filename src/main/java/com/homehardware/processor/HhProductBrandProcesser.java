@@ -81,7 +81,7 @@ public class HhProductBrandProcesser {
 	}
 
 
-	public void addOrUpdateProperty(final String value,final String attributeFqn,ApiContext apiContext,final String productCode){
+	/*public void addOrUpdateProperty(final String value,final String attributeFqn,ApiContext apiContext,final String productCode){
 		try {
 			ProductPropertyResource productPropertyResource = new ProductPropertyResource(apiContext);
 
@@ -115,10 +115,10 @@ public class HhProductBrandProcesser {
 		}
    }
    
-   /**
+   *//**
 	 * @param value.
 	 * @.return
-	 */
+	 *//*
 	public ProductPropertyValue createProductProperty(final String value) {
 		final ProductPropertyValue productPropertyValue = new ProductPropertyValue();
 		final ProductPropertyValueLocalizedContent content;
@@ -127,6 +127,6 @@ public class HhProductBrandProcesser {
 		productPropertyValue.setContent(content);
 		return productPropertyValue;
 	}
-
+*/
 
 }

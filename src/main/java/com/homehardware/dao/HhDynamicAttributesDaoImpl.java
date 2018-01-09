@@ -51,7 +51,7 @@ public class HhDynamicAttributesDaoImpl implements HhDynamicAttributesDao {
 		query.setParameter("status", status);
 		
 		final List list = query.getResultList();
-		
+		entityManager.close();
 		return list;
 	}
 	
@@ -70,7 +70,7 @@ public class HhDynamicAttributesDaoImpl implements HhDynamicAttributesDao {
 		query.setParameter("status", status);
 		
 		final List list = query.getResultList();
-		
+		entityManager.close();
 		return list;
 	}
 

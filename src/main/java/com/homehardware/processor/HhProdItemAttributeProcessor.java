@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.hh.integration.constants.Constant;
 import com.homehardware.model.ProductItemAttributes;
 import com.mozu.api.ApiContext;
 import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
@@ -38,20 +39,26 @@ public class HhProdItemAttributeProcessor {
 	
 	public void addOrUpdateProperty(final String value,final String attributeFqn,ApiContext apiContext,final String productCode){
 		try {
-			ProductPropertyResource productPropertyResource = new ProductPropertyResource(apiContext);
+			final ProductPropertyResource productPropertyResource
+				= new ProductPropertyResource(apiContext);
 
-			ProductProperty productProperty = productPropertyResource.getProperty(productCode, attributeFqn);
+			ProductProperty productProperty 
+				= productPropertyResource.getProperty(productCode, attributeFqn);
 			if (productProperty == null) {
-				ProductPropertyValue productPropertyValue = createProductProperty(value);
-				List<ProductPropertyValue> productPropertyValues = new ArrayList<ProductPropertyValue>();
+				final ProductPropertyValue productPropertyValue 
+					= createProductProperty(value);
+				final List<ProductPropertyValue> productPropertyValues 
+					= new ArrayList<ProductPropertyValue>();
 				productPropertyValues.add(productPropertyValue);
 				productProperty = new ProductProperty();
 				productProperty.setAttributeFQN(attributeFqn);
 				productProperty.setValues(productPropertyValues);
 				productPropertyResource.addProperty(productProperty, productCode);
-				logger.info("Property "+attributeFqn + " added successfully!!!!" );
+				logger.info("Property " + attributeFqn 
+						+ " added successfully!!!!" );
 			} else {
-				if (productProperty.getValues() != null && productProperty.getValues().size() != 0){
+				if (productProperty.getValues() != null && 
+						productProperty.getValues().size() != 0){
 					if(productProperty.getValues().get(0).getContent()!=null){
 					productProperty.getValues().get(0).getContent().setStringValue(value);
 					}else{

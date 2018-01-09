@@ -29,7 +29,7 @@ public class HhAffiliatedItemProcessor {
 		try {
 			final ProductPropertyResource productPropertyResource 
 			    = new ProductPropertyResource(apiContext);
-			System.out.println("Before");
+			
 			ProductProperty productProperty 
 				= productPropertyResource.getProperty(productCode, attributeFqn);
 			if(productProperty==null){
@@ -49,7 +49,7 @@ public class HhAffiliatedItemProcessor {
 			productProperty.setValues(productPropertyValuesList);
 			productPropertyResource.updateProperty(productProperty, productCode, attributeFqn);
 			
-			System.out.println("After updating ");
+			
 			}
 		} catch (Exception e) {
 			logger.error("Error " + e);

@@ -24,6 +24,11 @@
           <mapping class="com.homehardware.model.Gtin" />
           <mapping class="com.homehardware.model.ItemRestricted" />
           <mapping class="com.homehardware.model.Retail" />
+          
+          
+         <mapping class="com.homehardware.model.ProductAttr" />
+        <mapping class="com.homehardware.model.ProductItemAttr" />
+        <mapping class="com.homehardware.model.Hierarchy" />
     </session-factory>
        
 </hibernate-configuration>

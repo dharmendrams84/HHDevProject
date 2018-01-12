@@ -62,7 +62,7 @@ public class HhDynamicAttributesDaoImpl implements HhDynamicAttributesDao {
 				entityManagerFactory.createEntityManager();
 			
 		final Query query = entityManager.createQuery(
-				"from DynAttrType d where "
+				"from AttrDefinition d where "
 				+ "  d.batchId = :batchId"
 				+ " and d.status = :status"
 				);

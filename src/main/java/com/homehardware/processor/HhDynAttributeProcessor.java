@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 
 import com.hh.integration.constants.Constant;
 import com.homehardware.model.DynAttrInfo;
-import com.homehardware.model.DynAttrType;
+import com.homehardware.model.AttrDefinition;
 import com.homehardware.model.ItemDynAttr;
 import com.homehardware.utility.ProductUtility;
 import com.mozu.api.ApiContext;
@@ -25,7 +25,26 @@ import com.mozu.api.resources.commerce.catalog.admin.products.ProductPropertyRes
 
 public class HhDynAttributeProcessor {
 
-	protected static final Logger logger = Logger.getLogger(HhDynAttributeProcessor.class);	
+	protected static final Logger logger = Logger.getLogger(HhDynAttributeProcessor.class);
+	
+	
+	/**
+	 * @param item.
+	 * @param apiContext.
+	 */
+	public void transformHhAttributesDefinition(final List<AttrDefinition> attrDefinitions){
+		final List<ProductProperty> list = new ArrayList<>();
+		
+		for(AttrDefinition a : attrDefinitions){
+			list.add(PropertyUtility.
+					getProductProperty(a.getInputType(),
+							Constant.TENANT+a.getAttrName()));
+		}
+	}
+
+	
+	
+	
 	/**
 	 * @param item.
 	 * @param apiContext.
@@ -33,7 +52,7 @@ public class HhDynAttributeProcessor {
 	public void transformHhDynamicAttributes(
 			final List<ItemDynAttr> itemDynAttrs,
 			final List<DynAttrInfo> dynAttrInfos,
-			final List<DynAttrType> dynAttrTypes,
+			final List<AttrDefinition> dynAttrTypes,
 			final ApiContext apiContext,
 			final int productType)  throws Exception {
 		try {
@@ -142,11 +161,11 @@ public class HhDynAttributeProcessor {
 		
 	}
 	
-	public String getDynAttrType(final String attributeName,final List<DynAttrType> dynAttrTypes){
+	public String getDynAttrType(final String attributeName,final List<AttrDefinition> dynAttrTypes){
 		String attributeType = null;
-		for(DynAttrType d: dynAttrTypes){
+		for(AttrDefinition d: dynAttrTypes){
 			if(attributeName.equalsIgnoreCase(Constant.ATTRIBUTE+"_"+d.getDynAttrId())){
-				attributeType = d.getDynAttrType();
+				attributeType = d.getInputType();
 				break;
 			}
 		}

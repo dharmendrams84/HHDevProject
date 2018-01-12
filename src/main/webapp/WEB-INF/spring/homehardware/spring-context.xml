@@ -91,6 +91,8 @@
 	
 	<beans:bean id="hhItemRestrictedProcessor" class="com.homehardware.processor.HhItemRestrictedProcessor"></beans:bean>
 	
+	<beans:bean id="hhCategoryDao" class="com.homehardware.dao.HhCategoryDaoImpl"></beans:bean>
+	
 	
 		
 	

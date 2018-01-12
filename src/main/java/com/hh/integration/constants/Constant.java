@@ -62,6 +62,7 @@ public class Constant {
 	public static final String ID = "id";
 	public static final String IMAGES_FOLDER_LOC = "E:\\HOMEHARDWARE\\Files\\ImageUpload\\";
 	public static final String LOCALE = "en-US";
+	public static final String FR_CA = "fr-CA";
 	public static final int PRODUCT_TYPE = 2;
 	public static final String FILES_MOZU = "files@mozu";
 	public static final String STANDARD_PRODUCT = "Standard";
@@ -70,5 +71,12 @@ public class Constant {
 	public static final String IMAGE_JPG = "image/jpg";
 	public static final String IMAGE_MOZU = "image@mozu";
 	public static final String TENANT_FINISH = "tenant~finish";
+	public static final String INPUT_TYPE_TEXT_BOX = "Text Box";
+	public static final String INPUT_TYPE_TEXT_AREA = "Text Area";
+	public static final String INPUT_TYPE_YES_NO = "Yes/No";
+	public static final String DATE = "Date";
+	public static final String QUERY_CATEGORYCODE_EQ = "categoryCode eq ";
+	
+	public static final int FR_CATALOG_ID = 5;
 	
 }

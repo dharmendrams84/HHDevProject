@@ -57,13 +57,31 @@ public class HhAffiliatedItemProcessor {
 	}
 	
 	
-	public void createNewProperty(final List<ItemAffiliated> affiliatedItems,
-			final ProductProperty productProperty ){
+	/**
+	 * @param affiliatedItems.
+	 * @.return
+	 */
+	public List<ProductProperty> getHhAffiliatedPropertyList(
+		final List<ItemAffiliated> affiliatedItems){
+		final ProductProperty productProperty = new ProductProperty();
+		final List<ProductProperty> list = new ArrayList<>();
 		final ProductPropertyValue productPropertyValue 
-		= new ProductPropertyValue();
+			= new ProductPropertyValue();
 		final List<ProductPropertyValue> productPropertyValuesList = new ArrayList<>();
 		for (ItemAffiliated i : affiliatedItems) {
-			
+			productPropertyValuesList.add(createProductProperty(i.getItemAffiliated()));
+		}
+		productProperty.setValues(productPropertyValuesList);
+		list.add(productProperty);
+		return list;
+	}
+	
+	
+	public void createNewProperty(final List<ItemAffiliated> affiliatedItems, final ProductProperty productProperty) {
+		final ProductPropertyValue productPropertyValue = new ProductPropertyValue();
+		final List<ProductPropertyValue> productPropertyValuesList = new ArrayList<>();
+		for (ItemAffiliated i : affiliatedItems) {
+
 			productPropertyValuesList.add(createProductProperty(i.getItemAffiliated()));
 		}
 		productProperty.setValues(productPropertyValuesList);

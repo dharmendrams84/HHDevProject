@@ -17,17 +17,18 @@ public class HhItemLocProcessor {
 	 * @param product.
 	 * @param itemLocs.
 	 */
-	public void setProductItemLocation(final Product product, final List<ItemLoc> itemLocs) {
+	public Product setProductItemLocation(final Product product, final List<ItemLoc> itemLocs) {
 		if (itemLocs != null && itemLocs.size() != 0) {
 			for (ItemLoc itemLoc : itemLocs) {
 				setProductMeasurment(product, itemLoc);
-				ProductUtility productutility = new ProductUtility();
+				final ProductUtility productutility = new ProductUtility();
 				productutility.addOrUpdateProperty(product,
 						HhProductAttributeFqnConstants
 						.Hh_VendorProductNumber_Attr_Fqn,
 						itemLoc.getVpn());
 			}
 		}
+		return product;
 	}
 	
 	/**

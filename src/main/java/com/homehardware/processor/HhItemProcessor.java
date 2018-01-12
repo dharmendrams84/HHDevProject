@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import com.hh.integration.constants.Constant;
@@ -15,9 +16,11 @@ import com.mozu.api.contracts.core.Measurement;
 import com.mozu.api.contracts.productadmin.Product;
 import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
 import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
+import com.mozu.api.contracts.productadmin.ProductLocalizedSEOContent;
 import com.mozu.api.contracts.productadmin.ProductPrice;
 import com.mozu.api.contracts.productadmin.ProductProperty;
-import com.mozu.api.resources.commerce.catalog.admin.ProductResource;;
+import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;;
 
 @Component
 public class HhItemProcessor {
@@ -37,8 +40,8 @@ public class HhItemProcessor {
 				product = new Product();
 				createNewProduct(product, productResource, item);
 			}else{
-				/*convertHhItemToMozuProduct(item, product);
-				productResource.updateProduct(product, productCode);*/
+				convertHhItemToMozuProduct(item, product);
+				productResource.updateProduct(product, productCode);
 			}
 			
 		} catch (Exception e) {
@@ -62,18 +65,16 @@ public class HhItemProcessor {
 		product.setProductTypeId(Constant.int_7);
 
 		convertHhItemToMozuProduct(item, product);
-	        productResource.addProduct(product);
-	        logger.info("product with product code"+
-	        		item.getId().getItem()+ "added successfully" );    
+		productResource.addProduct(product);
+		
 	}
 	
 	/**
 	 * @param item.
 	 * @param product.
 	 */
-	public void convertHhItemToMozuProduct(
+	public Product convertHhItemToMozuProduct(
 			final Item item, final Product product) {
-		final String status = "INITIAL";
 		if (product.getProperties() == null 
 				|| product.getProperties().size() == 0) {
 			final List<ProductProperty> productProperties = new ArrayList<>();
@@ -81,6 +82,18 @@ public class HhItemProcessor {
 		}
 		setProductBasicProperties(item, product);
 		
+		
+				
+		List<ProductInCatalogInfo> productInCatalogInfos = product.getProductInCatalogs();
+		if (productInCatalogInfos == null) {
+			productInCatalogInfos = new ArrayList<ProductInCatalogInfo>();
+		}
+		ProductInCatalogInfo catalog = new ProductInCatalogInfo();
+		productInCatalogInfos.add(convertProdCatalogInfo(item, catalog));
+	    
+		
+		
+		return product;
 	}
 
 	/**
@@ -159,4 +172,37 @@ public class HhItemProcessor {
 		product.setContent(productLocalizedContent);
 	}
 
+	/**
+	 * @param item.
+	 * @param productInCatalogInfo.
+	 */
+	public ProductInCatalogInfo convertProdCatalogInfo(final Item item, ProductInCatalogInfo productInCatalogInfo) {
+		if (item != null) {
+			if (productInCatalogInfo == null) {
+				productInCatalogInfo 
+					= new ProductInCatalogInfo();
+			}
+			productInCatalogInfo.setCatalogId(Constant.FR_CATALOG_ID);
+			if (item.getItemDescFr() != null && item.getItemDescFr().length() != 0) {
+				productInCatalogInfo.setCatalogId(Constant.FR_CATALOG_ID);
+			}
+			final ProductLocalizedContent content = new ProductLocalizedContent();
+			content.setLocaleCode(Constant.FR_CA);
+			content.setProductName(item.getItemDescFr());
+			productInCatalogInfo.setContent(content);
+
+			final ProductLocalizedSEOContent seoContent = new ProductLocalizedSEOContent();
+			//seoContent.setMetaTagKeywords(item.get);
+			seoContent.setLocaleCode(Constant.FR_CA);
+			productInCatalogInfo.setSeoContent(seoContent);
+			productInCatalogInfo.setDateFirstAvailableInCatalog(new DateTime());
+
+			productInCatalogInfo.setIsContentOverridden(true);
+			productInCatalogInfo.setIsActive(true);
+			
+			productInCatalogInfo.setIsPriceOverridden(false);
+
+		}
+		return productInCatalogInfo;
+	}
 }

@@ -4,7 +4,7 @@ import com.hh.integration.constants.Constant;
 import com.homehardware.constants.HhProductAttributeFqnConstants;
 import com.homehardware.model.Brand;
 import com.homehardware.model.DynAttrInfo;
-import com.homehardware.model.DynAttrType;
+import com.homehardware.model.AttrDefinition;
 import com.homehardware.model.ExtDesc;
 import com.homehardware.model.Gtin;
 import com.homehardware.model.Images;
@@ -765,7 +765,7 @@ public final class ProductUtility {
 	public void transformHhDynamicAttributes(final Product product,
 			final List<ItemDynAttr> itemDynAttrs,
 			final List<DynAttrInfo> dynAttrInfos,
-			final List<DynAttrType> dynAttrTypes,
+			final List<AttrDefinition> dynAttrTypes,
 			final ApiContext apiContext)  throws Exception {
 		try {
 			/*final List<ItemDynAttr> itemDynAttrs = item.getItemDynAttr();*/
@@ -923,11 +923,11 @@ public final class ProductUtility {
 		
 	}
 	
-	public String getDynAttrType(final String attributeName,final List<DynAttrType> dynAttrTypes){
+	public String getDynAttrType(final String attributeName,final List<AttrDefinition> dynAttrTypes){
 		String attributeType = null;
-		for(DynAttrType d: dynAttrTypes){
+		for(AttrDefinition d: dynAttrTypes){
 			if(attributeName.equalsIgnoreCase(Constant.ATTRIBUTE+"_"+d.getDynAttrId())){
-				attributeType = d.getDynAttrType();
+				attributeType = d.getInputType();
 				break;
 			}
 		}

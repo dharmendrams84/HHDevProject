@@ -14,6 +14,7 @@ import com.mozu.api.ApiContext;
 import com.mozu.api.contracts.content.Document;
 import com.mozu.api.contracts.content.DocumentCollection;
 import com.mozu.api.contracts.productadmin.Product;
+import com.mozu.api.contracts.productadmin.ProductInCatalogInfo;
 import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
 import com.mozu.api.contracts.productadmin.ProductLocalizedImage;
 import com.mozu.api.resources.commerce.catalog.admin.ProductResource;
@@ -53,8 +54,26 @@ public class HhImagesProcessor {
 			}
 			content.setProductImages(productLocalizedImages);
 		}
-         
-        }
+		final List<ProductInCatalogInfo> list = product.getProductInCatalogs();
+		setFrCatalogImages(productLocalizedImages, list);
+		
+	}
+	
+	/**
+	 * @param productLocalizedImages.
+	 * @param list.
+	 */
+	public void setFrCatalogImages(
+		final List<ProductLocalizedImage> productLocalizedImages,
+		final List<ProductInCatalogInfo> list) {
+		if (list != null && list.size() != 0) {
+			for (ProductInCatalogInfo p : list) {
+				if (p.getCatalogId() == Constant.FR_CATALOG_ID) {
+					p.getContent().setProductImages(productLocalizedImages);
+				}
+			}
+		}
+	}
 	
 	/**
 	 * @param file.

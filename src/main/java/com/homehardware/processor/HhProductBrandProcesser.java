@@ -1,8 +1,11 @@
 package com.homehardware.processor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +24,60 @@ import com.mozu.api.resources.commerce.catalog.admin.products.ProductPropertyRes
 public class HhProductBrandProcesser {
 
 	protected static final Logger logger = Logger.getLogger(HhProductBrandProcesser.class);
+	String brandCode;
+	
+	/**
+	 * @param brandsList.
+	 */
+	public List<ProductProperty> transformHhProductBrandList(
+			final List<Brand> brandsList) {
+		final List<ProductProperty> list = new ArrayList<>();
+		ProductProperty productProperty = new ProductProperty();
+		if (brandsList != null && brandsList.size() != 0) {
+			for (Brand brand : brandsList) {
+				productProperty = PropertyUtility
+						.getProductProperty(
+								brand.getBrandDesc(), 
+								HhProductAttributeFqnConstants
+								.Hh_Brand_Desc_Attr_Fqn);
+				if (productProperty != null) {
+					list.add(productProperty);
+				}
+				
+				
+				productProperty = PropertyUtility
+						.getProductProperty(brand.getBrandCode(),
+						 HhProductAttributeFqnConstants
+						.Hh_Brand_Code_Attr_Fqn);
+				if (productProperty != null) {
+					list.add(productProperty);
+				}
+				
+				
+				productProperty = PropertyUtility
+						.getProductProperty(brand.getHomeExclusiveInd(), 
+						 HhProductAttributeFqnConstants
+						.Hh_Home_Exclusive_Ind_Attr_Fqn);
+				if (productProperty != null) {
+					list.add(productProperty);
+				}
+				
+				
+			}
+			logger.info("Brand details processed successfully!!!");
+
+		}
+		return list;
+	}
+	
+	
+	
 	/**
 	 * @param item.
 	 * @param product.
 	 */
-	public void setProductBrandList(final List<Brand> brandsList, final ApiContext apiContext) {
+	public void setProductBrandList(
+			final List<Brand> brandsList, final ApiContext apiContext) {
 		
 		transformHhBrandToKiboBrand(brandsList, apiContext);
 		/*for (Brand b : brandsList) {
@@ -37,26 +89,38 @@ public class HhProductBrandProcesser {
 	 * @param product.
 	 * @param brand.
 	 */
-	public void transformHhBrandToKiboBrand(
+	public Map<String,ProductProperty> transformHhBrandToKiboBrand(
 			final List<Brand> brandsList,final ApiContext apiContext) {
 
+		
+		final Map<String,ProductProperty> map = new HashMap();
 		// transform product brand description obj to kibo product brand
 		// description
+		
 		if (brandsList != null && brandsList.size() != 0) {
 			for (Brand brand : brandsList) {
-				PropertyUtility.addOrUpdateProperty(brand.getBrandDesc(),
+			
+			ProductProperty productProperty = PropertyUtility.addOrUpdateProperty(brand.getBrandDesc(),
 						HhProductAttributeFqnConstants
 						.Hh_Brand_Desc_Attr_Fqn, 
 						 apiContext, brand.getItem());
-				PropertyUtility.addOrUpdateProperty(brand.getBrandCode(),
+			String key= HhProductAttributeFqnConstants
+					.Hh_Brand_Desc_Attr_Fqn+ " : "+brand.getItem();
+			map.put(key,productProperty );
+			productProperty = PropertyUtility.addOrUpdateProperty(brand.getBrandCode(),
 						HhProductAttributeFqnConstants
 						.Hh_Brand_Code_Attr_Fqn, apiContext,
 						brand.getItem());
-				PropertyUtility.addOrUpdateProperty(brand.getHomeExclusiveInd(),
+			key= HhProductAttributeFqnConstants
+					.Hh_Brand_Code_Attr_Fqn+ " : "+brand.getItem();
+			map.put(key,productProperty );
+			productProperty = PropertyUtility.addOrUpdateProperty(brand.getHomeExclusiveInd(),
 						HhProductAttributeFqnConstants
 						.Hh_Home_Exclusive_Ind_Attr_Fqn, 
 						 apiContext, brand.getItem());
-
+			key= HhProductAttributeFqnConstants
+					.Hh_Home_Exclusive_Ind_Attr_Fqn+ " : "+brand.getItem();
+			map.put(key,productProperty );
 			}
 		}
 		logger.info("Brand details processed successfully!!!");
@@ -77,7 +141,7 @@ public class HhProductBrandProcesser {
 				brand.getHomeExclusiveInd());
 */
 		
-
+		return map;
 	}
 
 

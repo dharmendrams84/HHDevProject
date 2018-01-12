@@ -13,17 +13,47 @@ import com.mozu.api.contracts.productadmin.ProductLocalizedContent;
 @Component
 public class HhExtDescProcessor {
 
+	
+	/**
+	 * @param product.
+	 * @param extendedDesc.
+	 */
+	public Product transformHhProductExtendedDescription(
+			final Product product, final ExtDesc extendedDesc) {
+		// TODO Auto-generated method stub
+		String propertyName = null;
+		if (extendedDesc != null && extendedDesc.getType().equalsIgnoreCase(Constant.FB)) {
+			final ProductLocalizedContent content = product.getContent();
+			content.setLocaleCode(extendedDesc.getLanguage());
+			content.setProductFullDescription(extendedDesc.getDescription());
+			product.setContent(content);
+		} else {
+			if (extendedDesc.getType().equalsIgnoreCase(Constant.INGR)) {
+				propertyName = Constant.TENANT_INGREDIENTS;
+
+			} else if (extendedDesc.getType().equalsIgnoreCase(Constant.MKTG)) {
+				propertyName = Constant.tenant_marketing_description;
+
+			}
+			final ProductUtility productUtility = new ProductUtility();
+			productUtility.addOrUpdateProperty(product,
+					propertyName, extendedDesc.getDescription());
+		}
+		return product;
+	}
+
+	
 	/**
 	 * @param extDescs.
 	 * @param product.
 	 */
-	public void setProductExtDesc(
+	public Product setProductExtDesc(
 			final List<ExtDesc> extDescs, final Product product) {
 		
 		for (ExtDesc e : extDescs) {
 			transformHhExtendedDescription(product, e);
 		}
-		
+		return product;
 	}
 	
 	/**
